@@ -71,52 +71,109 @@ function txtBangers(ctx, text, x, y, fill, size, align, stroke, strokeW) {
     ctx.fillText(text, x, y);
 }
 
-// === PALETTES ===
+function txtOutfit(ctx, text, x, y, fill, size, align, weight, stroke, strokeW) {
+    ctx.font = `${weight||700} ${size}px 'Outfit', sans-serif`;
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'top';
+    if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeW || 3;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+    }
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+}
+
+function drawGlassPanel(ctx, x, y, w, h, borderColor, alpha) {
+    ctx.fillStyle = `rgba(15, 5, 30, ${alpha||0.75})`;
+    ctx.fillRect(x, y, w, h);
+    // top shine
+    const shineGrad = ctx.createLinearGradient(x, y, x, y + h * 0.3);
+    shineGrad.addColorStop(0, 'rgba(255,255,255,0.06)');
+    shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = shineGrad;
+    ctx.fillRect(x, y, w, h * 0.3);
+    // border
+    if (borderColor) {
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x, y, w, h);
+    }
+}
+
+function drawGradBar(ctx, x, y, w, h, ratio, color1, color2, bgColor) {
+    ctx.fillStyle = bgColor || '#0a0418';
+    ctx.fillRect(x, y, w, h);
+    if (ratio > 0) {
+        const grad = ctx.createLinearGradient(x, y, x + w * ratio, y);
+        grad.addColorStop(0, color1);
+        grad.addColorStop(1, color2 || color1);
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, Math.ceil(w * ratio), h);
+    }
+    // shine on top half
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(x, y, Math.ceil(w * ratio), Math.floor(h / 2));
+}
+
+// === PALETTES (unified idol style — same face/body, unique colors) ===
 const PALETTES = {
-    miho: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#f7e065', 4:'#e8c840',
-        5:'#ff88bb', 6:'#e8609a', 7:'#222034', 8:'#ff4488', 9:'#f7e065',
-        A:'#ffffff', B:'#e8609a', C:'#cc3366', D:'#ffc8a0' },
-    hyunju: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#ff8844', 4:'#dd6622',
-        5:'#fff5e0', 6:'#eed8b8', 7:'#222034', 8:'#ff6688', 9:'#44cc88',
-        A:'#ffffff', B:'#8b6848', C:'#6b4828', D:'#ffaa66' },
-    sujin: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#cc2244', 4:'#991133',
-        5:'#333344', 6:'#222233', 7:'#222034', 8:'#44aaff', 9:'#ffdd44',
-        A:'#ffffff', B:'#444455', C:'#666677', D:'#222034' },
-    sohee: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#4488ff', 4:'#2266cc',
-        5:'#e8f0e8', 6:'#c0d8c0', 7:'#222034', 8:'#44cc66', 9:'#ffffff',
-        A:'#ffffff', B:'#88bbaa', C:'#668877', D:'#ffdd44' },
+    miho: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ffe066', 4:'#e8b830',
+        5:'#ff6eb4', 6:'#ff3d8e', 7:'#1a1028', 8:'#ff6688', 9:'#ffd700',
+        A:'#ffffff', B:'#ffb0d0', C:'#ff70a0', D:'#fff0a0', E:'#ff44aa', F:'#ffffff' },
+    hyunju: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff9944', 4:'#dd7722',
+        5:'#fff0e0', 6:'#ffd4a8', 7:'#1a1028', 8:'#ff8866', 9:'#44cc88',
+        A:'#ffffff', B:'#dda870', C:'#bb8850', D:'#ffcc80', E:'#ff7744', F:'#ffffff' },
+    sujin: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#cc2244', 4:'#991133',
+        5:'#2a2a3e', 6:'#3a3a55', 7:'#1a1028', 8:'#dd4466', 9:'#ffdd44',
+        A:'#ffffff', B:'#333348', C:'#444466', D:'#ff3355', E:'#4488ff', F:'#ffffff' },
+    sohee: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#3366cc', 4:'#2244aa',
+        5:'#e0e8f0', 6:'#c0d0e8', 7:'#1a1028', 8:'#ee8899', 9:'#88ddff',
+        A:'#ffffff', B:'#7799bb', C:'#5577aa', D:'#5599ff', E:'#44ccaa', F:'#ffffff' },
 };
 
-const SPRITE_DATA = {
-    miho: [
-        '0000033333000000','0000333333300000','0D33033333033D00','0D33333333333D00',
-        '0033311111133000','0003317A17130000','0003311811130000','0000311111100000',
-        '0000031111300000','0000055555500000','0000555555500000','0005555A55550000',
-        '0005555555550000','0001555555510000','0001055555010000','0000055555000000',
-        '0000055055000000','00000BB0BB000000','00000BB0BB000000','00000CC0CC000000',
+// Shared body template — ALL idols have identical face, body, and legs
+const SPRITE_BODY = [
+    '0033311111133000', // forehead
+    '000331EA1E130000', // eyes (E=iris color)
+    '0003311811130000', // nose + mouth
+    '0000311111100000', // chin
+    '0000031191300000', // neck + accessory
+    '0000055555500000', // collar
+    '0000555555500000', // upper outfit
+    '0005555F55550000', // outfit + sparkle belt
+    '0005556655550000', // outfit accent trim
+    '0001555555510000', // arms + body
+    '0001055555010000', // waist
+    '0000055555000000', // skirt
+    '0000055055000000', // upper legs
+    '00000BB0BB000000', // lower legs
+    '00000BB0BB000000', // ankles
+    '00000CC0CC000000', // shoes
+];
+
+// Only the top 4 rows (hair) differ per character
+const SPRITE_HAIR = {
+    miho: [ // fox-ear tips, voluminous
+        '00D00333330D0000','00D3333333330D00','0D33033333033D00','0D33333333333D00',
     ],
-    hyunju: [
-        '0000033333000000','0003333333330000','0033333333333000','00D3333333D33000',
-        '0003311111133000','0003387A87130000','0003311811130000','0000311111100000',
-        '0000039911300000','0000055555500000','0000555555500000','0005555A55550000',
-        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
-        '0000000B0B000000','00000BB0BB000000','0000066006600000','0000066006600000',
+    hyunju: [ // long flowing wavy
+        '0000033333000000','0003333333330000','0033333333333000','00D3333333333D00',
     ],
-    sujin: [
+    sujin: [ // sharp styled bob
         '000003DD33000000','0000333333300000','0033333333333000','0033333333333000',
-        '0003311111133000','0003388881330000','0003311811130000','0000311111100000',
-        '0000031119300000','0000055555500000','0000555555500000','000C555A555C0000',
-        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
-        '0000000B0B000000','0000066006600000','0000066006600000','0000066006600000',
     ],
-    sohee: [
-        '00000D3333000000','0000333333300000','0033333333333000','0033333333333000',
-        '0003311111133000','0003318A81130000','0003311811130000','0000311111100000',
-        '0000031111300000','0000055555500000','0000555555500000','0005555A55550000',
-        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
-        '0000000B0B000000','00000BB0BB000000','00000CC0CC000000','00000CC0CC000000',
+    sohee: [ // long straight, side part
+        '0000D33333000000','00D0333333300000','0033333333333000','0033333333333D00',
     ],
 };
+
+// Combine hair + shared body into final sprite data
+const SPRITE_DATA = {};
+for (const name of ['miho','hyunju','sujin','sohee']) {
+    SPRITE_DATA[name] = [...SPRITE_HAIR[name], ...SPRITE_BODY];
+}
 
 // === SPRITE CACHE ===
 const spriteCache = {};
@@ -1063,24 +1120,40 @@ function updateCamera() {
 // ================================================================
 
 function drawPixelWorld() {
-    gctx.fillStyle = '#1a0a2e';
+    gctx.fillStyle = '#0e0620';
     gctx.fillRect(0, 0, PW, PH);
 
-    // Floor tiles
+    // Concert stage floor with subtle grid
     const ts = 32;
     const sx = -(camX%ts), sy = -(camY%ts);
     for (let gx=sx;gx<PW+ts;gx+=ts) for (let gy=sy;gy<PH+ts;gy+=ts) {
         const wx=Math.floor((gx+camX)/ts), wy=Math.floor((gy+camY)/ts);
-        gctx.fillStyle = (wx+wy)%2===0 ? '#1e0e33' : '#160828';
+        gctx.fillStyle = (wx+wy)%2===0 ? '#120830' : '#0e0624';
         gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
+        // Subtle tile edge highlight
+        gctx.fillStyle='rgba(255,255,255,0.015)';
+        gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,1);
+        gctx.fillRect(Math.floor(gx),Math.floor(gy),1,ts);
+        // Colored stage lights on tiles
         if ((wx*7+wy*13)%17===0) {
             const pulse=Math.sin(gameTime*0.03+wx+wy)*0.3+0.3;
-            const colors=['#ff44aa','#44aaff','#ffaa44','#aa44ff'];
-            gctx.globalAlpha=pulse*0.15;
+            const colors=['#ff2d78','#8b5cf6','#22d3ee','#ff9f43'];
+            gctx.globalAlpha=pulse*0.1;
             gctx.fillStyle=colors[(wx+wy)%colors.length];
             gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
             gctx.globalAlpha=1;
         }
+    }
+
+    // Sweeping stage light beams
+    for (let i = 0; i < 3; i++) {
+        const beamX = ((gameTime * 0.7 + i * 130) % (PW + 120)) - 60;
+        gctx.globalAlpha = 0.035;
+        gctx.fillStyle = ['#ff2d78','#8b5cf6','#22d3ee'][i];
+        gctx.fillRect(Math.floor(beamX) - 6, 0, 12, PH);
+        gctx.globalAlpha = 0.06;
+        gctx.fillRect(Math.floor(beamX) - 2, 0, 4, PH);
+        gctx.globalAlpha = 1;
     }
 
     // XP Gems
@@ -1154,6 +1227,13 @@ function drawPixelWorld() {
     if (player) {
         const px=Math.floor(player.x-camX), py=Math.floor(player.y-camY);
 
+        // Character glow aura (always on, subtle)
+        const glowPulse = Math.sin(gameTime * 0.06) * 0.04 + 0.08;
+        gctx.globalAlpha = glowPulse;
+        gctx.fillStyle = player.charDef.color;
+        gctx.beginPath(); gctx.arc(px, py, 16, 0, Math.PI*2); gctx.fill();
+        gctx.globalAlpha = 1;
+
         // Damage aura
         if (player.powers.dmgAura>0) {
             const r=25+player.powers.dmgAura*5;
@@ -1194,12 +1274,13 @@ function drawPixelWorld() {
         // Invincibility flash
         if (player.invTimer>0 && Math.floor(player.invTimer/3)%2===0) gctx.globalAlpha=0.4;
 
+        // Drop shadow
+        gctx.fillStyle='rgba(0,0,0,0.35)';
+        gctx.fillRect(px-6,py+9,12,3);
+
         const sprite = player.facingLeft ? renderSpriteFlipped(player.charId) : renderSprite(player.charId);
         if (sprite) { const bob=player.walkFrame===1?-1:0; gctx.drawImage(sprite, px-8, py-10+bob); }
         gctx.globalAlpha=1;
-
-        gctx.fillStyle='rgba(0,0,0,0.3)';
-        gctx.fillRect(px-5,py+9,10,2);
     }
 
     // Screen flash
@@ -1222,54 +1303,63 @@ function drawUI_HUD() {
 
     const cd = player.charDef;
 
-    // === TOP BAR (dark overlay strip) ===
-    uctx.fillStyle = 'rgba(10, 0, 20, 0.7)';
-    uctx.fillRect(0, 0, UW, 56);
+    // === TOP BAR (gradient glass strip) ===
+    const topGrad = uctx.createLinearGradient(0, 0, 0, 58);
+    topGrad.addColorStop(0, 'rgba(8, 2, 18, 0.85)');
+    topGrad.addColorStop(1, 'rgba(8, 2, 18, 0.4)');
+    uctx.fillStyle = topGrad;
+    uctx.fillRect(0, 0, UW, 58);
+    // Accent line
+    const accentGrad = uctx.createLinearGradient(0, 57, UW, 57);
+    accentGrad.addColorStop(0, '#ff2d78');
+    accentGrad.addColorStop(0.5, '#8b5cf6');
+    accentGrad.addColorStop(1, '#22d3ee');
+    uctx.fillStyle = accentGrad;
+    uctx.fillRect(0, 57, UW, 1.5);
 
     // Character emoji + name
-    txt(uctx, cd.emoji + ' ' + cd.name, 12, 6, cd.color, 14, 'left', '#000', 4);
+    txtOutfit(uctx, cd.emoji + ' ' + cd.name, 14, 6, cd.color, 18, 'left', 800, '#000', 4);
 
-    // HP bar
-    const hpX=160, hpY=8, hpW=140, hpH=16;
-    uctx.fillStyle='#1a0a1a'; uctx.fillRect(hpX,hpY,hpW,hpH);
+    // HP bar (gradient fill)
+    const hpX=160, hpY=7, hpW=150, hpH=16;
     const hpR = player.hp/player.maxHp;
-    const hpCol = hpR>0.5?'#ff44aa':(hpR>0.25?'#ffaa00':'#ff2244');
-    uctx.fillStyle=hpCol; uctx.fillRect(hpX,hpY,Math.ceil(hpW*hpR),hpH);
-    uctx.strokeStyle='#ff88cc'; uctx.lineWidth=2; uctx.strokeRect(hpX,hpY,hpW,hpH);
-    txt(uctx, '❤️ ' + Math.ceil(player.hp) + '/' + player.maxHp, hpX+4, hpY+2, '#fff', 9, 'left', '#000', 3);
+    const hpC1 = hpR>0.5?'#ff2d78':(hpR>0.25?'#ff9f43':'#ff2244');
+    const hpC2 = hpR>0.5?'#ff6eb4':(hpR>0.25?'#ffcc44':'#ff5566');
+    drawGradBar(uctx, hpX, hpY, hpW, hpH, hpR, hpC1, hpC2);
+    uctx.strokeStyle='rgba(255,255,255,0.15)'; uctx.lineWidth=1; uctx.strokeRect(hpX,hpY,hpW,hpH);
+    txtOutfit(uctx, '❤️ ' + Math.ceil(player.hp) + '/' + player.maxHp, hpX+6, hpY, '#fff', 11, 'left', 700, '#000', 2);
 
-    // XP bar
-    const xpX=160, xpY=28, xpW=140, xpH=10;
-    uctx.fillStyle='#1a0a1a'; uctx.fillRect(xpX,xpY,xpW,xpH);
+    // XP bar (purple gradient)
+    const xpX=160, xpY=27, xpW=150, xpH=10;
     const xpR = player.xp/player.xpToNext;
-    uctx.fillStyle='#aa44ff'; uctx.fillRect(xpX,xpY,Math.ceil(xpW*xpR),xpH);
-    uctx.strokeStyle='#cc88ff'; uctx.lineWidth=1; uctx.strokeRect(xpX,xpY,xpW,xpH);
-    txt(uctx, '⭐ LV.' + player.level, hpX, xpY+xpH+4, '#ffddff', 8, 'left', '#000', 2);
+    drawGradBar(uctx, xpX, xpY, xpW, xpH, xpR, '#8b5cf6', '#c084fc');
+    uctx.strokeStyle='rgba(255,255,255,0.1)'; uctx.lineWidth=0.5; uctx.strokeRect(xpX,xpY,xpW,xpH);
+    txtOutfit(uctx, '⭐ LV.' + player.level, hpX, xpY+xpH+4, '#e0d4ff', 10, 'left', 600);
 
     // Timer (center)
     const secs = Math.floor(survivalTime/60);
     const mins = Math.floor(secs/60);
     const secStr = (secs%60).toString().padStart(2,'0');
-    txt(uctx, '⏱️ ' + mins + ':' + secStr, UW/2, 6, '#ffffff', 14, 'center', '#000', 4);
+    txtOutfit(uctx, mins + ':' + secStr, UW/2, 4, '#ffffff', 22, 'center', 800, 'rgba(0,0,0,0.5)', 3);
 
     // Wave
-    txt(uctx, '🌊 Wave ' + difficulty, UW/2, 30, '#ffdd88', 10, 'center', '#000', 3);
+    txtOutfit(uctx, 'WAVE ' + difficulty, UW/2, 30, '#ffdd88', 11, 'center', 600, 'rgba(0,0,0,0.4)', 2);
 
     // Followers (right side)
-    txt(uctx, '👥 ' + formatNum(followers), UW-12, 6, '#ff88cc', 12, 'right', '#000', 3);
+    txtOutfit(uctx, '👥 ' + formatNum(followers), UW-14, 5, '#ff6eb4', 16, 'right', 800, '#000', 3);
 
     // KO count
-    txt(uctx, '💀 ' + killCount + ' KO', UW-12, 28, '#ff8888', 9, 'right', '#000', 2);
+    txtOutfit(uctx, '💀 ' + killCount + ' KO', UW-14, 28, '#ff8888', 11, 'right', 600, 'rgba(0,0,0,0.4)', 2);
 
     // Combo indicator
     if (comboCount >= 3) {
-        const comboX = UW/2, comboY = 52;
-        const pulse = 1 + Math.sin(gameTime*0.15)*0.1;
+        const comboX = UW/2, comboY = 64;
+        const pulse = 1 + Math.sin(gameTime*0.15)*0.15;
         uctx.save();
         uctx.translate(comboX, comboY);
         uctx.scale(pulse, pulse);
-        const comboCol = comboCount>=25?'#ffdd44':(comboCount>=10?'#ff8844':'#ff88cc');
-        txt(uctx, '🔥 ' + comboCount + 'x COMBO', 0, -6, comboCol, 10, 'center', '#000', 3);
+        const comboCol = comboCount>=25?'#ffdd44':(comboCount>=10?'#ff9f43':'#ff6eb4');
+        txtBangers(uctx, '🔥 ' + comboCount + 'x COMBO', 0, -8, comboCol, 28, 'center', '#000', 4);
         uctx.restore();
     }
 
@@ -1278,46 +1368,43 @@ function drawUI_HUD() {
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
     if (activeSkills.length > 0) {
-        const iconY = UH - 38;
-        const totalW = activeSkills.length * 36;
+        const iconY = UH - 42;
+        const totalW = activeSkills.length * 38;
         const startX = (UW - totalW) / 2;
 
-        uctx.fillStyle = 'rgba(10, 0, 20, 0.6)';
-        uctx.fillRect(startX - 8, iconY - 6, totalW + 16, 38);
+        drawGlassPanel(uctx, startX - 10, iconY - 6, totalW + 20, 42, 'rgba(139,92,246,0.3)', 0.55);
 
         activeSkills.forEach((sk, idx) => {
-            const ix = startX + idx * 36;
+            const ix = startX + idx * 38;
             const lv = player.powers[sk.id];
-            uctx.fillStyle = 'rgba(0,0,0,0.5)';
-            uctx.fillRect(ix, iconY, 30, 26);
-            uctx.strokeStyle = sk.color || '#666';
+            uctx.fillStyle = 'rgba(0,0,0,0.4)';
+            uctx.fillRect(ix, iconY, 32, 28);
+            uctx.strokeStyle = sk.color || '#555';
             uctx.lineWidth = 1;
-            uctx.strokeRect(ix, iconY, 30, 26);
+            uctx.strokeRect(ix, iconY, 32, 28);
 
-            // Emoji
-            uctx.font = '14px serif';
+            uctx.font = '15px serif';
             uctx.textAlign = 'center';
+            uctx.textBaseline = 'top';
             uctx.fillStyle = '#fff';
-            uctx.fillText(sk.emoji, ix + 15, iconY + 17);
+            uctx.fillText(sk.emoji, ix + 16, iconY + 3);
 
             // Level dots
             for (let d = 0; d < 5; d++) {
-                uctx.fillStyle = d < lv ? (sk.color || '#fff') : '#333';
-                uctx.fillRect(ix + 3 + d * 5, iconY + 22, 3, 2);
+                uctx.fillStyle = d < lv ? (sk.color || '#fff') : '#222';
+                uctx.fillRect(ix + 3 + d * 5.5, iconY + 23, 4, 2);
             }
         });
     }
 
     // === RIGHT SIDE: Notifications ===
-    let ny = 65;
+    let ny = 68;
     notifications.slice(-5).forEach(n => {
         const alpha = Math.min(1, n.life / 30);
         uctx.globalAlpha = alpha;
-        uctx.fillStyle = 'rgba(0,0,0,0.5)';
-        const tw = uctx.measureText ? 300 : 300;
-        uctx.fillRect(UW - tw - 20, ny - 2, tw + 12, 22);
-        txt(uctx, n.text, UW - 14, ny, n.color, 8, 'right');
-        ny += 26;
+        drawGlassPanel(uctx, UW - 316, ny - 3, 310, 24, null, 0.6);
+        txtOutfit(uctx, n.text, UW - 14, ny, n.color, 10, 'right', 600);
+        ny += 28;
     });
     uctx.globalAlpha = 1;
 
@@ -1325,7 +1412,7 @@ function drawUI_HUD() {
     if (trendingText) {
         const tpulse = Math.sin(gameTime * 0.05) * 0.2 + 0.8;
         uctx.globalAlpha = tpulse;
-        txt(uctx, '📈 TRENDING: ' + trendingText, 12, UH - 52, '#aa88ff', 7, 'left', '#000', 2);
+        txtOutfit(uctx, '📈 TRENDING: ' + trendingText, 14, UH - 56, '#a78bfa', 9, 'left', 600, '#000', 2);
         uctx.globalAlpha = 1;
     }
 
@@ -1334,7 +1421,7 @@ function drawUI_HUD() {
         const fx = (f.x - camX) * S;
         const fy = (f.y - camY) * S;
         uctx.globalAlpha = Math.min(1, f.life / 15);
-        txtGlow(uctx, f.text, fx, fy, '#ffffff', 9, 'center', '#ff44aa');
+        txtGlow(uctx, f.text, fx, fy, '#ffffff', 10, 'center', '#ff2d78');
     });
     uctx.globalAlpha = 1;
 
@@ -1361,203 +1448,245 @@ function formatNum(n) {
 function drawUI_Title() {
     uctx.clearRect(0, 0, UW, UH);
 
-    // Background
-    uctx.fillStyle = '#0a0018';
+    // Animated gradient background
+    const bgGrad = uctx.createLinearGradient(0, 0, UW, UH);
+    const shift = gameTime * 0.003;
+    bgGrad.addColorStop(0, '#060012');
+    bgGrad.addColorStop(0.3 + Math.sin(shift)*0.1, '#120828');
+    bgGrad.addColorStop(0.6 + Math.cos(shift)*0.1, '#0a0420');
+    bgGrad.addColorStop(1, '#060012');
+    uctx.fillStyle = bgGrad;
     uctx.fillRect(0, 0, UW, UH);
 
-    // Animated stars
-    for (let i = 0; i < 60; i++) {
-        const sx = ((i*73+gameTime*0.3)%UW);
-        const sy = ((i*47+gameTime*0.15)%UH);
-        const pulse = Math.sin(gameTime*0.05+i)*0.3+0.7;
-        uctx.globalAlpha=pulse*0.6;
-        uctx.fillStyle=['#ff44aa','#44aaff','#ffaa44','#aa44ff'][i%4];
-        uctx.fillRect(Math.floor(sx),Math.floor(sy),2,2);
+    // Animated floating sparkles
+    for (let i = 0; i < 80; i++) {
+        const sx = ((i*73+gameTime*0.25)%UW);
+        const sy = ((i*47+gameTime*0.12)%UH);
+        const pulse = Math.sin(gameTime*0.04+i*0.7)*0.4+0.6;
+        const sz = (i%3===0) ? 2.5 : 1.5;
+        uctx.globalAlpha=pulse*0.5;
+        uctx.fillStyle=['#ff2d78','#8b5cf6','#22d3ee','#ff9f43','#a78bfa'][i%5];
+        uctx.fillRect(Math.floor(sx),Math.floor(sy),sz,sz);
     }
     uctx.globalAlpha=1;
 
-    // Title glow bg
-    const pulse = Math.sin(gameTime*0.04)*0.2+0.8;
-    uctx.globalAlpha=pulse*0.15;
-    const grad = uctx.createLinearGradient(UW/2-250, 80, UW/2+250, 160);
-    grad.addColorStop(0,'#ff44aa'); grad.addColorStop(1,'#aa44ff');
-    uctx.fillStyle=grad;
-    uctx.fillRect(UW/2-250, 80, 500, 80);
+    // Diagonal light streaks
+    for (let i = 0; i < 4; i++) {
+        const streakX = ((gameTime * 0.5 + i * 280) % (UW + 400)) - 200;
+        uctx.save();
+        uctx.globalAlpha = 0.025;
+        uctx.fillStyle = ['#ff2d78','#8b5cf6','#22d3ee','#ff9f43'][i];
+        uctx.translate(streakX, 0);
+        uctx.transform(1, 0, -0.3, 1, 0, 0); // skew
+        uctx.fillRect(0, 0, 60, UH);
+        uctx.restore();
+    }
+    uctx.globalAlpha = 1;
+
+    // Title glow backdrop
+    const pulse = Math.sin(gameTime*0.04)*0.15+0.85;
+    uctx.globalAlpha=pulse*0.12;
+    const titleGrad = uctx.createLinearGradient(UW/2-300, 60, UW/2+300, 170);
+    titleGrad.addColorStop(0,'#ff2d78'); titleGrad.addColorStop(0.5,'#8b5cf6'); titleGrad.addColorStop(1,'#22d3ee');
+    uctx.fillStyle=titleGrad;
+    uctx.fillRect(UW/2-300, 60, 600, 110);
     uctx.globalAlpha=1;
 
-    // Title
-    txtBangers(uctx, '✨ SUPERNOVA ✨', UW/2, 70, '#ff44aa', 72, 'center', '#000', 6);
-    txt(uctx, 'STAGE SURVIVORS', UW/2, 155, '#ffaacc', 18, 'center', '#220022', 4);
+    // Title text
+    txtBangers(uctx, 'SUPERNOVA', UW/2, 62, '#ff2d78', 80, 'center', '#000', 7);
+    // Subtitle with gradient feel
+    txtOutfit(uctx, 'STAGE SURVIVORS', UW/2, 155, '#e0d4ff', 22, 'center', 800, 'rgba(0,0,0,0.6)', 3);
 
-    // Characters in a line
+    // Characters in a line with glow
     const names = ['MIHO 🦊','HYUNJU 🌙','SUJIN ⭐','SOHEE 🦋'];
-    const colors = ['#f7e065','#ff8844','#cc2244','#4488ff'];
+    const colors = ['#ffe066','#ff9944','#cc2244','#3366cc'];
     const charIDs = ['miho','hyunju','sujin','sohee'];
-    const startX = UW/2 - 180;
+    const startX = UW/2 - 200;
 
-    // Draw pixel sprites scaled up
     gctx.clearRect(0, 0, PW, PH);
     charIDs.forEach((c, i) => {
-        const scaled = getScaledSprite(c, 4);
+        const scaled = getScaledSprite(c, 5);
         if (scaled) {
-            const bob = Math.sin(gameTime*0.06 + i*1.5)*4;
-            uctx.drawImage(scaled, startX + i*100, 220 + bob);
+            const bob = Math.sin(gameTime*0.05 + i*1.3)*5;
+            const cx = startX + i*105;
+            const cy = 215 + bob;
+            // Character glow
+            uctx.save();
+            uctx.globalAlpha = 0.15 + Math.sin(gameTime*0.06+i)*0.05;
+            uctx.fillStyle = colors[i];
+            uctx.beginPath();
+            uctx.arc(cx + 40, cy + 50, 45, 0, Math.PI*2);
+            uctx.fill();
+            uctx.restore();
+            uctx.drawImage(scaled, cx, cy);
         }
-        txt(uctx, names[i], startX + i*100 + 32, 310, colors[i], 10, 'center', '#000', 3);
+        txtOutfit(uctx, names[i], startX + i*105 + 40, 325, colors[i], 13, 'center', 700, '#000', 3);
     });
 
     // Tagline
-    txt(uctx, '🎤 Pick your bias. Survive the hate. Slay the stage. 💅', UW/2, 370, '#8866aa', 10, 'center', '#000', 2);
+    txtOutfit(uctx, 'Pick your bias. Survive the hate. Slay the stage.', UW/2, 370, '#a78bfa', 14, 'center', 600, '#000', 2);
 
-    // Social media style features
-    txt(uctx, '📱 Social media themed  |  🔥 K-pop fandom vibes  |  ⭐ Deep skill trees', UW/2, 400, '#666688', 8, 'center', '#000', 2);
+    // Features
+    txtOutfit(uctx, '📱 Social media themed  |  🔥 K-pop fandom vibes  |  ⭐ Deep skill trees', UW/2, 400, '#555577', 11, 'center', 400);
 
     // Controls
-    txt(uctx, '🎮 WASD / Arrows to move  •  Auto-attack enemies', UW/2, 450, '#555577', 9, 'center', '#000', 2);
-    txt(uctx, '💎 Collect XP gems  •  Level up & choose powers', UW/2, 475, '#555577', 9, 'center', '#000', 2);
+    txtOutfit(uctx, '🎮 WASD / Arrows to move  •  Auto-attack enemies', UW/2, 440, '#444466', 11, 'center', 400);
+    txtOutfit(uctx, '💎 Collect XP gems  •  Level up & choose powers', UW/2, 462, '#444466', 11, 'center', 400);
 
-    // Start prompt
-    const blink = Math.sin(gameTime*0.08) > 0;
-    if (blink) {
-        txtGlow(uctx, '👆 CLICK OR PRESS SPACE TO START 👆', UW/2, 540, '#ffffff', 14, 'center', '#ff44aa');
-    }
+    // Start prompt (animated glow)
+    const blinkAlpha = Math.sin(gameTime*0.07)*0.3+0.7;
+    uctx.globalAlpha = blinkAlpha;
+    txtGlow(uctx, '👆 CLICK OR PRESS SPACE TO START 👆', UW/2, 530, '#ffffff', 14, 'center', '#ff2d78');
+    uctx.globalAlpha = 1;
 
-    // Version / hashtag
-    txt(uctx, '#SUPERNOVA_GAME  •  #STAN_SUPERNOVA', UW/2, UH-40, '#443355', 7, 'center');
+    // Bottom hashtag
+    txtOutfit(uctx, '#SUPERNOVA_GAME  •  #STAN_SUPERNOVA', UW/2, UH-36, '#332244', 9, 'center', 400);
 }
 
 function drawUI_Select() {
     uctx.clearRect(0, 0, UW, UH);
-    uctx.fillStyle = '#0a0018';
+
+    // Background with subtle gradient
+    const bgGrad = uctx.createLinearGradient(0, 0, 0, UH);
+    bgGrad.addColorStop(0, '#080016');
+    bgGrad.addColorStop(0.5, '#0c0822');
+    bgGrad.addColorStop(1, '#080016');
+    uctx.fillStyle = bgGrad;
     uctx.fillRect(0, 0, UW, UH);
 
-    txtBangers(uctx, '💗 PICK YOUR BIAS 💗', UW/2, 15, '#ff88cc', 48, 'center', '#000', 5);
-    txt(uctx, '◀ A/D or Arrows ▶  •  SPACE to confirm  •  Click to pick', UW/2, 70, '#8866aa', 8, 'center', '#000', 2);
+    // Floating sparkles
+    for (let i = 0; i < 40; i++) {
+        const sx = ((i*97+gameTime*0.2)%UW);
+        const sy = ((i*53+gameTime*0.1)%UH);
+        uctx.globalAlpha=Math.sin(gameTime*0.04+i)*0.25+0.25;
+        uctx.fillStyle=['#ff2d78','#8b5cf6','#22d3ee','#ff9f43'][i%4];
+        uctx.fillRect(Math.floor(sx),Math.floor(sy),1.5,1.5);
+    }
+    uctx.globalAlpha=1;
+
+    txtBangers(uctx, 'PICK YOUR BIAS', UW/2, 12, '#ff6eb4', 50, 'center', '#000', 5);
+    txtOutfit(uctx, 'A/D or ◀▶ to browse  •  SPACE to confirm  •  Click to pick', UW/2, 68, '#7766aa', 10, 'center', 400);
 
     // 4 character cards
     for (let i = 0; i < 4; i++) {
         const c = CHARACTERS[i];
-        const bx = 60 + i * 215, by = 100;
+        const bx = 55 + i * 218, by = 98;
         const sel = i === selectedChar;
 
-        // Card background
         if (sel) {
-            const p2 = Math.sin(gameTime*0.08)*0.15+0.85;
-            uctx.fillStyle = `rgba(255,68,170,${p2*0.2})`;
-            uctx.fillRect(bx-4, by-4, 203, 340);
-            uctx.strokeStyle = c.color;
-            uctx.lineWidth = 3;
-            uctx.strokeRect(bx-4, by-4, 203, 340);
+            // Selected card glow
+            uctx.save();
+            uctx.globalAlpha = Math.sin(gameTime*0.07)*0.08+0.12;
+            uctx.fillStyle = c.color;
+            uctx.fillRect(bx-8, by-8, 211, 348);
+            uctx.restore();
+            // Glass card
+            drawGlassPanel(uctx, bx-4, by-4, 203, 340, c.color, 0.8);
+            // Top accent gradient
+            const cardAccent = uctx.createLinearGradient(bx, by, bx, by+6);
+            cardAccent.addColorStop(0, c.color); cardAccent.addColorStop(1, 'transparent');
+            uctx.fillStyle = cardAccent;
+            uctx.fillRect(bx-4, by-4, 203, 6);
         } else {
-            uctx.fillStyle = 'rgba(20,10,40,0.8)';
-            uctx.fillRect(bx, by, 195, 332);
-            uctx.strokeStyle = '#333';
-            uctx.lineWidth = 1;
-            uctx.strokeRect(bx, by, 195, 332);
+            drawGlassPanel(uctx, bx, by, 195, 332, '#2a2240', 0.6);
         }
 
-        // Sprite
+        // Sprite with glow
         const sc = sel ? 5 : 4;
         const scaled = getScaledSprite(c.id, sc);
         if (scaled) {
-            const bob = sel ? Math.sin(gameTime*0.08)*4 : 0;
-            uctx.drawImage(scaled, bx + 97 - (16*sc)/2, by + 10 + bob);
+            const bob = sel ? Math.sin(gameTime*0.07)*4 : 0;
+            const sprX = bx + 97 - (16*sc)/2;
+            const sprY = by + 12 + bob;
+            if (sel) {
+                uctx.save();
+                uctx.globalAlpha = 0.15;
+                uctx.fillStyle = c.color;
+                uctx.beginPath(); uctx.arc(sprX+16*sc/2, sprY+20*sc/2, 40, 0, Math.PI*2); uctx.fill();
+                uctx.restore();
+            }
+            uctx.drawImage(scaled, sprX, sprY);
         }
 
-        // Name + emoji
-        const nameCol = sel ? c.color : '#666';
-        txt(uctx, c.emoji + ' ' + c.name, bx + 97, by + 120, nameCol, sel ? 14 : 11, 'center', '#000', 3);
-
-        // Title
-        txt(uctx, c.title, bx + 97, by + 142, sel ? '#ccaadd' : '#444', 8, 'center', '#000', 2);
-
-        // Hashtag
-        txt(uctx, c.hashtag, bx + 97, by + 160, sel ? '#aa88cc' : '#333', 7, 'center');
+        const nameCol = sel ? c.color : '#555';
+        txtOutfit(uctx, c.emoji + ' ' + c.name, bx + 97, by + 118, nameCol, sel ? 16 : 13, 'center', 800, '#000', 3);
+        txtOutfit(uctx, c.title, bx + 97, by + 140, sel ? '#c4b5de' : '#3a3a4a', 10, 'center', 600);
+        txtOutfit(uctx, c.hashtag, bx + 97, by + 158, sel ? '#a78bfa' : '#2a2a3a', 9, 'center', 400);
 
         if (sel) {
-            // Description quote
-            txt(uctx, c.desc, bx + 97, by + 182, '#aaaacc', 6, 'center', '#000', 2);
+            txtOutfit(uctx, c.desc, bx + 97, by + 178, '#9090bb', 8, 'center', 400);
+            txtOutfit(uctx, c.lightstick + ' ' + c.skills[0].name, bx + 97, by + 200, '#ff6eb4', 11, 'center', 700, '#000', 2);
+            txtOutfit(uctx, c.skills[0].desc, bx + 97, by + 218, '#7777aa', 8, 'center', 400);
 
-            // Ability
-            txt(uctx, c.lightstick + ' ' + c.skills[0].name, bx + 97, by + 205, '#ffaacc', 9, 'center', '#000', 2);
-            txt(uctx, c.skills[0].desc, bx + 97, by + 222, '#8888aa', 6, 'center');
-
-            // Stats bars
+            // Stats bars (gradient)
             const stats = c.stats;
             const statNames = ['⚡ SPD','❤️ HP','⚔️ ATK','🎯 RNG'];
             const statVals = [stats.speed/4, stats.hp/7, stats.atk/2, stats.range/100];
             statNames.forEach((name, idx) => {
-                const sy2 = by + 245 + idx * 20;
-                txt(uctx, name, bx + 10, sy2, '#888', 6, 'left');
-                uctx.fillStyle='#222'; uctx.fillRect(bx+75, sy2+2, 100, 8);
-                uctx.fillStyle=c.color; uctx.fillRect(bx+75, sy2+2, Math.floor(100*statVals[idx]), 8);
-                uctx.strokeStyle='#444'; uctx.lineWidth=1; uctx.strokeRect(bx+75, sy2+2, 100, 8);
+                const sy2 = by + 242 + idx * 20;
+                txtOutfit(uctx, name, bx + 10, sy2, '#888', 8, 'left', 600);
+                drawGradBar(uctx, bx+72, sy2+3, 104, 8, statVals[idx], c.color, c.color2 || c.color, '#0a0418');
+                uctx.strokeStyle='rgba(255,255,255,0.08)'; uctx.lineWidth=0.5; uctx.strokeRect(bx+72, sy2+3, 104, 8);
             });
 
-            // Fandom name
-            txt(uctx, '👥 Fandom: ' + c.fandom, bx + 97, by + 330 - 12, '#ff88cc', 6, 'center');
+            txtOutfit(uctx, '👥 Fandom: ' + c.fandom, bx + 97, by + 325, '#ff6eb4', 8, 'center', 600);
         }
     }
 
-    // Skill tree preview for selected character
-    const sel = CHARACTERS[selectedChar];
-    const treeY = 460;
-    uctx.fillStyle = 'rgba(10,5,25,0.9)';
-    uctx.fillRect(30, treeY, UW - 60, 230);
-    uctx.strokeStyle = sel.color;
-    uctx.lineWidth = 2;
-    uctx.strokeRect(30, treeY, UW - 60, 230);
+    // Skill tree preview
+    const selChar = CHARACTERS[selectedChar];
+    const treeY = 454;
+    drawGlassPanel(uctx, 28, treeY, UW - 56, 238, selChar.color, 0.8);
+    // Top accent line
+    const treeAccent = uctx.createLinearGradient(28, treeY, UW-28, treeY);
+    treeAccent.addColorStop(0, 'transparent'); treeAccent.addColorStop(0.5, selChar.color); treeAccent.addColorStop(1, 'transparent');
+    uctx.fillStyle = treeAccent;
+    uctx.fillRect(28, treeY, UW-56, 2);
 
-    txt(uctx, '📋 SKILL TREE — ' + sel.name + ' ' + sel.emoji, UW/2, treeY + 8, sel.color, 11, 'center', '#000', 3);
+    txtOutfit(uctx, 'SKILL TREE — ' + selChar.name + ' ' + selChar.emoji, UW/2, treeY + 10, selChar.color, 14, 'center', 700, '#000', 3);
 
-    sel.skills.forEach((sk, idx) => {
-        const sx2 = 55 + idx * 175;
-        const sy2 = treeY + 35;
+    selChar.skills.forEach((sk, idx) => {
+        const sx2 = 52 + idx * 176;
+        const sy2 = treeY + 38;
 
-        // Skill card
-        uctx.fillStyle = 'rgba(30,15,50,0.8)';
-        uctx.fillRect(sx2, sy2, 165, 175);
-        uctx.strokeStyle = sk.color;
-        uctx.lineWidth = 1;
-        uctx.strokeRect(sx2, sy2, 165, 175);
+        drawGlassPanel(uctx, sx2, sy2, 168, 180, sk.color, 0.5);
 
         // Emoji + name
-        txt(uctx, sk.emoji, sx2 + 82, sy2 + 5, '#fff', 16, 'center');
-        txt(uctx, sk.name, sx2 + 82, sy2 + 30, sk.color, 8, 'center', '#000', 2);
-        txt(uctx, sk.desc, sx2 + 82, sy2 + 48, '#8888aa', 5, 'center');
+        uctx.font = '18px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+        uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, sx2 + 84, sy2 + 6);
+        txtOutfit(uctx, sk.name, sx2 + 84, sy2 + 30, sk.color, 10, 'center', 700, '#000', 2);
+        txtOutfit(uctx, sk.desc, sx2 + 84, sy2 + 48, '#7777aa', 7, 'center', 400);
 
-        // Level progression
         sk.levels.forEach((lv, li) => {
-            const ly = sy2 + 65 + li * 20;
+            const ly = sy2 + 68 + li * 20;
             const isFirst = li === 0 && idx === 0;
-            txt(uctx, (li+1) + '.', sx2 + 8, ly, isFirst ? '#ffdd44' : '#555', 5, 'left');
-            txt(uctx, lv, sx2 + 25, ly, isFirst ? '#ffdd44' : '#777', 5, 'left');
+            txtOutfit(uctx, (li+1)+'.', sx2 + 8, ly, isFirst ? '#ffdd44' : '#444', 7, 'left', 700);
+            txtOutfit(uctx, lv, sx2 + 24, ly, isFirst ? '#ffdd44' : '#666', 7, 'left', 400);
         });
 
-        // Signature badge for first skill
         if (idx === 0) {
-            txt(uctx, '🌟 SIGNATURE', sx2 + 82, sy2 + 160, '#ffdd44', 5, 'center');
+            txtOutfit(uctx, '🌟 SIGNATURE', sx2 + 84, sy2 + 166, '#ffdd44', 7, 'center', 700);
         }
     });
 }
 
 function drawUI_LevelUp() {
-    // Overlay
-    uctx.fillStyle = 'rgba(0,0,0,0.75)';
+    // Dark overlay
+    uctx.fillStyle = 'rgba(4, 0, 12, 0.8)';
     uctx.fillRect(0, 0, UW, UH);
 
-    // Starburst effect
+    // Animated starburst with gradient
     uctx.save();
     uctx.translate(UW/2, UH/2);
-    uctx.rotate(gameTime * 0.005);
-    for (let i = 0; i < 12; i++) {
-        const a = (i/12) * Math.PI * 2;
-        uctx.globalAlpha = 0.03;
-        uctx.fillStyle = '#ffdd44';
+    uctx.rotate(gameTime * 0.004);
+    for (let i = 0; i < 16; i++) {
+        const a = (i/16) * Math.PI * 2;
+        uctx.globalAlpha = 0.02;
+        uctx.fillStyle = i%2===0 ? '#ffdd44' : '#ff2d78';
         uctx.beginPath();
         uctx.moveTo(0, 0);
-        uctx.lineTo(Math.cos(a-0.05)*500, Math.sin(a-0.05)*500);
-        uctx.lineTo(Math.cos(a+0.05)*500, Math.sin(a+0.05)*500);
+        uctx.lineTo(Math.cos(a-0.04)*600, Math.sin(a-0.04)*600);
+        uctx.lineTo(Math.cos(a+0.04)*600, Math.sin(a+0.04)*600);
         uctx.fill();
     }
     uctx.restore();
@@ -1565,109 +1694,129 @@ function drawUI_LevelUp() {
 
     // Title
     const bounce = Math.sin(gameTime*0.1)*3;
-    txtBangers(uctx, '🎉 LEVEL UP! 🎉', UW/2, 30 + bounce, '#ffdd44', 52, 'center', '#000', 5);
-    txt(uctx, '⭐ Level ' + player.level + ' — Choose your power-up! ⭐', UW/2, 95, '#ccaaff', 10, 'center', '#000', 3);
-
-    // Subtitle with character
-    txt(uctx, player.charDef.emoji + ' ' + player.charDef.name + ' is leveling up!', UW/2, 120, player.charDef.color, 9, 'center', '#000', 2);
+    txtBangers(uctx, 'LEVEL UP!', UW/2, 25 + bounce, '#ffdd44', 56, 'center', '#000', 6);
+    txtOutfit(uctx, 'Level ' + player.level + ' — Choose your power-up!', UW/2, 90, '#c4b5de', 13, 'center', 600, '#000', 2);
+    txtOutfit(uctx, player.charDef.emoji + ' ' + player.charDef.name + ' is leveling up!', UW/2, 115, player.charDef.color, 11, 'center', 700);
 
     // Cards
     levelUpChoices.forEach((choice, i) => {
-        const bx = 180, by = 170 + i * 115;
-        const hover = mouseX >= bx && mouseX <= bx + 600 && mouseY >= by && mouseY <= by + 100;
+        const bx = 175, by = 160 + i * 120;
+        const hover = mouseX >= bx && mouseX <= bx + 610 && mouseY >= by && mouseY <= by + 105;
         const cd = CHARACTERS[player.charIdx];
         const isCharSkill = cd.skills.some(s => s.id === choice.id);
 
-        // Card bg
-        uctx.fillStyle = hover ? 'rgba(40,20,60,0.95)' : 'rgba(20,10,35,0.9)';
-        uctx.fillRect(bx, by, 600, 100);
+        // Card with glass effect
+        drawGlassPanel(uctx, bx, by, 610, 105, hover ? choice.color : '#2a2240', hover ? 0.85 : 0.7);
 
-        // Gradient accent on left
-        const accentGrad = uctx.createLinearGradient(bx, by, bx + 8, by);
+        // Left accent gradient
+        const accentGrad = uctx.createLinearGradient(bx, by, bx + 6, by);
         accentGrad.addColorStop(0, choice.color); accentGrad.addColorStop(1, 'transparent');
         uctx.fillStyle = accentGrad;
-        uctx.fillRect(bx, by, 8, 100);
+        uctx.fillRect(bx, by, 6, 105);
 
-        uctx.strokeStyle = hover ? choice.color : '#443366';
-        uctx.lineWidth = hover ? 3 : 1;
-        uctx.strokeRect(bx, by, 600, 100);
-
-        // Key hint
-        txt(uctx, '[' + (i+1) + ']', bx + 20, by + 8, '#ff88cc', 12, 'left', '#000', 3);
-
-        // Emoji
-        uctx.font = '28px serif';
-        uctx.textAlign = 'left';
-        uctx.fillStyle = '#fff';
-        uctx.textBaseline = 'top';
-        uctx.fillText(choice.emoji, bx + 65, by + 12);
-
-        // Name + type badge
-        txt(uctx, choice.name, bx + 105, by + 10, choice.color, 13, 'left', '#000', 3);
-
-        if (isCharSkill) {
-            txt(uctx, '🌟 SIGNATURE', bx + 105 + choice.name.length * 13 + 20, by + 12, '#ffdd44', 7, 'left', '#000', 2);
+        if (hover) {
+            uctx.save();
+            uctx.globalAlpha = 0.05;
+            uctx.fillStyle = choice.color;
+            uctx.fillRect(bx, by, 610, 105);
+            uctx.restore();
         }
 
-        // Level indicator with dots
-        const curLv = player.powers[choice.id];
-        let lvText = 'Lv.' + curLv + ' → Lv.' + (curLv + 1);
-        txt(uctx, lvText, bx + 105, by + 32, '#aaaacc', 8, 'left', '#000', 2);
+        // Key hint
+        txtOutfit(uctx, '[' + (i+1) + ']', bx + 22, by + 10, '#ff6eb4', 16, 'left', 800, '#000', 3);
 
-        // Level dots
+        // Emoji
+        uctx.font = '30px serif'; uctx.textAlign='left'; uctx.textBaseline='top';
+        uctx.fillStyle='#fff'; uctx.fillText(choice.emoji, bx + 65, by + 10);
+
+        // Name
+        txtOutfit(uctx, choice.name, bx + 108, by + 8, choice.color, 16, 'left', 800, '#000', 3);
+
+        if (isCharSkill) {
+            txtOutfit(uctx, '🌟 SIGNATURE', bx + 108 + choice.name.length * 10 + 16, by + 11, '#ffdd44', 9, 'left', 700);
+        }
+
+        // Level indicator
+        const curLv = player.powers[choice.id];
+        txtOutfit(uctx, 'Lv.' + curLv + ' → Lv.' + (curLv + 1), bx + 108, by + 32, '#aaa8cc', 10, 'left', 600);
+
+        // Level dots (gradient)
         for (let d = 0; d < 5; d++) {
-            const dotX = bx + 250 + d * 18;
-            uctx.fillStyle = d < curLv ? choice.color : (d === curLv ? '#ffffff' : '#333');
-            uctx.fillRect(dotX, by + 34, 12, 6);
-            if (d === curLv) {
-                uctx.strokeStyle = '#fff';
-                uctx.lineWidth = 1;
-                uctx.strokeRect(dotX, by + 34, 12, 6);
+            const dotX = bx + 255 + d * 20;
+            if (d < curLv) {
+                uctx.fillStyle = choice.color;
+            } else if (d === curLv) {
+                uctx.fillStyle = '#ffffff';
+                uctx.strokeStyle = '#fff'; uctx.lineWidth = 1;
+                uctx.strokeRect(dotX, by + 35, 14, 7);
+            } else {
+                uctx.fillStyle = '#1a1428';
             }
+            uctx.fillRect(dotX, by + 35, 14, 7);
         }
 
         // Description
-        txt(uctx, choice.desc, bx + 105, by + 52, '#8888aa', 8, 'left');
+        txtOutfit(uctx, choice.desc, bx + 108, by + 54, '#7777aa', 10, 'left', 400);
 
         // Level-specific text
         const charSkill = cd.skills.find(s => s.id === choice.id);
         if (charSkill && charSkill.levels && charSkill.levels[curLv]) {
-            txt(uctx, '→ ' + charSkill.levels[curLv], bx + 105, by + 72, '#bbaadd', 7, 'left');
+            txtOutfit(uctx, '→ ' + charSkill.levels[curLv], bx + 108, by + 76, '#b8a8dd', 9, 'left', 600);
         }
     });
 
     // Hint
-    txt(uctx, '🎮 Press 1, 2, or 3  •  Or click to choose', UW/2, UH - 60, '#666688', 8, 'center');
+    txtOutfit(uctx, '🎮 Press 1, 2, or 3  •  Or click to choose', UW/2, UH - 55, '#555577', 10, 'center', 400);
 }
 
 function drawUI_GameOver() {
-    uctx.fillStyle = 'rgba(0,0,0,0.85)';
+    // Dark gradient overlay
+    const goGrad = uctx.createLinearGradient(0, 0, 0, UH);
+    goGrad.addColorStop(0, 'rgba(4, 0, 12, 0.9)');
+    goGrad.addColorStop(0.5, 'rgba(10, 2, 20, 0.88)');
+    goGrad.addColorStop(1, 'rgba(4, 0, 12, 0.92)');
+    uctx.fillStyle = goGrad;
     uctx.fillRect(0, 0, UW, UH);
 
-    // Sad but stylish
-    txtBangers(uctx, '💔 GAME OVER 💔', UW/2, 60, '#ff4466', 56, 'center', '#000', 5);
+    // Fading particles
+    for (let i = 0; i < 30; i++) {
+        const px = ((i*83+gameTime*0.15)%UW);
+        const py = ((i*59+gameTime*0.08)%UH);
+        uctx.globalAlpha = Math.sin(gameTime*0.03+i)*0.15+0.15;
+        uctx.fillStyle = '#ff2d78';
+        uctx.fillRect(Math.floor(px),Math.floor(py),1.5,1.5);
+    }
+    uctx.globalAlpha = 1;
+
+    txtBangers(uctx, 'GAME OVER', UW/2, 50, '#ff2d78', 60, 'center', '#000', 6);
 
     if (player) {
         const cd = player.charDef;
 
-        // Character
+        // Character with faded glow
         const goScaled = getScaledSprite(player.charId, 6);
         if (goScaled) {
-            uctx.globalAlpha = 0.7;
-            uctx.drawImage(goScaled, UW/2 - 48, 140);
+            uctx.save();
+            uctx.globalAlpha = 0.12;
+            uctx.fillStyle = cd.color;
+            uctx.beginPath(); uctx.arc(UW/2, 200, 55, 0, Math.PI*2); uctx.fill();
+            uctx.restore();
+            uctx.globalAlpha = 0.75;
+            uctx.drawImage(goScaled, UW/2 - 48, 135);
             uctx.globalAlpha = 1;
         }
 
-        txt(uctx, cd.emoji + ' ' + cd.name + ' — ' + cd.title, UW/2, 275, cd.color, 14, 'center', '#000', 3);
+        txtOutfit(uctx, cd.emoji + ' ' + cd.name + ' — ' + cd.title, UW/2, 268, cd.color, 16, 'center', 700, '#000', 3);
 
-        // Stats card
-        uctx.fillStyle = 'rgba(20,10,35,0.9)';
-        uctx.fillRect(UW/2-200, 310, 400, 210);
-        uctx.strokeStyle = '#ff44aa';
-        uctx.lineWidth = 2;
-        uctx.strokeRect(UW/2-200, 310, 400, 210);
+        // Stats glass card
+        drawGlassPanel(uctx, UW/2-210, 300, 420, 225, '#ff2d78', 0.8);
+        // Top accent
+        const statsAccent = uctx.createLinearGradient(UW/2-210, 300, UW/2+210, 300);
+        statsAccent.addColorStop(0, '#ff2d78'); statsAccent.addColorStop(0.5, '#8b5cf6'); statsAccent.addColorStop(1, '#22d3ee');
+        uctx.fillStyle = statsAccent;
+        uctx.fillRect(UW/2-210, 300, 420, 2);
 
-        txt(uctx, '📊 PERFORMANCE REPORT', UW/2, 320, '#ff88cc', 10, 'center', '#000', 2);
+        txtOutfit(uctx, '📊 PERFORMANCE REPORT', UW/2, 312, '#ff6eb4', 13, 'center', 700);
 
         const secs = Math.floor(survivalTime/60);
         const mins = Math.floor(secs/60);
@@ -1682,32 +1831,34 @@ function drawUI_GameOver() {
         ];
 
         stats.forEach((s, idx) => {
-            const sy = 348 + idx * 28;
-            txt(uctx, s[0], UW/2 - 180, sy, '#aaaacc', 9, 'left');
-            txt(uctx, s[1], UW/2 + 180, sy, '#ffffff', 11, 'right', '#000', 2);
+            const sy = 342 + idx * 30;
+            txtOutfit(uctx, s[0], UW/2 - 190, sy, '#9090bb', 12, 'left', 600);
+            txtOutfit(uctx, s[1], UW/2 + 190, sy, '#ffffff', 14, 'right', 800, '#000', 2);
         });
 
-        // Social media style verdict
+        // Verdict
         const verdict = killCount >= 100 ? '👑 LEGENDARY IDOL' :
                         killCount >= 50 ? '⭐ RISING STAR' :
                         killCount >= 25 ? '🎤 TRAINEE LEVEL' :
                         '💪 KEEP PRACTICING';
-        txt(uctx, verdict, UW/2, 490, '#ffdd44', 12, 'center', '#000', 3);
+        txtBangers(uctx, verdict, UW/2, 500, '#ffdd44', 28, 'center', '#000', 4);
 
-        txt(uctx, cd.hashtag + '  #SUPERNOVA_FOREVER', UW/2, 530, '#aa88cc', 8, 'center');
+        txtOutfit(uctx, cd.hashtag + '  #SUPERNOVA_FOREVER', UW/2, 538, '#7766aa', 10, 'center', 400);
     }
 
-    const blink = Math.sin(gameTime*0.08) > 0;
-    if (blink) {
-        txtGlow(uctx, '👆 PRESS SPACE FOR ANOTHER STAGE 👆', UW/2, UH - 80, '#ffffff', 12, 'center', '#ff44aa');
-    }
+    // Start prompt
+    const blinkAlpha = Math.sin(gameTime*0.07)*0.3+0.7;
+    uctx.globalAlpha = blinkAlpha;
+    txtGlow(uctx, '👆 PRESS SPACE FOR ANOTHER STAGE 👆', UW/2, UH - 75, '#ffffff', 13, 'center', '#ff2d78');
+    uctx.globalAlpha = 1;
 }
 
 function drawUI_Paused() {
-    uctx.fillStyle = 'rgba(0,0,0,0.65)';
+    uctx.fillStyle = 'rgba(4, 0, 12, 0.7)';
     uctx.fillRect(0, 0, UW, UH);
-    txtBangers(uctx, '⏸️ PAUSED', UW/2, UH/2 - 40, '#ffffff', 52, 'center', '#000', 5);
-    txt(uctx, 'Press ESC to resume', UW/2, UH/2 + 25, '#888', 10, 'center', '#000', 2);
+    drawGlassPanel(uctx, UW/2 - 200, UH/2 - 60, 400, 120, '#8b5cf6', 0.75);
+    txtBangers(uctx, 'PAUSED', UW/2, UH/2 - 40, '#ffffff', 52, 'center', '#000', 5);
+    txtOutfit(uctx, 'Press ESC to resume', UW/2, UH/2 + 25, '#a78bfa', 13, 'center', 600);
 }
 
 // ================================================================
