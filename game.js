@@ -143,6 +143,22 @@ function renderSpriteFlipped(name) {
     spriteCache[k] = c; return c;
 }
 
+// === SCALED SPRITE CACHE (for UI screens) ===
+const scaledSpriteCache = {};
+function getScaledSprite(name, scale) {
+    const key = name + '_s' + scale;
+    if (scaledSpriteCache[key]) return scaledSpriteCache[key];
+    const sprite = renderSprite(name);
+    if (!sprite) return null;
+    const c = document.createElement('canvas');
+    c.width = 16 * scale; c.height = 20 * scale;
+    const cx = c.getContext('2d');
+    cx.imageSmoothingEnabled = false;
+    cx.drawImage(sprite, 0, 0, 16 * scale, 20 * scale);
+    scaledSpriteCache[key] = c;
+    return c;
+}
+
 // === AUDIO ===
 const SFX = (() => {
     let ctx = null;
@@ -290,7 +306,7 @@ let projectiles = [], enemies = [], xpGems = [], particles = [], floatingTexts =
 let camX = 0, camY = 0;
 const ARENA_W = 800, ARENA_H = 800;
 let difficulty = 1, spawnTimer = 0, killCount = 0, survivalTime = 0;
-let followers = 0, comboCount = 0, comboTimer = 0;
+let followers = 0, comboCount = 0, comboTimer = 0, bestCombo = 0;
 let levelUpChoices = [];
 let screenFlash = 0, screenFlashColor = '#fff';
 let notifications = [];
@@ -382,7 +398,7 @@ function startGame() {
     SFX.start();
     state = State.PLAYING;
     gameTime = 0; killCount = 0; survivalTime = 0; difficulty = 1; spawnTimer = 0;
-    followers = 0; comboCount = 0; comboTimer = 0; score = 0;
+    followers = 0; comboCount = 0; comboTimer = 0; bestCombo = 0; score = 0;
     notifications = []; fanChants = []; trendingTimer = 0;
 
     const cd = CHARACTERS[selectedChar];
@@ -822,6 +838,7 @@ function killEnemy(e) {
     SFX.kill();
     killCount++;
     comboCount++; comboTimer = 120;
+    if (comboCount > bestCombo) bestCombo = comboCount;
 
     // Followers (social media score)
     const followerGain = Math.floor((e.xp * 10 + comboCount) * player.followerMult);
@@ -1381,16 +1398,10 @@ function drawUI_Title() {
     // Draw pixel sprites scaled up
     gctx.clearRect(0, 0, PW, PH);
     charIDs.forEach((c, i) => {
-        const sprite = renderSprite(c);
-        if (sprite) {
+        const scaled = getScaledSprite(c, 4);
+        if (scaled) {
             const bob = Math.sin(gameTime*0.06 + i*1.5)*4;
-            // Draw to a temp canvas and put on UI
-            const tmp = document.createElement('canvas');
-            tmp.width = 16*4; tmp.height = 20*4;
-            const tc = tmp.getContext('2d');
-            tc.imageSmoothingEnabled = false;
-            tc.drawImage(sprite, 0, 0, 16*4, 20*4);
-            uctx.drawImage(tmp, startX + i*100, 220 + bob);
+            uctx.drawImage(scaled, startX + i*100, 220 + bob);
         }
         txt(uctx, names[i], startX + i*100 + 32, 310, colors[i], 10, 'center', '#000', 3);
     });
@@ -1446,16 +1457,11 @@ function drawUI_Select() {
         }
 
         // Sprite
-        const sprite = renderSprite(c.id);
-        if (sprite) {
+        const sc = sel ? 5 : 4;
+        const scaled = getScaledSprite(c.id, sc);
+        if (scaled) {
             const bob = sel ? Math.sin(gameTime*0.08)*4 : 0;
-            const sc = sel ? 5 : 4;
-            const tmp = document.createElement('canvas');
-            tmp.width = 16*sc; tmp.height = 20*sc;
-            const tc = tmp.getContext('2d');
-            tc.imageSmoothingEnabled = false;
-            tc.drawImage(sprite, 0, 0, 16*sc, 20*sc);
-            uctx.drawImage(tmp, bx + 97 - (16*sc)/2, by + 10 + bob);
+            uctx.drawImage(scaled, bx + 97 - (16*sc)/2, by + 10 + bob);
         }
 
         // Name + emoji
@@ -1645,15 +1651,10 @@ function drawUI_GameOver() {
         const cd = player.charDef;
 
         // Character
-        const sprite = renderSprite(player.charId);
-        if (sprite) {
-            const tmp = document.createElement('canvas');
-            tmp.width = 16*6; tmp.height = 20*6;
-            const tc = tmp.getContext('2d');
-            tc.imageSmoothingEnabled = false;
-            tc.drawImage(sprite, 0, 0, 16*6, 20*6);
+        const goScaled = getScaledSprite(player.charId, 6);
+        if (goScaled) {
             uctx.globalAlpha = 0.7;
-            uctx.drawImage(tmp, UW/2 - 48, 140);
+            uctx.drawImage(goScaled, UW/2 - 48, 140);
             uctx.globalAlpha = 1;
         }
 
@@ -1677,7 +1678,7 @@ function drawUI_GameOver() {
             ['💀 Total KO', killCount.toString()],
             ['⭐ Level', player.level.toString()],
             ['👥 Followers', formatNum(followers)],
-            ['🔥 Best Combo', comboCount.toString() + 'x'],
+            ['🔥 Best Combo', bestCombo.toString() + 'x'],
         ];
 
         stats.forEach((s, idx) => {
