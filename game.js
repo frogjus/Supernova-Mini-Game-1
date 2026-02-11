@@ -1,1007 +1,810 @@
-// ============================================================
-// SUPERNOVA: Stage Survivors
-// A K-pop themed survivor game featuring the idol group SUPERNOVA
-// Members: Miho (gumiho), Hyunju (INFP), Sujin (nerd), Sohee (insecure)
-// ============================================================
+// ================================================================
+// ✨ SUPERNOVA: STAGE SURVIVORS ✨
+// K-pop idol group survival game
+// Members: Miho 🦊 Hyunju 🌙 Sujin ⭐ Sohee 🦋
+// ================================================================
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+// === TWO-LAYER CANVAS: pixel game + crisp UI ===
+const gameCanvas = document.getElementById('gameCanvas');
+const gctx = gameCanvas.getContext('2d');
+const uiCanvas = document.getElementById('uiCanvas');
+const uctx = uiCanvas.getContext('2d');
 
-// Pixel-art scale: we draw at low res and scale up
-const GAME_W = 320;
-const GAME_H = 240;
-const SCALE = 3;
-canvas.width = GAME_W * SCALE;
-canvas.height = GAME_H * SCALE;
-ctx.imageSmoothingEnabled = false;
+const PW = 320, PH = 240; // pixel world size
+const UW = 960, UH = 720; // UI size (3x)
+const S = 3; // scale factor
 
-// Off-screen buffer for pixel rendering
-const buf = document.createElement('canvas');
-buf.width = GAME_W;
-buf.height = GAME_H;
-const bctx = buf.getContext('2d');
-bctx.imageSmoothingEnabled = false;
+gameCanvas.width = PW;
+gameCanvas.height = PH;
+uiCanvas.width = UW;
+uiCanvas.height = UH;
 
-// ============================================================
-// PIXEL ART SPRITE DATA
-// Each sprite is a 2D array of color indices mapped to a palette
-// ============================================================
-
-const PALETTES = {
-    miho: {
-        0: null, // transparent
-        1: '#fde8d0', // skin
-        2: '#f5d49e', // skin shadow
-        3: '#f7e065', // blonde hair
-        4: '#e8c840', // hair shadow
-        5: '#ff88bb', // pink dress
-        6: '#e8609a', // dress shadow
-        7: '#222034', // eyes
-        8: '#ff4488', // blush / fox marks
-        9: '#f7e065', // tail
-        A: '#ffffff', // whites / highlights
-        B: '#e8609a', // shoes
-        C: '#cc3366', // shoe shadow
-        D: '#ffc8a0', // ear inner
-    },
-    hyunju: {
-        0: null,
-        1: '#fde8d0', // skin
-        2: '#f5d49e', // skin shadow
-        3: '#ff8844', // orange hair
-        4: '#dd6622', // hair shadow
-        5: '#fff5e0', // cream top
-        6: '#eed8b8', // top shadow
-        7: '#222034', // eyes
-        8: '#ff6688', // pink eyes / blush
-        9: '#44cc88', // green necklace
-        A: '#ffffff', // whites
-        B: '#8b6848', // skirt/bottom
-        C: '#6b4828', // skirt shadow
-        D: '#ffaa66', // hair tie ribbons
-    },
-    sujin: {
-        0: null,
-        1: '#fde8d0', // skin
-        2: '#f5d49e', // skin shadow
-        3: '#cc2244', // red hair
-        4: '#991133', // hair shadow
-        5: '#333344', // dark top
-        6: '#222233', // top shadow
-        7: '#222034', // eyes
-        8: '#44aaff', // glasses
-        9: '#ffdd44', // star earrings
-        A: '#ffffff', // whites
-        B: '#444455', // pants/skirt
-        C: '#666677', // belt studs
-        D: '#222034', // bow
-    },
-    sohee: {
-        0: null,
-        1: '#fde8d0', // skin
-        2: '#f5d49e', // skin shadow
-        3: '#4488ff', // blue hair
-        4: '#2266cc', // hair shadow
-        5: '#e8f0e8', // green-white top
-        6: '#c0d8c0', // top shadow
-        7: '#222034', // eyes
-        8: '#44cc66', // green eyes
-        9: '#ffffff', // white bow
-        A: '#ffffff', // whites
-        B: '#88bbaa', // skirt
-        C: '#668877', // skirt shadow
-        D: '#ffdd44', // star clip
+// === OUTLINED TEXT HELPERS ===
+function txt(ctx, text, x, y, fill, size, align, stroke, strokeW) {
+    ctx.font = `bold ${size}px 'Press Start 2P', monospace`;
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'top';
+    if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeW || 3;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
     }
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+}
+
+function txtShadow(ctx, text, x, y, fill, size, align) {
+    ctx.font = `bold ${size}px 'Press Start 2P', monospace`;
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText(text, x + 2, y + 2);
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+}
+
+function txtGlow(ctx, text, x, y, fill, size, align, glowColor) {
+    ctx.save();
+    ctx.font = `bold ${size}px 'Press Start 2P', monospace`;
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor = glowColor || fill;
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+}
+
+function txtBangers(ctx, text, x, y, fill, size, align, stroke, strokeW) {
+    ctx.font = `${size}px 'Bangers', cursive`;
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'top';
+    if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeW || 4;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(text, x, y);
+    }
+    ctx.fillStyle = fill;
+    ctx.fillText(text, x, y);
+}
+
+// === PALETTES ===
+const PALETTES = {
+    miho: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#f7e065', 4:'#e8c840',
+        5:'#ff88bb', 6:'#e8609a', 7:'#222034', 8:'#ff4488', 9:'#f7e065',
+        A:'#ffffff', B:'#e8609a', C:'#cc3366', D:'#ffc8a0' },
+    hyunju: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#ff8844', 4:'#dd6622',
+        5:'#fff5e0', 6:'#eed8b8', 7:'#222034', 8:'#ff6688', 9:'#44cc88',
+        A:'#ffffff', B:'#8b6848', C:'#6b4828', D:'#ffaa66' },
+    sujin: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#cc2244', 4:'#991133',
+        5:'#333344', 6:'#222233', 7:'#222034', 8:'#44aaff', 9:'#ffdd44',
+        A:'#ffffff', B:'#444455', C:'#666677', D:'#222034' },
+    sohee: { 0:null, 1:'#fde8d0', 2:'#f5d49e', 3:'#4488ff', 4:'#2266cc',
+        5:'#e8f0e8', 6:'#c0d8c0', 7:'#222034', 8:'#44cc66', 9:'#ffffff',
+        A:'#ffffff', B:'#88bbaa', C:'#668877', D:'#ffdd44' },
 };
 
-// 16x20 pixel sprites for each character (facing down / idle)
 const SPRITE_DATA = {
     miho: [
-        '0000033333000000',
-        '0000333333300000',
-        '0D33033333033D00',
-        '0D33333333333D00',
-        '0033311111133000',
-        '0003317A1713000',
-        '0003311811130000',
-        '0000311111100000',
-        '0000031111300000',
-        '0000055555500000',
-        '0000555555500000',
-        '0005555A5555000',
-        '0005555555550000',
-        '0001555555510000',
-        '0001055555010000',
-        '0000055555000000',
-        '000005505500000',
-        '00000BB0BB000000',
-        '00000BB0BB000000',
-        '00000CC0CC000000',
+        '0000033333000000','0000333333300000','0D33033333033D00','0D33333333333D00',
+        '0033311111133000','0003317A17130000','0003311811130000','0000311111100000',
+        '0000031111300000','0000055555500000','0000555555500000','0005555A55550000',
+        '0005555555550000','0001555555510000','0001055555010000','0000055555000000',
+        '0000055055000000','00000BB0BB000000','00000BB0BB000000','00000CC0CC000000',
     ],
     hyunju: [
-        '0000033333000000',
-        '0003333333330000',
-        '0033333333333000',
-        '00D3333333D33000',
-        '0003311111133000',
-        '0003387A8713000',
-        '0003311811130000',
-        '0000311111100000',
-        '0000039911300000',
-        '0000055555500000',
-        '0000555555500000',
-        '0005555A5555000',
-        '0005556655550000',
-        '0001555555510000',
-        '000100BBB0010000',
-        '00000BBBBB000000',
-        '000000B0B0000000',
-        '00000BB0BB000000',
-        '00000660660000000',
-        '0000066066000000',
+        '0000033333000000','0003333333330000','0033333333333000','00D3333333D33000',
+        '0003311111133000','0003387A87130000','0003311811130000','0000311111100000',
+        '0000039911300000','0000055555500000','0000555555500000','0005555A55550000',
+        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
+        '0000000B0B000000','00000BB0BB000000','0000066006600000','0000066006600000',
     ],
     sujin: [
-        '000003DD33000000',
-        '0000333333300000',
-        '0033333333333000',
-        '0033333333333000',
-        '0003311111133000',
-        '00033888813300',
-        '0003311811130000',
-        '0000311111100000',
-        '000003111A300000',
-        '0000055555500000',
-        '0000555555500000',
-        '000C555A555C0000',
-        '0005556655550000',
-        '0001555555510000',
-        '000100BBB0010000',
-        '00000BBBBB000000',
-        '000000B0B0000000',
-        '00000660660000000',
-        '0000066066000000',
-        '0000066066000000',
+        '000003DD33000000','0000333333300000','0033333333333000','0033333333333000',
+        '0003311111133000','0003388881330000','0003311811130000','0000311111100000',
+        '0000031119300000','0000055555500000','0000555555500000','000C555A555C0000',
+        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
+        '0000000B0B000000','0000066006600000','0000066006600000','0000066006600000',
     ],
     sohee: [
-        '00000D3333000000',
-        '0000333333300000',
-        '0033333333333000',
-        '0033333333333000',
-        '0003311111133000',
-        '0003318A8113000',
-        '0003311811130000',
-        '0000311111100000',
-        '0000031111300000',
-        '0000055555500000',
-        '0000555555500000',
-        '0005555A5555000',
-        '0005556655550000',
-        '0001555555510000',
-        '000100BBB0010000',
-        '00000BBBBB000000',
-        '000000B0B0000000',
-        '00000BB0BB000000',
-        '00000CC0CC000000',
-        '00000CC0CC000000',
+        '00000D3333000000','0000333333300000','0033333333333000','0033333333333000',
+        '0003311111133000','0003318A81130000','0003311811130000','0000311111100000',
+        '0000031111300000','0000055555500000','0000555555500000','0005555A55550000',
+        '0005556655550000','0001555555510000','0001000BBB010000','00000BBBBB000000',
+        '0000000B0B000000','00000BB0BB000000','00000CC0CC000000','00000CC0CC000000',
     ],
 };
 
-// ============================================================
-// SPRITE RENDERING
-// ============================================================
-
-// Cache rendered sprites
+// === SPRITE CACHE ===
 const spriteCache = {};
-
-function renderSprite(name, palette) {
-    const key = name;
-    if (spriteCache[key]) return spriteCache[key];
-
-    const data = SPRITE_DATA[name];
-    if (!data) return null;
-
-    const h = data.length;
-    const w = data[0].length;
+function renderSprite(name) {
+    if (spriteCache[name]) return spriteCache[name];
+    const pal = PALETTES[name]; const data = SPRITE_DATA[name];
+    if (!pal || !data) return null;
     const c = document.createElement('canvas');
-    c.width = w;
-    c.height = h;
+    c.width = 16; c.height = 20;
     const cx = c.getContext('2d');
-
-    for (let y = 0; y < h; y++) {
+    for (let y = 0; y < data.length; y++)
         for (let x = 0; x < data[y].length; x++) {
-            const ch = data[y][x];
-            const color = palette[ch];
-            if (color) {
-                cx.fillStyle = color;
-                cx.fillRect(x, y, 1, 1);
-            }
+            const col = pal[data[y][x]];
+            if (col) { cx.fillStyle = col; cx.fillRect(x, y, 1, 1); }
         }
-    }
-
-    spriteCache[key] = c;
-    return c;
+    spriteCache[name] = c; return c;
+}
+function renderSpriteFlipped(name) {
+    const k = name + '_f';
+    if (spriteCache[k]) return spriteCache[k];
+    const s = renderSprite(name); if (!s) return null;
+    const c = document.createElement('canvas'); c.width = s.width; c.height = s.height;
+    const cx = c.getContext('2d'); cx.translate(s.width, 0); cx.scale(-1,1); cx.drawImage(s,0,0);
+    spriteCache[k] = c; return c;
 }
 
-// Render a flipped version
-function renderSpriteFlipped(name, palette) {
-    const key = name + '_flip';
-    if (spriteCache[key]) return spriteCache[key];
-
-    const src = renderSprite(name, palette);
-    if (!src) return null;
-
-    const c = document.createElement('canvas');
-    c.width = src.width;
-    c.height = src.height;
-    const cx = c.getContext('2d');
-    cx.translate(src.width, 0);
-    cx.scale(-1, 1);
-    cx.drawImage(src, 0, 0);
-
-    spriteCache[key] = c;
-    return c;
-}
-
-// ============================================================
-// AUDIO ENGINE - Chiptune style
-// ============================================================
-
-const Audio = (() => {
+// === AUDIO ===
+const SFX = (() => {
     let ctx = null;
-    function getCtx() {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        return ctx;
+    function getCtx() { if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
+    function tone(f,d,t='square',v=0.07,fEnd=null) {
+        try { const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+        o.type=t;o.frequency.setValueAtTime(f,c.currentTime);
+        if(fEnd)o.frequency.exponentialRampToValueAtTime(Math.max(fEnd,20),c.currentTime+d);
+        g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+        o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d); } catch(e){}
     }
-
-    function tone(freq, dur, type = 'square', vol = 0.08, freqEnd = null) {
-        try {
-            const c = getCtx();
-            const o = c.createOscillator();
-            const g = c.createGain();
-            o.type = type;
-            o.frequency.setValueAtTime(freq, c.currentTime);
-            if (freqEnd) o.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 20), c.currentTime + dur);
-            g.gain.setValueAtTime(vol, c.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
-            o.connect(g);
-            g.connect(c.destination);
-            o.start();
-            o.stop(c.currentTime + dur);
-        } catch (e) {}
+    function noise(d,v=0.04) {
+        try { const c=getCtx(),b=c.createBuffer(1,c.sampleRate*d,c.sampleRate),a=b.getChannelData(0);
+        for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;
+        const s=c.createBufferSource();s.buffer=b;const g=c.createGain();
+        g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+        s.connect(g);g.connect(c.destination);s.start(); } catch(e){}
     }
-
-    function noise(dur, vol = 0.04) {
-        try {
-            const c = getCtx();
-            const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
-            const d = buf.getChannelData(0);
-            for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-            const s = c.createBufferSource();
-            s.buffer = buf;
-            const g = c.createGain();
-            g.gain.setValueAtTime(vol, c.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
-            s.connect(g);
-            g.connect(c.destination);
-            s.start();
-        } catch (e) {}
-    }
-
     return {
-        hit() { tone(300, 0.1, 'square', 0.06, 100); },
-        kill() { noise(0.15, 0.08); tone(200, 0.15, 'square', 0.06, 80); },
-        levelUp() {
-            tone(523, 0.1, 'square', 0.08);
-            setTimeout(() => tone(659, 0.1, 'square', 0.08), 100);
-            setTimeout(() => tone(784, 0.15, 'square', 0.08), 200);
-        },
-        pickup() { tone(600, 0.08, 'sine', 0.06, 900); },
-        playerHit() { tone(150, 0.2, 'sawtooth', 0.08, 50); noise(0.15, 0.06); },
-        select() { tone(440, 0.08, 'square', 0.06, 660); },
-        start() {
-            tone(262, 0.12, 'square', 0.07);
-            setTimeout(() => tone(330, 0.12, 'square', 0.07), 120);
-            setTimeout(() => tone(392, 0.12, 'square', 0.07), 240);
-            setTimeout(() => tone(523, 0.2, 'square', 0.07), 360);
-        },
-        gameOver() {
-            tone(392, 0.2, 'sawtooth', 0.08, 200);
-            setTimeout(() => tone(262, 0.3, 'sawtooth', 0.08, 100), 250);
-            setTimeout(() => tone(196, 0.5, 'sawtooth', 0.08, 60), 550);
-        },
-        foxFire() { tone(800, 0.12, 'sine', 0.06, 400); },
-        heartAttack() { tone(500, 0.15, 'triangle', 0.06, 300); },
-        techBlast() { tone(200, 0.1, 'square', 0.05, 800); },
-        shieldUp() { tone(300, 0.2, 'sine', 0.05, 600); },
+        hit(){tone(300,0.08,'square',0.05,100);},
+        kill(){noise(0.12,0.07);tone(200,0.12,'square',0.05,80);},
+        levelUp(){tone(523,0.1,'square',0.08);setTimeout(()=>tone(659,0.1,'square',0.08),100);setTimeout(()=>tone(784,0.15,'square',0.08),200);setTimeout(()=>tone(1047,0.2,'square',0.08),300);},
+        pickup(){tone(600,0.06,'sine',0.05,900);},
+        playerHit(){tone(150,0.2,'sawtooth',0.07,50);noise(0.12,0.05);},
+        select(){tone(440,0.06,'square',0.05,660);},
+        start(){tone(262,0.1,'square',0.06);setTimeout(()=>tone(330,0.1,'square',0.06),100);setTimeout(()=>tone(392,0.1,'square',0.06),200);setTimeout(()=>tone(523,0.18,'square',0.06),300);},
+        gameOver(){tone(392,0.2,'sawtooth',0.07,200);setTimeout(()=>tone(262,0.3,'sawtooth',0.07,100),250);setTimeout(()=>tone(196,0.5,'sawtooth',0.07,60),550);},
+        foxFire(){tone(800,0.1,'sine',0.05,400);},
+        heartWave(){tone(500,0.12,'triangle',0.05,300);},
+        starBeam(){tone(200,0.08,'square',0.04,800);},
+        shieldUp(){tone(300,0.15,'sine',0.04,600);},
+        fanChant(){tone(660,0.06,'square',0.04);setTimeout(()=>tone(880,0.06,'square',0.04),70);},
     };
 })();
 
-// ============================================================
-// CHARACTER DEFINITIONS
-// ============================================================
+// ================================================================
+// CHARACTER DEFINITIONS WITH DEEP SKILL TREES
+// ================================================================
 
 const CHARACTERS = [
     {
-        id: 'miho',
-        name: 'MIHO',
-        title: 'The Gumiho',
-        desc: 'Fox fire burns all who get close',
-        color: '#f7e065',
-        abilityName: 'Fox Fire',
-        abilityDesc: 'Shoots homing fox flames',
+        id: 'miho', name: 'MIHO', emoji: '🦊',
+        title: 'The Gumiho', hashtag: '#FoxQueen',
+        desc: '"My flames will protect SUPERNOVA forever~"',
+        fandom: 'Foxies', lightstick: '🔥',
+        color: '#f7e065', color2: '#ff88bb', bgGrad: ['#f7e065','#ff88bb'],
         stats: { speed: 3.2, hp: 4, atk: 1.2, atkSpeed: 40, range: 60 },
+        skills: [
+            { id:'foxFire', name:'Fox Fire', emoji:'🔥', desc:'Homing flames that chase enemies', color:'#ff8844',
+              levels:['1 flame','2 flames','3 flames, +pierce','4 flames, +speed','5 flames, fox inferno!'] },
+            { id:'nineTails', name:'Nine Tails', emoji:'🦊', desc:'Tail sweep damages nearby foes', color:'#f7e065',
+              levels:['Tail whip x1','Tail whip x2','Wider sweep','Tail whip x3','NINE TAILS UNLEASHED'] },
+            { id:'charm', name:'Charm', emoji:'💫', desc:'Enemies freeze in your presence', color:'#ff66aa',
+              levels:['10% freeze 1s','15% freeze 1.5s','20% freeze 2s','25% + slow','30% + confusion'] },
+            { id:'spiritForm', name:'Spirit Form', emoji:'👻', desc:'Phase through damage briefly', color:'#ddaaff',
+              levels:['0.5s on hit','0.8s on hit','1s + speed boost','1.2s + heal','Phantom fox mode'] },
+            { id:'feast', name:'Gumiho\'s Feast', emoji:'💀', desc:'Steal life from fallen enemies', color:'#ff4466',
+              levels:['+0.3 HP/kill','+0.5 HP/kill','+0.7 HP/kill','+1 HP/kill','Full restore every 50 KO'] },
+        ],
     },
     {
-        id: 'hyunju',
-        name: 'HYUNJU',
-        title: 'The Dreamer',
-        desc: 'Her emotions resonate with everyone',
-        color: '#ff8844',
-        abilityName: 'Heart Wave',
-        abilityDesc: 'Radiates emotional shockwaves',
+        id: 'hyunju', name: 'HYUNJU', emoji: '🌙',
+        title: 'The Dreamer', hashtag: '#DreamWeaver',
+        desc: '"I feel everything... and I\'ll share it all~"',
+        fandom: 'Dreamers', lightstick: '💗',
+        color: '#ff8844', color2: '#ff6688', bgGrad: ['#ff8844','#ffcc44'],
         stats: { speed: 2.8, hp: 5, atk: 1.0, atkSpeed: 55, range: 50 },
+        skills: [
+            { id:'heartWave', name:'Heart Wave', emoji:'💗', desc:'360° emotional shockwave', color:'#ff6688',
+              levels:['6 hearts','8 hearts, +range','10 hearts, +dmg','12 hearts, +speed','HEART TSUNAMI'] },
+            { id:'daydream', name:'Daydream', emoji:'☁️', desc:'Enemies slow in your dreamy aura', color:'#aaccff',
+              levels:['Small slow zone','Medium zone','Large + stronger','Huge + damage','DREAMWORLD ZONE'] },
+            { id:'empathy', name:'Empathy Link', emoji:'🔗', desc:'Damage chains between enemies', color:'#ff88cc',
+              levels:['Chain x1','Chain x2','Chain x3, +range','Chain x4, +dmg','EMOTIONAL OVERLOAD'] },
+            { id:'moodRing', name:'Mood Ring', emoji:'🌈', desc:'Random powerful buff every 10s', color:'#ffaa44',
+              levels:['1 buff type','2 buff types','3 types, stronger','4 types, faster','ALL MOODS AT ONCE'] },
+            { id:'innerWorld', name:'Inner World', emoji:'🌸', desc:'Healing cherry blossom zone', color:'#ffbbdd',
+              levels:['Heal 0.2/s','Heal 0.3/s','Larger zone','Heal 0.5/s + allies','SAKURA PARADISE'] },
+        ],
     },
     {
-        id: 'sujin',
-        name: 'SUJIN',
-        title: 'The Genius',
-        desc: 'Calculated strikes never miss',
-        color: '#cc2244',
-        abilityName: 'Star Beam',
-        abilityDesc: 'Precise piercing laser beams',
+        id: 'sujin', name: 'SUJIN', emoji: '⭐',
+        title: 'The Genius', hashtag: '#BigBrainStar',
+        desc: '"Calculated. Precise. ...and fabulous."',
+        fandom: 'Starlings', lightstick: '⚡',
+        color: '#cc2244', color2: '#ffdd44', bgGrad: ['#cc2244','#ff6644'],
         stats: { speed: 2.5, hp: 3, atk: 1.8, atkSpeed: 50, range: 80 },
+        skills: [
+            { id:'starBeam', name:'Star Beam', emoji:'⭐', desc:'Piercing precision laser', color:'#ffdd44',
+              levels:['1 beam, pierce 1','1 beam, pierce 2','2 beams','2 beams, +dmg','SUPERNOVA BEAM'] },
+            { id:'dataScan', name:'Data Scan', emoji:'📡', desc:'Scanned enemies take more damage', color:'#44aaff',
+              levels:['+15% to scanned','+25% to scanned','Scan AoE','+40% to scanned','AUTO-SCAN ALL'] },
+            { id:'algorithm', name:'Algorithm', emoji:'🧮', desc:'Consecutive hits speed up attacks', color:'#88ff88',
+              levels:['+5%/hit (max 3)','+8%/hit (max 5)','+10%/hit (max 7)','+12%/hit (max 9)','INFINITE COMBO'] },
+            { id:'overclock', name:'Overclock', emoji:'⚡', desc:'Burst mode: double fire rate', color:'#ff8844',
+              levels:['2s every 15s','3s every 12s','3s every 10s','4s every 8s','PERMANENT OC MODE'] },
+            { id:'viralCode', name:'Viral Code', emoji:'💻', desc:'Killed enemies explode', color:'#ff44aa',
+              levels:['Small blast','Medium blast','Large + chain','Massive blast','SYSTEM CRASH AoE'] },
+        ],
     },
     {
-        id: 'sohee',
-        name: 'SOHEE',
-        title: 'The Quiet Storm',
-        desc: 'Inner strength builds over time',
-        color: '#4488ff',
-        abilityName: 'Aura Shield',
-        abilityDesc: 'Orbiting protective barriers',
+        id: 'sohee', name: 'SOHEE', emoji: '🦋',
+        title: 'The Quiet Storm', hashtag: '#SilentPower',
+        desc: '"I\'m scared... but I won\'t let you down."',
+        fandom: 'Butterflies', lightstick: '🛡️',
+        color: '#4488ff', color2: '#88ccff', bgGrad: ['#4488ff','#44ddff'],
         stats: { speed: 3.0, hp: 6, atk: 0.8, atkSpeed: 35, range: 45 },
+        skills: [
+            { id:'auraShield', name:'Aura Shield', emoji:'🛡️', desc:'Orbiting protective barriers', color:'#88ccff',
+              levels:['2 shields','3 shields','3 shields +dmg','4 shields','FORTRESS MODE'] },
+            { id:'quietStr', name:'Quiet Strength', emoji:'💪', desc:'Damage grows over time', color:'#aaddff',
+              levels:['+2%/10s','+3%/10s','+4%/10s, no cap','+5%/10s','STORM UNLEASHED'] },
+            { id:'breakthrough', name:'Breakthrough', emoji:'🌟', desc:'Dash attack on double-tap', color:'#ffdd44',
+              levels:['Small dash','Longer dash','Dash + invuln','Dash + dmg trail','SUPERNOVA DASH'] },
+            { id:'selfLove', name:'Self-Love', emoji:'💙', desc:'Passive HP regeneration', color:'#44aaff',
+              levels:['0.1 HP/3s','0.2 HP/3s','0.3 HP/2s','0.5 HP/2s','UNBREAKABLE SPIRIT'] },
+            { id:'butterfly', name:'Butterfly Effect', emoji:'🦋', desc:'Shields multiply on contact', color:'#bb88ff',
+              levels:['10% split','15% split','20% split + size','25% split','BUTTERFLY STORM'] },
+        ],
     },
 ];
 
-// ============================================================
+// === SHARED POWER-UPS (available to all) ===
+const SHARED_POWERS = [
+    { id:'speedBoost', name:'Quick Step', emoji:'👟', desc:'Move speed +15%', color:'#44ff88' },
+    { id:'hpBoost', name:'Encore', emoji:'❤️', desc:'Max HP +1 & heal', color:'#ff4466' },
+    { id:'magnetRange', name:'Fan Power', emoji:'🧲', desc:'XP magnet range +30%', color:'#dd88ff' },
+    { id:'critChance', name:'High Note', emoji:'🎵', desc:'Crit chance +12%', color:'#ffaa44' },
+    { id:'multiShot', name:'Harmony', emoji:'🎤', desc:'Extra projectile +1', color:'#44ddff' },
+    { id:'dmgAura', name:'Stage Presence', emoji:'✨', desc:'Damage aura around you', color:'#ffdd88' },
+    { id:'lightstick', name:'Lightstick', emoji:'🔦', desc:'All damage +15%', color:'#ffffaa' },
+    { id:'fancam', name:'Fancam Boost', emoji:'📱', desc:'Follower gain +25%', color:'#ff88cc' },
+];
+
+// ================================================================
 // GAME STATE
-// ============================================================
+// ================================================================
 
-const State = { TITLE: 0, SELECT: 1, PLAYING: 2, LEVELUP: 3, GAMEOVER: 4, PAUSED: 5 };
-
+const State = { TITLE:0, SELECT:1, PLAYING:2, LEVELUP:3, GAMEOVER:4, PAUSED:5 };
 let state = State.TITLE;
 let selectedChar = 0;
-let gameTime = 0;
-let frameCount = 0;
-
-// Player
+let gameTime = 0, frameCount = 0;
 let player = null;
-
-// Entity pools
-let projectiles = [];
-let enemies = [];
-let xpGems = [];
-let particles = [];
-let floatingTexts = [];
-
-// Camera
+let projectiles = [], enemies = [], xpGems = [], particles = [], floatingTexts = [];
 let camX = 0, camY = 0;
-
-// Arena
-const ARENA_W = 800;
-const ARENA_H = 800;
-
-// Wave/difficulty
-let difficulty = 1;
-let spawnTimer = 0;
-let killCount = 0;
-let survivalTime = 0;
-
-// Level up choices
+const ARENA_W = 800, ARENA_H = 800;
+let difficulty = 1, spawnTimer = 0, killCount = 0, survivalTime = 0;
+let followers = 0, comboCount = 0, comboTimer = 0;
 let levelUpChoices = [];
+let screenFlash = 0, screenFlashColor = '#fff';
+let notifications = [];
+let fanChants = [];
+let trendingTimer = 0, trendingText = '';
+let score = 0;
 
-// Input
+// === FAN CHANT MESSAGES ===
+const KILL_CHANTS = [
+    '💥 SLAYYYY', '🔥 PERIODT', '✨ ICONIC', '💅 SERVE', '👑 QUEEN BEHAVIOR',
+    '🎤 MAIN CHARACTER', '💗 WE LOVE YOU', '⭐ SUPERSTAR', '🦊 SLAY BESTIE',
+    '📱 FANCAM MATERIAL', '🎵 HIT DIFFERENT', '💫 NO SKIP', '🌟 BIAS WRECKER',
+    '🔥 FIRE FIRE', '💀 IM DEAD', '😭 HELP', '✨ FLAWLESS', '💗 MY HEART',
+    '🎯 BULLSEYE', '⚡ ELECTRIC',
+];
+
+const TRENDING_TAGS = [
+    '#SUPERNOVA_WORLDDOMINATION', '#SUPERNOVA_COMEBACK', '#STREAM_SUPERNOVA',
+    '#1_ON_MELON', '#DAESANG_WHEN', '#SUPERNOVA_SOTY', '#LIGHTSTICK_OUT',
+    '#FANDOM_POWER', '#SUPERNOVA_BEST_GROUP', '#ALL_KILL',
+];
+
+// === INPUT ===
 const keys = {};
 let mouseX = 0, mouseY = 0;
+const wrap = document.getElementById('wrap');
 window.addEventListener('keydown', e => {
     keys[e.code] = true;
-    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
-    handleKeyPress(e.code);
+    if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+    handleKey(e.code);
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
-canvas.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    mouseX = (e.clientX - r.left) / SCALE;
-    mouseY = (e.clientY - r.top) / SCALE;
+wrap.addEventListener('mousemove', e => {
+    const r = wrap.getBoundingClientRect();
+    mouseX = e.clientX - r.left;
+    mouseY = e.clientY - r.top;
 });
-canvas.addEventListener('click', () => {
-    handleClick();
-});
+wrap.addEventListener('click', () => handleClick());
 
-// ============================================================
+// ================================================================
 // INPUT HANDLING
-// ============================================================
+// ================================================================
 
-function handleKeyPress(code) {
+function handleKey(code) {
     if (state === State.TITLE) {
-        if (code === 'Space' || code === 'Enter') {
-            state = State.SELECT;
-            Audio.select();
-        }
+        if (code === 'Space' || code === 'Enter') { state = State.SELECT; SFX.select(); }
     } else if (state === State.SELECT) {
-        if (code === 'ArrowLeft' || code === 'KeyA') {
-            selectedChar = (selectedChar + 3) % 4;
-            Audio.select();
-        } else if (code === 'ArrowRight' || code === 'KeyD') {
-            selectedChar = (selectedChar + 1) % 4;
-            Audio.select();
-        } else if (code === 'Space' || code === 'Enter') {
-            startGame();
-        } else if (code === 'Escape') {
-            state = State.TITLE;
-        }
+        if (code === 'ArrowLeft' || code === 'KeyA') { selectedChar = (selectedChar+3)%4; SFX.select(); }
+        else if (code === 'ArrowRight' || code === 'KeyD') { selectedChar = (selectedChar+1)%4; SFX.select(); }
+        else if (code === 'Space' || code === 'Enter') { startGame(); }
+        else if (code === 'Escape') { state = State.TITLE; }
     } else if (state === State.PLAYING) {
-        if (code === 'Escape') {
-            state = State.PAUSED;
-        }
+        if (code === 'Escape') state = State.PAUSED;
     } else if (state === State.PAUSED) {
-        if (code === 'Escape' || code === 'Space') {
-            state = State.PLAYING;
-        }
+        if (code === 'Escape' || code === 'Space') state = State.PLAYING;
     } else if (state === State.LEVELUP) {
-        if (code === 'Digit1' || code === 'Numpad1') { choosePowerUp(0); }
-        else if (code === 'Digit2' || code === 'Numpad2') { choosePowerUp(1); }
-        else if (code === 'Digit3' || code === 'Numpad3') { choosePowerUp(2); }
+        if (code === 'Digit1' || code === 'Numpad1') choosePowerUp(0);
+        else if (code === 'Digit2' || code === 'Numpad2') choosePowerUp(1);
+        else if (code === 'Digit3' || code === 'Numpad3') choosePowerUp(2);
     } else if (state === State.GAMEOVER) {
-        if (code === 'Space' || code === 'Enter') {
-            state = State.TITLE;
-        }
+        if (code === 'Space' || code === 'Enter') state = State.TITLE;
     }
 }
 
 function handleClick() {
-    if (state === State.TITLE) {
-        state = State.SELECT;
-        Audio.select();
-    } else if (state === State.SELECT) {
-        // Check which character was clicked
+    if (state === State.TITLE) { state = State.SELECT; SFX.select(); }
+    else if (state === State.SELECT) {
         for (let i = 0; i < 4; i++) {
-            const bx = 30 + i * 70;
-            const by = 100;
-            const mx = mouseX;
-            const my = mouseY;
-            if (mx >= bx && mx <= bx + 60 && my >= by && my <= by + 80) {
-                selectedChar = i;
-                Audio.select();
-                startGame();
-                return;
+            const bx = 60 + i * 215, by = 160;
+            if (mouseX >= bx && mouseX <= bx + 195 && mouseY >= by && mouseY <= by + 280) {
+                selectedChar = i; SFX.select(); startGame(); return;
             }
         }
     } else if (state === State.LEVELUP) {
-        // Check which power-up was clicked
         for (let i = 0; i < levelUpChoices.length; i++) {
-            const bx = 40;
-            const by = 80 + i * 50;
-            if (mouseX >= bx && mouseX <= bx + 240 && mouseY >= by && mouseY <= by + 42) {
-                choosePowerUp(i);
-                return;
+            const bx = 180, by = 175 + i * 110;
+            if (mouseX >= bx && mouseX <= bx + 600 && mouseY >= by && mouseY <= by + 95) {
+                choosePowerUp(i); return;
             }
         }
     }
 }
 
-// ============================================================
-// GAME INIT
-// ============================================================
+// ================================================================
+// GAME START
+// ================================================================
 
 function startGame() {
-    Audio.start();
+    SFX.start();
     state = State.PLAYING;
-    gameTime = 0;
-    killCount = 0;
-    survivalTime = 0;
-    difficulty = 1;
-    spawnTimer = 0;
+    gameTime = 0; killCount = 0; survivalTime = 0; difficulty = 1; spawnTimer = 0;
+    followers = 0; comboCount = 0; comboTimer = 0; score = 0;
+    notifications = []; fanChants = []; trendingTimer = 0;
 
-    const charDef = CHARACTERS[selectedChar];
+    const cd = CHARACTERS[selectedChar];
     player = {
-        x: ARENA_W / 2,
-        y: ARENA_H / 2,
-        charId: charDef.id,
-        charDef: charDef,
-        hp: charDef.stats.hp,
-        maxHp: charDef.stats.hp,
-        speed: charDef.stats.speed,
-        atk: charDef.stats.atk,
-        atkSpeed: charDef.stats.atkSpeed,
-        range: charDef.stats.range,
-        atkTimer: 0,
-        xp: 0,
-        level: 1,
-        xpToNext: 5,
-        facingLeft: false,
-        invTimer: 0,
-        // Power up levels
-        powers: {
-            foxFire: charDef.id === 'miho' ? 1 : 0,
-            heartWave: charDef.id === 'hyunju' ? 1 : 0,
-            starBeam: charDef.id === 'sujin' ? 1 : 0,
-            auraShield: charDef.id === 'sohee' ? 1 : 0,
-            speedBoost: 0,
-            hpBoost: 0,
-            magnetRange: 0,
-            critChance: 0,
-            multiShot: 0,
-            damageAura: 0,
-        },
-        // Orbiting shields for Sohee
-        shields: [],
-        shieldTimer: 0,
-        // Anim
-        walkFrame: 0,
-        walkTimer: 0,
+        x: ARENA_W/2, y: ARENA_H/2,
+        charId: cd.id, charDef: cd, charIdx: selectedChar,
+        hp: cd.stats.hp, maxHp: cd.stats.hp,
+        speed: cd.stats.speed, atk: cd.stats.atk,
+        atkSpeed: cd.stats.atkSpeed, range: cd.stats.range,
+        atkTimer: 0, xp: 0, level: 1, xpToNext: 5,
+        facingLeft: false, invTimer: 0,
+        walkFrame: 0, walkTimer: 0,
+        shields: [], shieldTimer: 0,
+        // all skill levels
+        powers: {},
+        // combat bonuses
+        dmgMult: 1, followerMult: 1, comboSpeedBonus: 0,
+        quietStrTimer: 0, quietStrBonus: 0,
+        overclockTimer: 0, overclockCD: 0,
+        spiritTimer: 0, dashCD: 0, regenTimer: 0,
+        healPerKill: 0,
     };
 
-    // Init Sohee's shields
-    if (charDef.id === 'sohee') {
-        for (let i = 0; i < 2; i++) {
-            player.shields.push({ angle: (i / 2) * Math.PI * 2, dist: 25 });
-        }
+    // Initialize all power levels to 0
+    cd.skills.forEach(sk => { player.powers[sk.id] = 0; });
+    SHARED_POWERS.forEach(sp => { player.powers[sp.id] = 0; });
+
+    // Set signature skill to level 1
+    player.powers[cd.skills[0].id] = 1;
+
+    // Init Sohee shields
+    if (cd.id === 'sohee') {
+        for (let i = 0; i < 2; i++)
+            player.shields.push({ angle: (i/2)*Math.PI*2, dist: 28 });
     }
 
-    projectiles = [];
-    enemies = [];
-    xpGems = [];
-    particles = [];
-    floatingTexts = [];
+    projectiles = []; enemies = []; xpGems = []; particles = []; floatingTexts = [];
+
+    addNotification('🎤 ' + cd.name + ' takes the stage!', cd.color);
+    addNotification('💗 ' + cd.fandom + ' are cheering!', '#ff88cc');
 }
 
-// ============================================================
-// LEVEL UP SYSTEM
-// ============================================================
+// ================================================================
+// NOTIFICATION SYSTEM (social media style)
+// ================================================================
 
-const POWER_UPS = [
-    { id: 'foxFire', name: 'Fox Fire', desc: 'Homing fox flames +1', icon: '🔥', color: '#ff8844', forChar: 'miho' },
-    { id: 'heartWave', name: 'Heart Wave', desc: 'Emotion shockwave +1', icon: '💗', color: '#ff6688', forChar: 'hyunju' },
-    { id: 'starBeam', name: 'Star Beam', desc: 'Piercing laser +1', icon: '⭐', color: '#ffdd44', forChar: 'sujin' },
-    { id: 'auraShield', name: 'Aura Shield', desc: 'Orbiting shield +1', icon: '🛡', color: '#4488ff', forChar: 'sohee' },
-    { id: 'speedBoost', name: 'Quick Step', desc: 'Move speed +15%', icon: '👟', color: '#44ff88' },
-    { id: 'hpBoost', name: 'Encore', desc: 'Max HP +1, heal +1', icon: '❤', color: '#ff4466' },
-    { id: 'magnetRange', name: 'Fan Power', desc: 'XP pickup range +30%', icon: '🧲', color: '#dd88ff' },
-    { id: 'critChance', name: 'High Note', desc: 'Crit chance +10%', icon: '🎵', color: '#ffaa44' },
-    { id: 'multiShot', name: 'Harmony', desc: 'Extra projectile +1', icon: '🎤', color: '#44ddff' },
-    { id: 'damageAura', name: 'Stage Presence', desc: 'Damage aura around you', icon: '✨', color: '#ffdd88' },
-];
+function addNotification(text, color) {
+    notifications.push({ text, color, life: 180, y: 0, alpha: 1 });
+}
+
+function addFanChant(x, y) {
+    const msg = KILL_CHANTS[Math.floor(Math.random() * KILL_CHANTS.length)];
+    fanChants.push({ text: msg, x, y, life: 50, vy: -1.5 });
+}
+
+// ================================================================
+// LEVEL UP SYSTEM (deep character trees)
+// ================================================================
 
 function triggerLevelUp() {
-    Audio.levelUp();
+    SFX.levelUp();
     state = State.LEVELUP;
+    screenFlash = 15; screenFlashColor = '#ffdd44';
 
-    // Pick 3 random power-ups, prioritizing character-specific ones
-    const available = POWER_UPS.filter(p => {
-        if (p.forChar && p.forChar !== player.charId) return false;
-        if (player.powers[p.id] >= 5) return false;
-        return true;
+    const cd = CHARACTERS[player.charIdx];
+
+    // Build pool: character skills + shared powers
+    const pool = [];
+
+    // Character-specific skills (higher weight)
+    cd.skills.forEach(sk => {
+        if (player.powers[sk.id] < 5) {
+            pool.push({ ...sk, isSignature: true, weight: 3 });
+            pool.push({ ...sk, isSignature: true, weight: 3 }); // double weight
+        }
     });
 
-    // Shuffle and pick 3
-    const shuffled = available.sort(() => Math.random() - 0.5);
-    levelUpChoices = shuffled.slice(0, Math.min(3, shuffled.length));
+    // Shared powers
+    SHARED_POWERS.forEach(sp => {
+        if (player.powers[sp.id] < 5) {
+            pool.push({ ...sp, isSignature: false, weight: 1 });
+        }
+    });
+
+    // Shuffle and pick 3 unique
+    const shuffled = pool.sort(() => Math.random() - 0.5);
+    const seen = new Set();
+    levelUpChoices = [];
+    for (const item of shuffled) {
+        if (!seen.has(item.id) && levelUpChoices.length < 3) {
+            seen.add(item.id);
+            levelUpChoices.push(item);
+        }
+    }
 }
 
 function choosePowerUp(index) {
     if (index >= levelUpChoices.length) return;
-
     const choice = levelUpChoices[index];
     player.powers[choice.id]++;
-    Audio.select();
+    SFX.select();
 
     // Apply immediate effects
-    if (choice.id === 'speedBoost') {
-        player.speed *= 1.15;
-    } else if (choice.id === 'hpBoost') {
-        player.maxHp++;
-        player.hp = Math.min(player.hp + 1, player.maxHp);
-    } else if (choice.id === 'auraShield') {
-        player.shields.push({ angle: (player.shields.length / (player.shields.length + 1)) * Math.PI * 2, dist: 25 });
+    const lv = player.powers[choice.id];
+    if (choice.id === 'speedBoost') player.speed *= 1.15;
+    else if (choice.id === 'hpBoost') { player.maxHp++; player.hp = Math.min(player.hp+1, player.maxHp); }
+    else if (choice.id === 'lightstick') player.dmgMult += 0.15;
+    else if (choice.id === 'fancam') player.followerMult += 0.25;
+    else if (choice.id === 'auraShield') {
+        player.shields.push({ angle: (player.shields.length/(player.shields.length+1))*Math.PI*2, dist: 28 });
     }
+    else if (choice.id === 'feast') player.healPerKill = lv * 0.2 + 0.1;
+    else if (choice.id === 'selfLove') player.regenTimer = 0;
 
-    spawnFloatingText(player.x, player.y - 16, choice.name + '!', choice.color);
+    const n = choice.emoji + ' ' + choice.name + ' Lv.' + lv + '!';
+    addNotification(n, choice.color);
+    spawnFloatingText(player.x, player.y - 20, choice.emoji + ' ' + choice.name + '!', choice.color);
+    screenFlash = 8; screenFlashColor = choice.color;
     state = State.PLAYING;
 }
 
-// ============================================================
-// ENEMY DEFINITIONS
-// ============================================================
+// ================================================================
+// ENEMY TYPES
+// ================================================================
 
 const ENEMY_TYPES = [
-    {
-        id: 'antifan',
-        name: 'Anti-fan',
-        w: 8, h: 8,
-        hp: 2, speed: 0.8, damage: 1, xp: 1,
-        color1: '#666688', color2: '#444466',
-    },
-    {
-        id: 'hater',
-        name: 'Online Hater',
-        w: 10, h: 10,
-        hp: 4, speed: 0.6, damage: 1, xp: 2,
-        color1: '#884444', color2: '#662222',
-    },
-    {
-        id: 'sasaeng',
-        name: 'Sasaeng',
-        w: 8, h: 8,
-        hp: 3, speed: 1.4, damage: 1, xp: 2,
-        color1: '#886644', color2: '#664422',
-    },
-    {
-        id: 'critic',
-        name: 'Harsh Critic',
-        w: 12, h: 12,
-        hp: 8, speed: 0.4, damage: 2, xp: 4,
-        color1: '#445566', color2: '#223344',
-    },
-    {
-        id: 'troll',
-        name: 'Internet Troll',
-        w: 9, h: 9,
-        hp: 5, speed: 1.0, damage: 1, xp: 3,
-        color1: '#558844', color2: '#336622',
-    },
+    { id:'antifan', name:'Anti 🚫', w:8, h:8, hp:2, speed:0.8, damage:1, xp:1, color1:'#666688', color2:'#444466', emoji:'🚫' },
+    { id:'hater', name:'Hater 💢', w:10, h:10, hp:4, speed:0.6, damage:1, xp:2, color1:'#884444', color2:'#662222', emoji:'💢' },
+    { id:'sasaeng', name:'Sasaeng 📸', w:8, h:8, hp:3, speed:1.4, damage:1, xp:2, color1:'#886644', color2:'#664422', emoji:'📸' },
+    { id:'critic', name:'Critic 📝', w:12, h:12, hp:8, speed:0.4, damage:2, xp:4, color1:'#445566', color2:'#223344', emoji:'📝' },
+    { id:'troll', name:'Troll 👺', w:9, h:9, hp:5, speed:1.0, damage:1, xp:3, color1:'#558844', color2:'#336622', emoji:'👺' },
+    { id:'dispatch', name:'Dispatch 📰', w:11, h:11, hp:6, speed:0.9, damage:2, xp:4, color1:'#666666', color2:'#444444', emoji:'📰' },
 ];
 
 function spawnEnemy() {
-    // Pick type based on difficulty
-    let typeIndex;
+    let ti;
     const r = Math.random();
-    if (difficulty < 3) {
-        typeIndex = r < 0.7 ? 0 : (r < 0.9 ? 2 : 1);
-    } else if (difficulty < 6) {
-        typeIndex = r < 0.3 ? 0 : (r < 0.5 ? 1 : (r < 0.7 ? 2 : (r < 0.9 ? 4 : 3)));
-    } else {
-        typeIndex = r < 0.15 ? 0 : (r < 0.3 ? 1 : (r < 0.5 ? 2 : (r < 0.75 ? 4 : 3)));
-    }
+    if (difficulty < 3) ti = r < 0.6 ? 0 : (r < 0.85 ? 2 : 1);
+    else if (difficulty < 6) ti = r < 0.2 ? 0 : (r < 0.4 ? 1 : (r < 0.6 ? 2 : (r < 0.8 ? 4 : (r < 0.95 ? 3 : 5))));
+    else ti = r < 0.1 ? 0 : (r < 0.25 ? 1 : (r < 0.4 ? 2 : (r < 0.6 ? 4 : (r < 0.8 ? 3 : 5))));
 
-    const type = ENEMY_TYPES[typeIndex];
-    const hpMult = 1 + (difficulty - 1) * 0.3;
-
-    // Spawn from edges around the player
+    const type = ENEMY_TYPES[ti];
+    const hpMult = 1 + (difficulty-1) * 0.35;
+    const side = Math.floor(Math.random()*4);
+    const dist = 170, margin = 25;
     let ex, ey;
-    const side = Math.floor(Math.random() * 4);
-    const margin = 20;
-    const spawnDist = 160;
-
-    if (side === 0) { // top
-        ex = player.x + (Math.random() - 0.5) * spawnDist * 2;
-        ey = player.y - spawnDist - margin;
-    } else if (side === 1) { // bottom
-        ex = player.x + (Math.random() - 0.5) * spawnDist * 2;
-        ey = player.y + spawnDist + margin;
-    } else if (side === 2) { // left
-        ex = player.x - spawnDist - margin;
-        ey = player.y + (Math.random() - 0.5) * spawnDist * 2;
-    } else { // right
-        ex = player.x + spawnDist + margin;
-        ey = player.y + (Math.random() - 0.5) * spawnDist * 2;
-    }
-
-    // Clamp to arena
-    ex = Math.max(10, Math.min(ARENA_W - 10, ex));
-    ey = Math.max(10, Math.min(ARENA_H - 10, ey));
+    if (side===0) { ex=player.x+(Math.random()-0.5)*dist*2; ey=player.y-dist-margin; }
+    else if (side===1) { ex=player.x+(Math.random()-0.5)*dist*2; ey=player.y+dist+margin; }
+    else if (side===2) { ex=player.x-dist-margin; ey=player.y+(Math.random()-0.5)*dist*2; }
+    else { ex=player.x+dist+margin; ey=player.y+(Math.random()-0.5)*dist*2; }
+    ex = Math.max(10,Math.min(ARENA_W-10,ex));
+    ey = Math.max(10,Math.min(ARENA_H-10,ey));
 
     enemies.push({
-        x: ex,
-        y: ey,
-        type: type,
-        hp: Math.ceil(type.hp * hpMult),
-        maxHp: Math.ceil(type.hp * hpMult),
-        speed: type.speed,
-        damage: type.damage,
-        xp: type.xp,
-        w: type.w,
-        h: type.h,
-        flashTimer: 0,
-        phase: Math.random() * Math.PI * 2,
+        x:ex, y:ey, type, hp:Math.ceil(type.hp*hpMult), maxHp:Math.ceil(type.hp*hpMult),
+        speed:type.speed, damage:type.damage, xp:type.xp, w:type.w, h:type.h,
+        flashTimer:0, phase:Math.random()*Math.PI*2,
+        frozen:0, scanned:false,
     });
 }
 
-// ============================================================
-// PROJECTILE ATTACK SYSTEMS
-// ============================================================
+// ================================================================
+// PROJECTILE SYSTEMS
+// ================================================================
 
 function fireProjectiles() {
-    player.atkTimer = player.atkSpeed;
+    player.atkTimer = Math.max(8, player.atkSpeed - player.comboSpeedBonus);
+    if (player.overclockTimer > 0) player.atkTimer = Math.floor(player.atkTimer * 0.5);
 
-    const charId = player.charId;
-    const multiShot = player.powers.multiShot;
-    const crit = Math.random() < (player.powers.critChance * 0.10);
-    const dmgMult = crit ? 2.5 : 1;
+    const crit = Math.random() < (player.powers.critChance * 0.12);
+    const dm = (crit ? 2.5 : 1) * player.dmgMult;
+    if (crit) spawnFloatingText(player.x, player.y - 14, '⚡ CRIT!', '#ffdd44');
 
-    if (charId === 'miho' || player.powers.foxFire > 0) {
-        fireFoxFire(dmgMult);
-    }
-    if (charId === 'hyunju' || player.powers.heartWave > 0) {
-        fireHeartWave(dmgMult);
-    }
-    if (charId === 'sujin' || player.powers.starBeam > 0) {
-        fireStarBeam(dmgMult);
-    }
-    // Sohee's shields are passive, but she fires small projectiles too
-    if (charId === 'sohee') {
-        fireAuraBlast(dmgMult);
+    const id = player.charId;
+    if (id === 'miho' || player.powers.foxFire > 0) fireFoxFire(dm);
+    if (id === 'hyunju' || player.powers.heartWave > 0) fireHeartWave(dm);
+    if (id === 'sujin' || player.powers.starBeam > 0) fireStarBeam(dm);
+    if (id === 'sohee') fireAuraBlast(dm);
+
+    // Nine Tails (Miho)
+    if (player.powers.nineTails > 0) fireNineTails(dm);
+}
+
+function fireFoxFire(dm) {
+    const lv = player.powers.foxFire; if (lv<=0) return;
+    SFX.foxFire();
+    const count = lv + (player.powers.multiShot||0);
+    const near = findNearest(count, player.range + lv*15);
+    for (let i = 0; i < count; i++) {
+        const t = near[i%Math.max(1,near.length)];
+        let a = t ? Math.atan2(t.y-player.y, t.x-player.x) : (i/count)*Math.PI*2 + gameTime*0.02;
+        projectiles.push({ x:player.x, y:player.y, vx:Math.cos(a)*3, vy:Math.sin(a)*3,
+            damage:player.atk*lv*0.7*dm, life:60, type:'foxfire', homing:!!t, target:t,
+            color:'#ff8844', size:3+lv*0.5, pierce:Math.floor(lv/3) });
     }
 }
 
-function fireFoxFire(dmgMult) {
-    const level = player.powers.foxFire;
-    if (level <= 0) return;
-
-    Audio.foxFire();
-    const count = level + player.powers.multiShot;
-    const nearest = findNearestEnemies(player.x, player.y, count, player.range + level * 15);
-
+function fireHeartWave(dm) {
+    const lv = player.powers.heartWave; if (lv<=0) return;
+    SFX.heartWave();
+    const count = 6 + lv*2 + (player.powers.multiShot||0)*2;
     for (let i = 0; i < count; i++) {
-        const target = nearest[i % nearest.length];
-        let angle;
-        if (target) {
-            angle = Math.atan2(target.y - player.y, target.x - player.x);
-        } else {
-            angle = (i / count) * Math.PI * 2 + gameTime * 0.02;
+        const a = (i/count)*Math.PI*2;
+        projectiles.push({ x:player.x, y:player.y, vx:Math.cos(a)*(1.5+lv*0.3), vy:Math.sin(a)*(1.5+lv*0.3),
+            damage:player.atk*lv*0.5*dm, life:30+lv*5, type:'heart', color:'#ff6688', size:3+lv*0.3, pierce:0 });
+    }
+}
+
+function fireStarBeam(dm) {
+    const lv = player.powers.starBeam; if (lv<=0) return;
+    SFX.starBeam();
+    const count = 1 + Math.floor(lv/2) + (player.powers.multiShot||0);
+    const near = findNearest(count, player.range + lv*20);
+    for (let i = 0; i < count; i++) {
+        const t = near[i%Math.max(1,near.length)];
+        let a = t ? Math.atan2(t.y-player.y, t.x-player.x) : (player.facingLeft ? Math.PI : 0) + (i>0?(i-count/2)*0.3:0);
+        projectiles.push({ x:player.x, y:player.y, vx:Math.cos(a)*5, vy:Math.sin(a)*5,
+            damage:player.atk*lv*1.0*dm, life:40+lv*5, type:'beam', color:'#ffdd44', size:2, pierce:lv });
+    }
+}
+
+function fireAuraBlast(dm) {
+    const count = 2 + (player.powers.multiShot||0);
+    const near = findNearest(count, player.range+20);
+    for (let i = 0; i < count; i++) {
+        const t = near[i%Math.max(1,near.length)];
+        let a = t ? Math.atan2(t.y-player.y, t.x-player.x) : (i/count)*Math.PI*2 + gameTime*0.05;
+        projectiles.push({ x:player.x, y:player.y, vx:Math.cos(a)*2.5, vy:Math.sin(a)*2.5,
+            damage:player.atk*0.8*dm, life:40, type:'aura', color:'#88ccff', size:3, pierce:0 });
+    }
+}
+
+function fireNineTails(dm) {
+    const lv = player.powers.nineTails;
+    const count = Math.min(lv + 1, 5);
+    const range = 22 + lv * 4;
+    enemies.forEach(e => {
+        if (Math.hypot(e.x-player.x, e.y-player.y) < range) {
+            damageEnemy(e, player.atk * lv * 0.4 * dm);
         }
-
-        projectiles.push({
-            x: player.x,
-            y: player.y,
-            vx: Math.cos(angle) * 3,
-            vy: Math.sin(angle) * 3,
-            damage: player.atk * level * 0.7 * dmgMult,
-            life: 60,
-            type: 'foxfire',
-            homing: !!target,
-            target: target,
-            color: '#ff8844',
-            size: 3 + level * 0.5,
-            pierce: Math.floor(level / 3),
-        });
+    });
+    // Tail sweep particles
+    for (let i = 0; i < count * 2; i++) {
+        const a = Math.random()*Math.PI*2;
+        particles.push({ x:player.x+Math.cos(a)*range, y:player.y+Math.sin(a)*range,
+            vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#f7e065', size:2 });
     }
 }
 
-function fireHeartWave(dmgMult) {
-    const level = player.powers.heartWave;
-    if (level <= 0) return;
-
-    Audio.heartAttack();
-    const count = 6 + level * 2 + player.powers.multiShot * 2;
-
-    for (let i = 0; i < count; i++) {
-        const angle = (i / count) * Math.PI * 2;
-        projectiles.push({
-            x: player.x,
-            y: player.y,
-            vx: Math.cos(angle) * (1.5 + level * 0.3),
-            vy: Math.sin(angle) * (1.5 + level * 0.3),
-            damage: player.atk * level * 0.5 * dmgMult,
-            life: 30 + level * 5,
-            type: 'heart',
-            color: '#ff6688',
-            size: 3 + level * 0.3,
-            pierce: 0,
-        });
-    }
+function findNearest(count, range) {
+    return enemies.map(e=>({e,d:Math.hypot(e.x-player.x,e.y-player.y)}))
+        .filter(o=>o.d<range).sort((a,b)=>a.d-b.d).slice(0,count).map(o=>o.e);
 }
 
-function fireStarBeam(dmgMult) {
-    const level = player.powers.starBeam;
-    if (level <= 0) return;
-
-    Audio.techBlast();
-    const count = 1 + Math.floor(level / 2) + player.powers.multiShot;
-    const nearest = findNearestEnemies(player.x, player.y, count, player.range + level * 20);
-
-    for (let i = 0; i < count; i++) {
-        const target = nearest[i % Math.max(1, nearest.length)];
-        let angle;
-        if (target) {
-            angle = Math.atan2(target.y - player.y, target.x - player.x);
-        } else {
-            angle = player.facingLeft ? Math.PI : 0;
-            if (i > 0) angle += (i - count / 2) * 0.3;
-        }
-
-        projectiles.push({
-            x: player.x,
-            y: player.y,
-            vx: Math.cos(angle) * 5,
-            vy: Math.sin(angle) * 5,
-            damage: player.atk * level * 1.0 * dmgMult,
-            life: 40 + level * 5,
-            type: 'beam',
-            color: '#ffdd44',
-            size: 2,
-            pierce: level,
-        });
-    }
-}
-
-function fireAuraBlast(dmgMult) {
-    const count = 2 + player.powers.multiShot;
-    const nearest = findNearestEnemies(player.x, player.y, count, player.range + 20);
-
-    for (let i = 0; i < count; i++) {
-        const target = nearest[i % Math.max(1, nearest.length)];
-        let angle;
-        if (target) {
-            angle = Math.atan2(target.y - player.y, target.x - player.x);
-        } else {
-            angle = (i / count) * Math.PI * 2 + gameTime * 0.05;
-        }
-
-        projectiles.push({
-            x: player.x,
-            y: player.y,
-            vx: Math.cos(angle) * 2.5,
-            vy: Math.sin(angle) * 2.5,
-            damage: player.atk * 0.8 * dmgMult,
-            life: 40,
-            type: 'aura',
-            color: '#88ccff',
-            size: 3,
-            pierce: 0,
-        });
-    }
-}
-
-function findNearestEnemies(x, y, count, range) {
-    return enemies
-        .map(e => ({ e, d: Math.hypot(e.x - x, e.y - y) }))
-        .filter(o => o.d < range)
-        .sort((a, b) => a.d - b.d)
-        .slice(0, count)
-        .map(o => o.e);
-}
-
-// ============================================================
-// UPDATE FUNCTIONS
-// ============================================================
+// ================================================================
+// UPDATE
+// ================================================================
 
 function updatePlayer() {
     if (!player) return;
+    let dx=0, dy=0;
+    if (keys['ArrowLeft']||keys['KeyA']) dx=-1;
+    if (keys['ArrowRight']||keys['KeyD']) dx=1;
+    if (keys['ArrowUp']||keys['KeyW']) dy=-1;
+    if (keys['ArrowDown']||keys['KeyS']) dy=1;
 
-    // Movement
-    let dx = 0, dy = 0;
-    if (keys['ArrowLeft'] || keys['KeyA']) dx -= 1;
-    if (keys['ArrowRight'] || keys['KeyD']) dx += 1;
-    if (keys['ArrowUp'] || keys['KeyW']) dy -= 1;
-    if (keys['ArrowDown'] || keys['KeyS']) dy += 1;
-
-    if (dx !== 0 || dy !== 0) {
-        const len = Math.hypot(dx, dy);
-        dx /= len;
-        dy /= len;
-        player.x += dx * player.speed;
-        player.y += dy * player.speed;
-        if (dx < 0) player.facingLeft = true;
-        else if (dx > 0) player.facingLeft = false;
-
+    if (dx||dy) {
+        const len=Math.hypot(dx,dy); dx/=len; dy/=len;
+        player.x += dx*player.speed; player.y += dy*player.speed;
+        if (dx<0) player.facingLeft=true; else if (dx>0) player.facingLeft=false;
         player.walkTimer++;
-        if (player.walkTimer >= 10) {
-            player.walkTimer = 0;
-            player.walkFrame = (player.walkFrame + 1) % 2;
-        }
-    } else {
-        player.walkFrame = 0;
-        player.walkTimer = 0;
-    }
+        if (player.walkTimer>=10) { player.walkTimer=0; player.walkFrame=(player.walkFrame+1)%2; }
+    } else { player.walkFrame=0; player.walkTimer=0; }
 
-    // Clamp to arena
-    player.x = Math.max(8, Math.min(ARENA_W - 8, player.x));
-    player.y = Math.max(8, Math.min(ARENA_H - 8, player.y));
+    player.x=Math.max(8,Math.min(ARENA_W-8,player.x));
+    player.y=Math.max(8,Math.min(ARENA_H-8,player.y));
 
     // Auto-attack
     player.atkTimer--;
-    if (player.atkTimer <= 0 && enemies.length > 0) {
-        fireProjectiles();
-    }
+    if (player.atkTimer<=0 && enemies.length>0) fireProjectiles();
 
-    // Invincibility
-    if (player.invTimer > 0) player.invTimer--;
+    // Invincibility / Spirit Form
+    if (player.invTimer>0) player.invTimer--;
+    if (player.spiritTimer>0) { player.spiritTimer--; player.invTimer = Math.max(player.invTimer, 1); }
 
-    // XP/Level up check
+    // XP / Level
     if (player.xp >= player.xpToNext) {
         player.xp -= player.xpToNext;
         player.level++;
-        player.xpToNext = Math.floor(player.xpToNext * 1.5) + 3;
+        player.xpToNext = Math.floor(player.xpToNext * 1.4) + 4;
         triggerLevelUp();
     }
 
-    // Shields (Sohee)
-    player.shieldTimer += 0.03;
-    player.shields.forEach((s, i) => {
-        s.angle = player.shieldTimer + (i / player.shields.length) * Math.PI * 2;
-    });
+    // Shields
+    player.shieldTimer += 0.04;
+    player.shields.forEach((s,i) => { s.angle = player.shieldTimer + (i/player.shields.length)*Math.PI*2; });
 
-    // Damage aura
-    if (player.powers.damageAura > 0 && frameCount % 15 === 0) {
-        const auraRange = 25 + player.powers.damageAura * 5;
-        const auraDmg = player.atk * player.powers.damageAura * 0.3;
+    // Combo timer
+    if (comboTimer > 0) { comboTimer--; } else { comboCount = 0; player.comboSpeedBonus = 0; }
+
+    // Quiet Strength (Sohee)
+    if (player.powers.quietStr > 0) {
+        player.quietStrTimer++;
+        if (player.quietStrTimer % 600 === 0) { // every 10s
+            player.quietStrBonus += player.powers.quietStr * 0.02 + 0.01;
+        }
+    }
+
+    // Overclock (Sujin)
+    if (player.powers.overclock > 0) {
+        if (player.overclockTimer > 0) player.overclockTimer--;
+        if (player.overclockCD > 0) player.overclockCD--;
+        if (player.overclockCD <= 0 && player.overclockTimer <= 0) {
+            const lv = player.powers.overclock;
+            player.overclockTimer = (lv + 1) * 60;
+            player.overclockCD = Math.max(480, 900 - lv * 120);
+            addNotification('⚡ OVERCLOCK ACTIVATED!', '#ff8844');
+        }
+    }
+
+    // Self-Love (Sohee passive regen)
+    if (player.powers.selfLove > 0) {
+        player.regenTimer++;
+        const interval = player.powers.selfLove >= 3 ? 120 : 180;
+        if (player.regenTimer >= interval) {
+            player.regenTimer = 0;
+            const heal = [0.1, 0.2, 0.3, 0.5, 0.8][player.powers.selfLove - 1] || 0.1;
+            player.hp = Math.min(player.maxHp, player.hp + heal);
+        }
+    }
+
+    // Daydream slow aura (Hyunju)
+    if (player.powers.daydream > 0) {
+        const r = 30 + player.powers.daydream * 10;
         enemies.forEach(e => {
-            if (Math.hypot(e.x - player.x, e.y - player.y) < auraRange) {
-                damageEnemy(e, auraDmg);
+            if (Math.hypot(e.x-player.x,e.y-player.y) < r) {
+                e.speed = e.type.speed * (0.6 - player.powers.daydream * 0.05);
+                if (player.powers.daydream >= 4 && frameCount%30===0) damageEnemy(e, player.atk*0.2);
+            } else { e.speed = e.type.speed; }
+        });
+        if (frameCount%4===0) {
+            const a=Math.random()*Math.PI*2;
+            particles.push({x:player.x+Math.cos(a)*r, y:player.y+Math.sin(a)*r,
+                vx:0, vy:-0.3, life:20, color:'#aaccff', size:1.5});
+        }
+    }
+
+    // Stage Presence damage aura
+    if (player.powers.dmgAura > 0 && frameCount%15===0) {
+        const r = 25 + player.powers.dmgAura * 5;
+        enemies.forEach(e => {
+            if (Math.hypot(e.x-player.x,e.y-player.y)<r) damageEnemy(e, player.atk*player.powers.dmgAura*0.3);
+        });
+        for (let i=0;i<4;i++) {
+            const a=Math.random()*Math.PI*2;
+            particles.push({x:player.x+Math.cos(a)*r, y:player.y+Math.sin(a)*r,
+                vx:Math.cos(a)*0.3,vy:Math.sin(a)*0.3,life:12,color:'#ffdd88',size:1});
+        }
+    }
+
+    // Charm freeze (Miho)
+    if (player.powers.charm > 0) {
+        const chance = player.powers.charm * 0.04 + 0.06;
+        enemies.forEach(e => {
+            if (e.frozen <= 0 && Math.hypot(e.x-player.x,e.y-player.y) < player.range + 20) {
+                if (Math.random() < chance * 0.02) {
+                    e.frozen = 60 + player.powers.charm * 15;
+                }
             }
         });
-        // Aura particles
-        for (let i = 0; i < 4; i++) {
-            const a = Math.random() * Math.PI * 2;
-            particles.push({
-                x: player.x + Math.cos(a) * auraRange,
-                y: player.y + Math.sin(a) * auraRange,
-                vx: Math.cos(a) * 0.3,
-                vy: Math.sin(a) * 0.3,
-                life: 15,
-                color: '#ffdd88',
-                size: 1,
-            });
+    }
+
+    // Inner World healing (Hyunju)
+    if (player.powers.innerWorld > 0 && frameCount%60===0) {
+        const heal = player.powers.innerWorld * 0.08 + 0.1;
+        player.hp = Math.min(player.maxHp, player.hp + heal);
+        for (let i=0;i<3;i++) {
+            particles.push({x:player.x+(Math.random()-0.5)*20, y:player.y+(Math.random()-0.5)*20,
+                vx:0,vy:-0.5,life:25,color:'#ffbbdd',size:1.5});
         }
+    }
+
+    // Mood Ring (Hyunju)
+    if (player.powers.moodRing > 0 && frameCount % 600 === 0) {
+        const buffs = ['🔥 ATK UP!','⚡ SPD UP!','💗 HEAL!','🛡️ DEF UP!'];
+        const idx = Math.floor(Math.random() * Math.min(player.powers.moodRing + 1, buffs.length));
+        if (idx === 0) player.atk *= 1.1;
+        else if (idx === 1) player.speed *= 1.05;
+        else if (idx === 2) player.hp = Math.min(player.maxHp, player.hp + 1);
+        else player.invTimer += 60;
+        addNotification('🌈 Mood Ring: ' + buffs[idx], '#ffaa44');
     }
 }
 
 function updateProjectiles() {
-    for (let i = projectiles.length - 1; i >= 0; i--) {
+    for (let i = projectiles.length-1; i >= 0; i--) {
         const p = projectiles[i];
         p.life--;
 
-        // Homing
         if (p.homing && p.target && enemies.includes(p.target)) {
-            const dx = p.target.x - p.x;
-            const dy = p.target.y - p.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist > 0) {
-                p.vx += (dx / dist) * 0.3;
-                p.vy += (dy / dist) * 0.3;
-                const spd = Math.hypot(p.vx, p.vy);
-                if (spd > 4) {
-                    p.vx = (p.vx / spd) * 4;
-                    p.vy = (p.vy / spd) * 4;
+            const dx=p.target.x-p.x, dy=p.target.y-p.y, d=Math.hypot(dx,dy);
+            if (d>0) { p.vx+=(dx/d)*0.3; p.vy+=(dy/d)*0.3;
+                const spd=Math.hypot(p.vx,p.vy); if(spd>4){p.vx=(p.vx/spd)*4;p.vy=(p.vy/spd)*4;} }
+        }
+
+        p.x+=p.vx; p.y+=p.vy;
+
+        if (frameCount%3===0) particles.push({x:p.x+(Math.random()-0.5)*2, y:p.y+(Math.random()-0.5)*2,
+            vx:-p.vx*0.08, vy:-p.vy*0.08, life:8, color:p.color, size:p.size*0.4});
+
+        if (p.life<=0||p.x<-20||p.x>ARENA_W+20||p.y<-20||p.y>ARENA_H+20) { projectiles.splice(i,1); continue; }
+
+        for (let j=enemies.length-1;j>=0;j--) {
+            const e=enemies[j];
+            if (Math.hypot(p.x-e.x,p.y-e.y) < e.w/2+p.size) {
+                const bonus = e.scanned ? (1 + player.powers.dataScan * 0.12) : 1;
+                damageEnemy(e, p.damage * bonus * (1 + player.quietStrBonus));
+                // Algorithm speed bonus
+                if (player.powers.algorithm > 0) {
+                    player.comboSpeedBonus = Math.min(player.powers.algorithm * 2 + 3, player.comboSpeedBonus + player.powers.algorithm);
                 }
-            }
-        }
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Trail particles
-        if (frameCount % 2 === 0) {
-            particles.push({
-                x: p.x + (Math.random() - 0.5) * 2,
-                y: p.y + (Math.random() - 0.5) * 2,
-                vx: -p.vx * 0.1,
-                vy: -p.vy * 0.1,
-                life: 10,
-                color: p.color,
-                size: p.size * 0.5,
-            });
-        }
-
-        // Remove if dead or out of arena
-        if (p.life <= 0 || p.x < -20 || p.x > ARENA_W + 20 || p.y < -20 || p.y > ARENA_H + 20) {
-            projectiles.splice(i, 1);
-            continue;
-        }
-
-        // Hit enemies
-        for (let j = enemies.length - 1; j >= 0; j--) {
-            const e = enemies[j];
-            if (Math.hypot(p.x - e.x, p.y - e.y) < e.w / 2 + p.size) {
-                damageEnemy(e, p.damage);
-
-                if (p.pierce > 0) {
-                    p.pierce--;
-                    p.damage *= 0.8;
-                } else {
-                    projectiles.splice(i, 1);
-                }
+                if (p.pierce>0) { p.pierce--; p.damage*=0.8; } else { projectiles.splice(i,1); }
                 break;
             }
         }
@@ -1009,42 +812,93 @@ function updateProjectiles() {
 }
 
 function damageEnemy(e, dmg) {
-    e.hp -= dmg;
-    e.flashTimer = 4;
-    Audio.hit();
-
+    e.hp -= dmg; e.flashTimer = 4;
+    SFX.hit();
     spawnHitParticles(e.x, e.y, e.type.color1);
-
-    if (e.hp <= 0) {
-        killEnemy(e);
-    }
+    if (e.hp <= 0) killEnemy(e);
 }
 
 function killEnemy(e) {
-    Audio.kill();
+    SFX.kill();
     killCount++;
-    score += e.xp * 10;
+    comboCount++; comboTimer = 120;
+
+    // Followers (social media score)
+    const followerGain = Math.floor((e.xp * 10 + comboCount) * player.followerMult);
+    followers += followerGain;
+    score += followerGain;
+
+    // Fan chant on kills (every few kills or on combos)
+    if (killCount % 5 === 0 || comboCount >= 10) {
+        addFanChant(e.x, e.y);
+        SFX.fanChant();
+    }
+
+    // Combo notification
+    if (comboCount === 10) addNotification('🔥 10 COMBO! Fans are going wild!', '#ff8844');
+    if (comboCount === 25) addNotification('💥 25 COMBO!! The crowd is SCREAMING!', '#ff4466');
+    if (comboCount === 50) addNotification('👑 50 COMBO!!! LEGENDARY PERFORMANCE!', '#ffdd44');
+
+    // Gumiho's Feast heal
+    if (player.healPerKill > 0) {
+        player.hp = Math.min(player.maxHp, player.hp + player.healPerKill);
+    }
+
+    // Viral Code explosion (Sujin)
+    if (player.powers.viralCode > 0) {
+        const r = 15 + player.powers.viralCode * 8;
+        const vdmg = player.atk * player.powers.viralCode * 0.5;
+        enemies.forEach(e2 => {
+            if (e2 !== e && Math.hypot(e2.x-e.x, e2.y-e.y) < r) damageEnemy(e2, vdmg);
+        });
+        for (let i=0;i<6;i++) {
+            const a=Math.random()*Math.PI*2;
+            particles.push({x:e.x+Math.cos(a)*r*0.5,y:e.y+Math.sin(a)*r*0.5,
+                vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:15,color:'#ff44aa',size:2});
+        }
+    }
+
+    // Empathy Link chain (Hyunju)
+    if (player.powers.empathy > 0) {
+        const chains = player.powers.empathy;
+        const chainDmg = player.atk * 0.4;
+        let lastX = e.x, lastY = e.y, hit = 0;
+        const hitSet = new Set();
+        for (let c = 0; c < chains && hit < chains; c++) {
+            let nearest = null, nearDist = 50 + player.powers.empathy * 10;
+            enemies.forEach(e2 => {
+                if (!hitSet.has(e2)) {
+                    const d = Math.hypot(e2.x-lastX, e2.y-lastY);
+                    if (d < nearDist) { nearest = e2; nearDist = d; }
+                }
+            });
+            if (nearest) {
+                hitSet.add(nearest);
+                damageEnemy(nearest, chainDmg);
+                // Chain lightning visual
+                particles.push({x:(lastX+nearest.x)/2,y:(lastY+nearest.y)/2,vx:0,vy:0,life:8,color:'#ff88cc',size:2});
+                lastX = nearest.x; lastY = nearest.y; hit++;
+            }
+        }
+    }
+
+    // Data Scan (Sujin) - scan nearby on kill
+    if (player.powers.dataScan > 0) {
+        const scanR = player.powers.dataScan >= 3 ? 60 : 35;
+        enemies.forEach(e2 => {
+            if (Math.hypot(e2.x-e.x, e2.y-e.y) < scanR) e2.scanned = true;
+        });
+    }
 
     // XP gem
-    xpGems.push({
-        x: e.x + (Math.random() - 0.5) * 6,
-        y: e.y + (Math.random() - 0.5) * 6,
-        xp: e.xp,
-        life: 600,
-        size: Math.min(3 + e.xp, 6),
-    });
+    xpGems.push({ x:e.x+(Math.random()-0.5)*6, y:e.y+(Math.random()-0.5)*6,
+        xp:e.xp, life:600, size:Math.min(3+e.xp, 6) });
 
     // Death particles
-    for (let i = 0; i < 8; i++) {
-        const a = Math.random() * Math.PI * 2;
-        particles.push({
-            x: e.x, y: e.y,
-            vx: Math.cos(a) * (Math.random() * 2 + 0.5),
-            vy: Math.sin(a) * (Math.random() * 2 + 0.5),
-            life: 20 + Math.random() * 10,
-            color: e.type.color1,
-            size: Math.random() * 2 + 1,
-        });
+    for (let i=0;i<10;i++) {
+        const a=Math.random()*Math.PI*2;
+        particles.push({x:e.x,y:e.y,vx:Math.cos(a)*(Math.random()*2.5+0.5),
+            vy:Math.sin(a)*(Math.random()*2.5+0.5),life:20+Math.random()*10,color:e.type.color1,size:Math.random()*2+1});
     }
 
     const idx = enemies.indexOf(e);
@@ -1052,803 +906,839 @@ function killEnemy(e) {
 }
 
 function updateEnemies() {
-    for (let i = enemies.length - 1; i >= 0; i--) {
+    for (let i = enemies.length-1; i >= 0; i--) {
         const e = enemies[i];
         e.phase += 0.03;
 
-        // Move toward player
-        const dx = player.x - e.x;
-        const dy = player.y - e.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist > 0) {
-            e.x += (dx / dist) * e.speed;
-            e.y += (dy / dist) * e.speed;
-        }
+        if (e.frozen > 0) { e.frozen--; continue; }
 
-        if (e.flashTimer > 0) e.flashTimer--;
+        const dx=player.x-e.x, dy=player.y-e.y, dist=Math.hypot(dx,dy);
+        if (dist>0) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        if (e.flashTimer>0) e.flashTimer--;
 
         // Hit player
-        if (player.invTimer <= 0 && dist < 10) {
-            playerTakeDamage(e.damage);
-        }
+        if (player.invTimer<=0 && player.spiritTimer<=0 && dist<10) playerTakeDamage(e.damage);
 
-        // Hit by shields (Sohee)
+        // Shields
         player.shields.forEach(s => {
-            const sx = player.x + Math.cos(s.angle) * s.dist;
-            const sy = player.y + Math.sin(s.angle) * s.dist;
-            if (Math.hypot(e.x - sx, e.y - sy) < e.w / 2 + 5) {
-                damageEnemy(e, player.atk * (player.powers.auraShield || 1) * 0.5);
+            const sx=player.x+Math.cos(s.angle)*s.dist, sy=player.y+Math.sin(s.angle)*s.dist;
+            if (Math.hypot(e.x-sx,e.y-sy) < e.w/2+5) {
+                const shieldDmg = player.atk * (player.powers.auraShield||1) * 0.6;
+                damageEnemy(e, shieldDmg);
+                // Butterfly Effect
+                if (player.powers.butterfly > 0 && Math.random() < player.powers.butterfly * 0.05 + 0.05) {
+                    player.shields.push({angle:Math.random()*Math.PI*2, dist:28});
+                    setTimeout(() => { if(player.shields.length>player.powers.auraShield+2) player.shields.pop(); }, 3000);
+                }
             }
         });
     }
 }
 
 function playerTakeDamage(dmg) {
-    if (player.invTimer > 0) return;
+    if (player.invTimer>0 || player.spiritTimer>0) return;
     player.hp -= dmg;
     player.invTimer = 60;
-    Audio.playerHit();
+    SFX.playerHit();
+    screenFlash = 6; screenFlashColor = '#ff2244';
+    spawnHitParticles(player.x,player.y,'#ff4466');
+    spawnFloatingText(player.x,player.y-12, '💔 -'+dmg, '#ff4466');
 
-    spawnHitParticles(player.x, player.y, '#ff4466');
-    spawnFloatingText(player.x, player.y - 12, '-' + dmg, '#ff4466');
-
-    if (player.hp <= 0) {
-        gameOver();
+    // Spirit Form (Miho)
+    if (player.powers.spiritForm > 0) {
+        player.spiritTimer = 30 + player.powers.spiritForm * 15;
+        addNotification('👻 Spirit Form activated!', '#ddaaff');
     }
+
+    if (player.hp<=0) gameOver();
 }
 
 function gameOver() {
     state = State.GAMEOVER;
-    Audio.gameOver();
-
-    // Big explosion
-    for (let i = 0; i < 30; i++) {
-        const a = Math.random() * Math.PI * 2;
-        particles.push({
-            x: player.x, y: player.y,
-            vx: Math.cos(a) * (Math.random() * 3 + 1),
-            vy: Math.sin(a) * (Math.random() * 3 + 1),
-            life: 30 + Math.random() * 20,
-            color: player.charDef.color,
-            size: Math.random() * 3 + 1,
-        });
-    }
-
-    // Save high score
-    const best = parseInt(localStorage.getItem('supernova_best_' + player.charId) || '0');
-    if (killCount > best) {
-        localStorage.setItem('supernova_best_' + player.charId, killCount.toString());
+    SFX.gameOver();
+    screenFlash = 20; screenFlashColor = '#ff0044';
+    for (let i=0;i<40;i++) {
+        const a=Math.random()*Math.PI*2;
+        particles.push({x:player.x,y:player.y,vx:Math.cos(a)*(Math.random()*3+1),
+            vy:Math.sin(a)*(Math.random()*3+1),life:35+Math.random()*20,color:player.charDef.color,size:Math.random()*3+1});
     }
 }
 
 function updateXPGems() {
-    const magnetRange = 30 + player.powers.magnetRange * 15;
-
-    for (let i = xpGems.length - 1; i >= 0; i--) {
-        const g = xpGems[i];
-        g.life--;
-
-        const dx = player.x - g.x;
-        const dy = player.y - g.y;
-        const dist = Math.hypot(dx, dy);
-
-        // Magnet effect
-        if (dist < magnetRange) {
-            const pullSpeed = 2 + (magnetRange - dist) / magnetRange * 3;
-            g.x += (dx / dist) * pullSpeed;
-            g.y += (dy / dist) * pullSpeed;
-        }
-
-        // Pickup
-        if (dist < 8) {
-            player.xp += g.xp;
-            Audio.pickup();
-            xpGems.splice(i, 1);
-            continue;
-        }
-
-        if (g.life <= 0) {
-            xpGems.splice(i, 1);
-        }
+    const magR = 30 + (player.powers.magnetRange||0) * 15;
+    for (let i=xpGems.length-1;i>=0;i--) {
+        const g=xpGems[i]; g.life--;
+        const dx=player.x-g.x, dy=player.y-g.y, d=Math.hypot(dx,dy);
+        if (d<magR) { const sp=2+(magR-d)/magR*3; g.x+=(dx/d)*sp; g.y+=(dy/d)*sp; }
+        if (d<8) { player.xp+=g.xp; SFX.pickup(); xpGems.splice(i,1); continue; }
+        if (g.life<=0) xpGems.splice(i,1);
     }
 }
 
 function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= 0.95;
-        p.vy *= 0.95;
-        p.life--;
-        if (p.life <= 0) particles.splice(i, 1);
+    for (let i=particles.length-1;i>=0;i--) {
+        const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vx*=0.95; p.vy*=0.95; p.life--;
+        if (p.life<=0) particles.splice(i,1);
     }
 }
 
 function updateFloatingTexts() {
-    for (let i = floatingTexts.length - 1; i >= 0; i--) {
-        const t = floatingTexts[i];
-        t.y -= 0.5;
-        t.life--;
-        if (t.life <= 0) floatingTexts.splice(i, 1);
+    for (let i=floatingTexts.length-1;i>=0;i--) {
+        const t=floatingTexts[i]; t.y-=0.5; t.life--;
+        if (t.life<=0) floatingTexts.splice(i,1);
     }
 }
 
-function spawnHitParticles(x, y, color) {
-    for (let i = 0; i < 4; i++) {
-        const a = Math.random() * Math.PI * 2;
-        particles.push({
-            x, y,
-            vx: Math.cos(a) * (Math.random() * 1.5 + 0.5),
-            vy: Math.sin(a) * (Math.random() * 1.5 + 0.5),
-            life: 12,
-            color,
-            size: Math.random() + 1,
-        });
+function updateFanChants() {
+    for (let i=fanChants.length-1;i>=0;i--) {
+        const f=fanChants[i]; f.y+=f.vy; f.life--;
+        if (f.life<=0) fanChants.splice(i,1);
     }
 }
 
-function spawnFloatingText(x, y, text, color) {
-    floatingTexts.push({ x, y, text, color, life: 40 });
+function updateNotifications() {
+    for (let i=notifications.length-1;i>=0;i--) {
+        notifications[i].life--;
+        if (notifications[i].life<=0) notifications.splice(i,1);
+    }
 }
+
+function spawnHitParticles(x,y,color) {
+    for (let i=0;i<5;i++) {
+        const a=Math.random()*Math.PI*2;
+        particles.push({x,y,vx:Math.cos(a)*(Math.random()*1.5+0.5),vy:Math.sin(a)*(Math.random()*1.5+0.5),
+            life:12,color,size:Math.random()+1});
+    }
+}
+
+function spawnFloatingText(x,y,text,color) { floatingTexts.push({x,y,text,color,life:45}); }
 
 function updateSpawning() {
     survivalTime++;
-
-    // Increase difficulty every ~15 seconds (900 frames)
     difficulty = 1 + Math.floor(survivalTime / 900);
 
-    // Spawn rate increases with difficulty
-    const baseRate = Math.max(10, 60 - difficulty * 5);
+    // Trending hashtag
+    trendingTimer--;
+    if (trendingTimer <= 0) {
+        trendingText = TRENDING_TAGS[Math.floor(Math.random()*TRENDING_TAGS.length)];
+        trendingTimer = 600 + Math.floor(Math.random()*300);
+    }
+
+    const baseRate = Math.max(8, 55 - difficulty*5);
     spawnTimer--;
-    if (spawnTimer <= 0) {
-        const count = 1 + Math.floor(difficulty / 3);
-        for (let i = 0; i < count; i++) spawnEnemy();
+    if (spawnTimer<=0) {
+        const count = 1 + Math.floor(difficulty/3);
+        for (let i=0;i<count;i++) spawnEnemy();
         spawnTimer = baseRate;
     }
-
-    // Limit enemies on screen
-    if (enemies.length > 80) {
-        enemies.splice(0, enemies.length - 80);
-    }
+    if (enemies.length > 100) enemies.splice(0, enemies.length-100);
 }
-
-// ============================================================
-// CAMERA
-// ============================================================
 
 function updateCamera() {
     if (!player) return;
-    camX = player.x - GAME_W / 2;
-    camY = player.y - GAME_H / 2;
-    camX = Math.max(0, Math.min(ARENA_W - GAME_W, camX));
-    camY = Math.max(0, Math.min(ARENA_H - GAME_H, camY));
+    camX = player.x - PW/2; camY = player.y - PH/2;
+    camX = Math.max(0, Math.min(ARENA_W-PW, camX));
+    camY = Math.max(0, Math.min(ARENA_H-PH, camY));
 }
 
-// ============================================================
-// DRAWING
-// ============================================================
+// ================================================================
+// PIXEL LAYER DRAWING (game world at 320x240)
+// ================================================================
 
-function drawFloor() {
-    // K-pop stage floor with tiles
-    bctx.fillStyle = '#1a0a2e';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
+function drawPixelWorld() {
+    gctx.fillStyle = '#1a0a2e';
+    gctx.fillRect(0, 0, PW, PH);
 
-    // Grid pattern for stage floor
-    const tileSize = 32;
-    const startX = -(camX % tileSize);
-    const startY = -(camY % tileSize);
-
-    for (let gx = startX; gx < GAME_W + tileSize; gx += tileSize) {
-        for (let gy = startY; gy < GAME_H + tileSize; gy += tileSize) {
-            const worldX = Math.floor((gx + camX) / tileSize);
-            const worldY = Math.floor((gy + camY) / tileSize);
-            const isLight = (worldX + worldY) % 2 === 0;
-
-            bctx.fillStyle = isLight ? '#1e0e33' : '#160828';
-            bctx.fillRect(Math.floor(gx), Math.floor(gy), tileSize, tileSize);
-
-            // Stage lights on some tiles
-            if ((worldX * 7 + worldY * 13) % 17 === 0) {
-                const pulse = Math.sin(gameTime * 0.03 + worldX + worldY) * 0.3 + 0.3;
-                const colors = ['#ff44aa', '#44aaff', '#ffaa44', '#aa44ff'];
-                const c = colors[(worldX + worldY) % colors.length];
-                bctx.globalAlpha = pulse * 0.15;
-                bctx.fillStyle = c;
-                bctx.fillRect(Math.floor(gx), Math.floor(gy), tileSize, tileSize);
-                bctx.globalAlpha = 1;
-            }
+    // Floor tiles
+    const ts = 32;
+    const sx = -(camX%ts), sy = -(camY%ts);
+    for (let gx=sx;gx<PW+ts;gx+=ts) for (let gy=sy;gy<PH+ts;gy+=ts) {
+        const wx=Math.floor((gx+camX)/ts), wy=Math.floor((gy+camY)/ts);
+        gctx.fillStyle = (wx+wy)%2===0 ? '#1e0e33' : '#160828';
+        gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
+        if ((wx*7+wy*13)%17===0) {
+            const pulse=Math.sin(gameTime*0.03+wx+wy)*0.3+0.3;
+            const colors=['#ff44aa','#44aaff','#ffaa44','#aa44ff'];
+            gctx.globalAlpha=pulse*0.15;
+            gctx.fillStyle=colors[(wx+wy)%colors.length];
+            gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
+            gctx.globalAlpha=1;
         }
     }
 
-    // Arena border indicators
-    const bx = -camX;
-    const by = -camY;
-    bctx.strokeStyle = '#ff44aa33';
-    bctx.lineWidth = 1;
-    bctx.strokeRect(bx, by, ARENA_W, ARENA_H);
-}
-
-function drawPlayer_() {
-    if (!player) return;
-    const px = Math.floor(player.x - camX);
-    const py = Math.floor(player.y - camY);
-
-    // Damage aura glow
-    if (player.powers.damageAura > 0) {
-        const auraR = 25 + player.powers.damageAura * 5;
-        const pulse = Math.sin(gameTime * 0.08) * 0.1 + 0.15;
-        bctx.globalAlpha = pulse;
-        bctx.fillStyle = '#ffdd44';
-        bctx.beginPath();
-        bctx.arc(px, py, auraR, 0, Math.PI * 2);
-        bctx.fill();
-        bctx.globalAlpha = 1;
-    }
-
-    // Shields
-    player.shields.forEach(s => {
-        const sx = px + Math.cos(s.angle) * s.dist;
-        const sy = py + Math.sin(s.angle) * s.dist;
-        bctx.fillStyle = '#88ccff';
-        bctx.globalAlpha = 0.7 + Math.sin(gameTime * 0.1) * 0.3;
-        bctx.fillRect(Math.floor(sx) - 3, Math.floor(sy) - 3, 6, 6);
-        bctx.fillStyle = '#bbddff';
-        bctx.fillRect(Math.floor(sx) - 1, Math.floor(sy) - 1, 2, 2);
-        bctx.globalAlpha = 1;
-    });
-
-    // Invincibility flash
-    if (player.invTimer > 0 && Math.floor(player.invTimer / 3) % 2 === 0) {
-        bctx.globalAlpha = 0.4;
-    }
-
-    // Draw character sprite
-    const sprite = player.facingLeft
-        ? renderSpriteFlipped(player.charId, PALETTES[player.charId])
-        : renderSprite(player.charId, PALETTES[player.charId]);
-
-    if (sprite) {
-        const bob = player.walkFrame === 1 ? -1 : 0;
-        bctx.drawImage(sprite, px - 8, py - 10 + bob);
-    }
-
-    bctx.globalAlpha = 1;
-
-    // Shadow
-    bctx.fillStyle = 'rgba(0,0,0,0.3)';
-    bctx.fillRect(px - 5, py + 9, 10, 2);
-}
-
-function drawEnemies_() {
-    enemies.forEach(e => {
-        const ex = Math.floor(e.x - camX);
-        const ey = Math.floor(e.y - camY);
-
-        // Skip if off screen
-        if (ex < -20 || ex > GAME_W + 20 || ey < -20 || ey > GAME_H + 20) return;
-
-        const flash = e.flashTimer > 0;
-
-        // Shadow
-        bctx.fillStyle = 'rgba(0,0,0,0.25)';
-        bctx.fillRect(ex - e.w / 2 + 1, ey + e.h / 2, e.w - 2, 2);
-
-        // Body
-        bctx.fillStyle = flash ? '#ffffff' : e.type.color1;
-        bctx.fillRect(ex - e.w / 2, ey - e.h / 2, e.w, e.h);
-
-        // Inner detail
-        bctx.fillStyle = flash ? '#ffdddd' : e.type.color2;
-        bctx.fillRect(ex - e.w / 2 + 1, ey - e.h / 2 + 1, e.w - 2, e.h - 2);
-
-        // Eyes (angry)
-        bctx.fillStyle = flash ? '#ff0000' : '#ff3344';
-        bctx.fillRect(ex - 2, ey - 2, 2, 2);
-        bctx.fillRect(ex + 1, ey - 2, 2, 2);
-
-        // Mouth
-        bctx.fillStyle = '#000';
-        bctx.fillRect(ex - 1, ey + 1, 3, 1);
-
-        // HP bar for tougher enemies
-        if (e.maxHp > 3) {
-            const barW = e.w;
-            const hpRatio = e.hp / e.maxHp;
-            bctx.fillStyle = '#333';
-            bctx.fillRect(ex - barW / 2, ey - e.h / 2 - 4, barW, 2);
-            bctx.fillStyle = hpRatio > 0.5 ? '#44ff44' : (hpRatio > 0.25 ? '#ffaa00' : '#ff3344');
-            bctx.fillRect(ex - barW / 2, ey - e.h / 2 - 4, Math.ceil(barW * hpRatio), 2);
-        }
-    });
-}
-
-function drawProjectiles_() {
-    projectiles.forEach(p => {
-        const px = Math.floor(p.x - camX);
-        const py = Math.floor(p.y - camY);
-
-        if (px < -10 || px > GAME_W + 10 || py < -10 || py > GAME_H + 10) return;
-
-        bctx.fillStyle = p.color;
-
-        if (p.type === 'foxfire') {
-            // Flickering flame shape
-            const flicker = Math.sin(gameTime * 0.3 + p.x) * 1;
-            bctx.fillRect(px - 1, py - 2 + flicker, 3, 4);
-            bctx.fillStyle = '#ffdd88';
-            bctx.fillRect(px, py - 1, 1, 2);
-        } else if (p.type === 'heart') {
-            // Small heart / circle
-            bctx.fillRect(px - 1, py - 1, 3, 3);
-            bctx.fillStyle = '#ffaacc';
-            bctx.fillRect(px, py, 1, 1);
-        } else if (p.type === 'beam') {
-            // Laser line
-            const len = 4;
-            const angle = Math.atan2(p.vy, p.vx);
-            bctx.save();
-            bctx.translate(px, py);
-            bctx.rotate(angle);
-            bctx.fillRect(-len, -1, len * 2, 2);
-            bctx.fillStyle = '#ffffff';
-            bctx.fillRect(-len + 1, 0, len * 2 - 2, 1);
-            bctx.restore();
-        } else if (p.type === 'aura') {
-            bctx.fillRect(px - 1, py - 1, 3, 3);
-            bctx.fillStyle = '#ffffff';
-            bctx.fillRect(px, py, 1, 1);
-        }
-    });
-}
-
-function drawXPGems_() {
+    // XP Gems
     xpGems.forEach(g => {
-        const gx = Math.floor(g.x - camX);
-        const gy = Math.floor(g.y - camY);
-
-        if (gx < -5 || gx > GAME_W + 5 || gy < -5 || gy > GAME_H + 5) return;
-
-        const pulse = Math.sin(gameTime * 0.1 + g.x) * 0.3 + 0.7;
-        bctx.globalAlpha = pulse * (g.life < 60 ? g.life / 60 : 1);
-
-        // Star/gem shape
-        bctx.fillStyle = '#dd88ff';
-        bctx.fillRect(gx - 1, gy - 2, 3, 1);
-        bctx.fillRect(gx - 2, gy - 1, 5, 1);
-        bctx.fillRect(gx - 1, gy, 3, 1);
-        bctx.fillRect(gx, gy + 1, 1, 1);
-        bctx.fillRect(gx, gy - 3, 1, 1);
-
-        // Center bright
-        bctx.fillStyle = '#ffddff';
-        bctx.fillRect(gx, gy - 1, 1, 1);
-
-        bctx.globalAlpha = 1;
+        const gx=Math.floor(g.x-camX), gy=Math.floor(g.y-camY);
+        if(gx<-5||gx>PW+5||gy<-5||gy>PH+5) return;
+        const pulse=Math.sin(gameTime*0.1+g.x)*0.3+0.7;
+        gctx.globalAlpha=pulse*(g.life<60?g.life/60:1);
+        gctx.fillStyle='#dd88ff';
+        gctx.fillRect(gx-1,gy-2,3,1); gctx.fillRect(gx-2,gy-1,5,1);
+        gctx.fillRect(gx-1,gy,3,1); gctx.fillRect(gx,gy+1,1,1); gctx.fillRect(gx,gy-3,1,1);
+        gctx.fillStyle='#ffddff'; gctx.fillRect(gx,gy-1,1,1);
+        gctx.globalAlpha=1;
     });
-}
 
-function drawParticles_() {
+    // Enemies
+    enemies.forEach(e => {
+        const ex=Math.floor(e.x-camX), ey=Math.floor(e.y-camY);
+        if(ex<-20||ex>PW+20||ey<-20||ey>PH+20) return;
+        const flash = e.flashTimer>0;
+        const frozen = e.frozen > 0;
+
+        gctx.fillStyle='rgba(0,0,0,0.25)';
+        gctx.fillRect(ex-e.w/2+1,ey+e.h/2,e.w-2,2);
+
+        gctx.fillStyle = frozen ? '#88ccff' : (flash ? '#ffffff' : e.type.color1);
+        gctx.fillRect(ex-e.w/2,ey-e.h/2,e.w,e.h);
+        gctx.fillStyle = frozen ? '#aaddff' : (flash ? '#ffdddd' : e.type.color2);
+        gctx.fillRect(ex-e.w/2+1,ey-e.h/2+1,e.w-2,e.h-2);
+
+        // Scanned indicator
+        if (e.scanned) {
+            gctx.strokeStyle='#44aaff'; gctx.lineWidth=0.5;
+            gctx.strokeRect(ex-e.w/2-1,ey-e.h/2-1,e.w+2,e.h+2);
+        }
+
+        gctx.fillStyle = flash?'#ff0000':'#ff3344';
+        gctx.fillRect(ex-2,ey-2,2,2); gctx.fillRect(ex+1,ey-2,2,2);
+        gctx.fillStyle='#000'; gctx.fillRect(ex-1,ey+1,3,1);
+
+        if (e.maxHp>3) {
+            const bw=e.w, hr=e.hp/e.maxHp;
+            gctx.fillStyle='#222'; gctx.fillRect(ex-bw/2,ey-e.h/2-4,bw,2);
+            gctx.fillStyle=hr>0.5?'#44ff44':(hr>0.25?'#ffaa00':'#ff3344');
+            gctx.fillRect(ex-bw/2,ey-e.h/2-4,Math.ceil(bw*hr),2);
+        }
+    });
+
+    // Projectiles
+    projectiles.forEach(p => {
+        const px=Math.floor(p.x-camX), py=Math.floor(p.y-camY);
+        if(px<-10||px>PW+10||py<-10||py>PH+10) return;
+        gctx.fillStyle=p.color;
+        if(p.type==='foxfire'){ const f=Math.sin(gameTime*0.3+p.x); gctx.fillRect(px-1,py-2+f,3,4); gctx.fillStyle='#ffdd88'; gctx.fillRect(px,py-1,1,2); }
+        else if(p.type==='heart'){ gctx.fillRect(px-1,py-1,3,3); gctx.fillStyle='#ffaacc'; gctx.fillRect(px,py,1,1); }
+        else if(p.type==='beam'){ const a=Math.atan2(p.vy,p.vx); gctx.save(); gctx.translate(px,py); gctx.rotate(a); gctx.fillRect(-4,-1,8,2); gctx.fillStyle='#fff'; gctx.fillRect(-3,0,6,1); gctx.restore(); }
+        else if(p.type==='aura'){ gctx.fillRect(px-1,py-1,3,3); gctx.fillStyle='#fff'; gctx.fillRect(px,py,1,1); }
+    });
+
+    // Particles
     particles.forEach(p => {
-        const px = Math.floor(p.x - camX);
-        const py = Math.floor(p.y - camY);
-        bctx.globalAlpha = Math.max(0, p.life / 20);
-        bctx.fillStyle = p.color;
-        const s = Math.ceil(p.size);
-        bctx.fillRect(px - Math.floor(s / 2), py - Math.floor(s / 2), s, s);
+        const px=Math.floor(p.x-camX), py=Math.floor(p.y-camY);
+        gctx.globalAlpha=Math.max(0,p.life/20);
+        gctx.fillStyle=p.color;
+        const s=Math.ceil(p.size);
+        gctx.fillRect(px-Math.floor(s/2),py-Math.floor(s/2),s,s);
     });
-    bctx.globalAlpha = 1;
+    gctx.globalAlpha=1;
+
+    // Player
+    if (player) {
+        const px=Math.floor(player.x-camX), py=Math.floor(player.y-camY);
+
+        // Damage aura
+        if (player.powers.dmgAura>0) {
+            const r=25+player.powers.dmgAura*5;
+            gctx.globalAlpha=Math.sin(gameTime*0.08)*0.1+0.15;
+            gctx.fillStyle='#ffdd44';
+            gctx.beginPath(); gctx.arc(px,py,r,0,Math.PI*2); gctx.fill();
+            gctx.globalAlpha=1;
+        }
+
+        // Daydream zone
+        if (player.powers.daydream>0) {
+            const r=30+player.powers.daydream*10;
+            gctx.globalAlpha=0.08;
+            gctx.fillStyle='#aaccff';
+            gctx.beginPath(); gctx.arc(px,py,r,0,Math.PI*2); gctx.fill();
+            gctx.globalAlpha=1;
+        }
+
+        // Shields
+        player.shields.forEach(s => {
+            const sx=px+Math.cos(s.angle)*s.dist, sy=py+Math.sin(s.angle)*s.dist;
+            gctx.fillStyle='#88ccff';
+            gctx.globalAlpha=0.7+Math.sin(gameTime*0.1)*0.3;
+            gctx.fillRect(Math.floor(sx)-3,Math.floor(sy)-3,6,6);
+            gctx.fillStyle='#bbddff';
+            gctx.fillRect(Math.floor(sx)-1,Math.floor(sy)-1,2,2);
+            gctx.globalAlpha=1;
+        });
+
+        // Spirit form glow
+        if (player.spiritTimer > 0) {
+            gctx.globalAlpha = 0.3 + Math.sin(gameTime*0.2)*0.1;
+            gctx.fillStyle = '#ddaaff';
+            gctx.beginPath(); gctx.arc(px,py,12,0,Math.PI*2); gctx.fill();
+            gctx.globalAlpha = 0.5;
+        }
+
+        // Invincibility flash
+        if (player.invTimer>0 && Math.floor(player.invTimer/3)%2===0) gctx.globalAlpha=0.4;
+
+        const sprite = player.facingLeft ? renderSpriteFlipped(player.charId) : renderSprite(player.charId);
+        if (sprite) { const bob=player.walkFrame===1?-1:0; gctx.drawImage(sprite, px-8, py-10+bob); }
+        gctx.globalAlpha=1;
+
+        gctx.fillStyle='rgba(0,0,0,0.3)';
+        gctx.fillRect(px-5,py+9,10,2);
+    }
+
+    // Screen flash
+    if (screenFlash > 0) {
+        gctx.globalAlpha = screenFlash / 20;
+        gctx.fillStyle = screenFlashColor;
+        gctx.fillRect(0, 0, PW, PH);
+        gctx.globalAlpha = 1;
+        screenFlash--;
+    }
 }
 
-function drawFloatingTexts_() {
-    floatingTexts.forEach(t => {
-        const tx = Math.floor(t.x - camX);
-        const ty = Math.floor(t.y - camY);
-        bctx.globalAlpha = Math.min(1, t.life / 15);
-        bctx.fillStyle = t.color;
-        bctx.font = '6px monospace';
-        bctx.textAlign = 'center';
-        bctx.fillText(t.text, tx, ty);
-    });
-    bctx.globalAlpha = 1;
-}
+// ================================================================
+// UI LAYER DRAWING (960x720, crisp text)
+// ================================================================
 
-function drawHUD() {
+function drawUI_HUD() {
+    uctx.clearRect(0, 0, UW, UH);
     if (!player) return;
+
+    const cd = player.charDef;
+
+    // === TOP BAR (dark overlay strip) ===
+    uctx.fillStyle = 'rgba(10, 0, 20, 0.7)';
+    uctx.fillRect(0, 0, UW, 56);
+
+    // Character emoji + name
+    txt(uctx, cd.emoji + ' ' + cd.name, 12, 6, cd.color, 14, 'left', '#000', 4);
 
     // HP bar
-    const barX = 4;
-    const barY = 4;
-    const barW = 50;
-    const barH = 5;
-    bctx.fillStyle = '#222';
-    bctx.fillRect(barX, barY, barW, barH);
-    const hpRatio = player.hp / player.maxHp;
-    bctx.fillStyle = hpRatio > 0.5 ? '#ff4488' : (hpRatio > 0.25 ? '#ffaa00' : '#ff2222');
-    bctx.fillRect(barX, barY, Math.ceil(barW * hpRatio), barH);
-    bctx.strokeStyle = '#ff88bb';
-    bctx.lineWidth = 0.5;
-    bctx.strokeRect(barX, barY, barW, barH);
-
-    // HP text
-    bctx.fillStyle = '#fff';
-    bctx.font = '5px monospace';
-    bctx.textAlign = 'left';
-    bctx.fillText('HP ' + player.hp + '/' + player.maxHp, barX + 1, barY + 4);
+    const hpX=160, hpY=8, hpW=140, hpH=16;
+    uctx.fillStyle='#1a0a1a'; uctx.fillRect(hpX,hpY,hpW,hpH);
+    const hpR = player.hp/player.maxHp;
+    const hpCol = hpR>0.5?'#ff44aa':(hpR>0.25?'#ffaa00':'#ff2244');
+    uctx.fillStyle=hpCol; uctx.fillRect(hpX,hpY,Math.ceil(hpW*hpR),hpH);
+    uctx.strokeStyle='#ff88cc'; uctx.lineWidth=2; uctx.strokeRect(hpX,hpY,hpW,hpH);
+    txt(uctx, '❤️ ' + Math.ceil(player.hp) + '/' + player.maxHp, hpX+4, hpY+2, '#fff', 9, 'left', '#000', 3);
 
     // XP bar
-    const xpY = barY + barH + 2;
-    bctx.fillStyle = '#222';
-    bctx.fillRect(barX, xpY, barW, 3);
-    const xpRatio = player.xp / player.xpToNext;
-    bctx.fillStyle = '#aa44ff';
-    bctx.fillRect(barX, xpY, Math.ceil(barW * xpRatio), 3);
+    const xpX=160, xpY=28, xpW=140, xpH=10;
+    uctx.fillStyle='#1a0a1a'; uctx.fillRect(xpX,xpY,xpW,xpH);
+    const xpR = player.xp/player.xpToNext;
+    uctx.fillStyle='#aa44ff'; uctx.fillRect(xpX,xpY,Math.ceil(xpW*xpR),xpH);
+    uctx.strokeStyle='#cc88ff'; uctx.lineWidth=1; uctx.strokeRect(xpX,xpY,xpW,xpH);
+    txt(uctx, '⭐ LV.' + player.level, hpX, xpY+xpH+4, '#ffddff', 8, 'left', '#000', 2);
 
-    // Level
-    bctx.fillStyle = '#ffddff';
-    bctx.font = '5px monospace';
-    bctx.fillText('LV ' + player.level, barX, xpY + 9);
+    // Timer (center)
+    const secs = Math.floor(survivalTime/60);
+    const mins = Math.floor(secs/60);
+    const secStr = (secs%60).toString().padStart(2,'0');
+    txt(uctx, '⏱️ ' + mins + ':' + secStr, UW/2, 6, '#ffffff', 14, 'center', '#000', 4);
 
-    // Character name
-    bctx.fillStyle = player.charDef.color;
-    bctx.font = '5px monospace';
-    bctx.textAlign = 'left';
-    bctx.fillText(player.charDef.name, barX + barW + 4, barY + 4);
+    // Wave
+    txt(uctx, '🌊 Wave ' + difficulty, UW/2, 30, '#ffdd88', 10, 'center', '#000', 3);
 
-    // Timer
-    const secs = Math.floor(survivalTime / 60);
-    const mins = Math.floor(secs / 60);
-    const secStr = (secs % 60).toString().padStart(2, '0');
-    bctx.fillStyle = '#fff';
-    bctx.textAlign = 'center';
-    bctx.font = '6px monospace';
-    bctx.fillText(mins + ':' + secStr, GAME_W / 2, 8);
+    // Followers (right side)
+    txt(uctx, '👥 ' + formatNum(followers), UW-12, 6, '#ff88cc', 12, 'right', '#000', 3);
 
-    // Kill count (right side)
-    bctx.textAlign = 'right';
-    bctx.fillStyle = '#ff88aa';
-    bctx.font = '5px monospace';
-    bctx.fillText('KO: ' + killCount, GAME_W - 4, 8);
+    // KO count
+    txt(uctx, '💀 ' + killCount + ' KO', UW-12, 28, '#ff8888', 9, 'right', '#000', 2);
 
-    // Wave indicator
-    bctx.fillStyle = '#ffdd88';
-    bctx.fillText('Wave ' + difficulty, GAME_W - 4, 16);
+    // Combo indicator
+    if (comboCount >= 3) {
+        const comboX = UW/2, comboY = 52;
+        const pulse = 1 + Math.sin(gameTime*0.15)*0.1;
+        uctx.save();
+        uctx.translate(comboX, comboY);
+        uctx.scale(pulse, pulse);
+        const comboCol = comboCount>=25?'#ffdd44':(comboCount>=10?'#ff8844':'#ff88cc');
+        txt(uctx, '🔥 ' + comboCount + 'x COMBO', 0, -6, comboCol, 10, 'center', '#000', 3);
+        uctx.restore();
+    }
+
+    // === BOTTOM: Active skill icons ===
+    const cd2 = CHARACTERS[player.charIdx];
+    const allSkills = [...cd2.skills, ...SHARED_POWERS];
+    const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
+    if (activeSkills.length > 0) {
+        const iconY = UH - 38;
+        const totalW = activeSkills.length * 36;
+        const startX = (UW - totalW) / 2;
+
+        uctx.fillStyle = 'rgba(10, 0, 20, 0.6)';
+        uctx.fillRect(startX - 8, iconY - 6, totalW + 16, 38);
+
+        activeSkills.forEach((sk, idx) => {
+            const ix = startX + idx * 36;
+            const lv = player.powers[sk.id];
+            uctx.fillStyle = 'rgba(0,0,0,0.5)';
+            uctx.fillRect(ix, iconY, 30, 26);
+            uctx.strokeStyle = sk.color || '#666';
+            uctx.lineWidth = 1;
+            uctx.strokeRect(ix, iconY, 30, 26);
+
+            // Emoji
+            uctx.font = '14px serif';
+            uctx.textAlign = 'center';
+            uctx.fillStyle = '#fff';
+            uctx.fillText(sk.emoji, ix + 15, iconY + 17);
+
+            // Level dots
+            for (let d = 0; d < 5; d++) {
+                uctx.fillStyle = d < lv ? (sk.color || '#fff') : '#333';
+                uctx.fillRect(ix + 3 + d * 5, iconY + 22, 3, 2);
+            }
+        });
+    }
+
+    // === RIGHT SIDE: Notifications ===
+    let ny = 65;
+    notifications.slice(-5).forEach(n => {
+        const alpha = Math.min(1, n.life / 30);
+        uctx.globalAlpha = alpha;
+        uctx.fillStyle = 'rgba(0,0,0,0.5)';
+        const tw = uctx.measureText ? 300 : 300;
+        uctx.fillRect(UW - tw - 20, ny - 2, tw + 12, 22);
+        txt(uctx, n.text, UW - 14, ny, n.color, 8, 'right');
+        ny += 26;
+    });
+    uctx.globalAlpha = 1;
+
+    // === Trending hashtag (bottom-left) ===
+    if (trendingText) {
+        const tpulse = Math.sin(gameTime * 0.05) * 0.2 + 0.8;
+        uctx.globalAlpha = tpulse;
+        txt(uctx, '📈 TRENDING: ' + trendingText, 12, UH - 52, '#aa88ff', 7, 'left', '#000', 2);
+        uctx.globalAlpha = 1;
+    }
+
+    // Fan chants (world-space, scaled to UI)
+    fanChants.forEach(f => {
+        const fx = (f.x - camX) * S;
+        const fy = (f.y - camY) * S;
+        uctx.globalAlpha = Math.min(1, f.life / 15);
+        txtGlow(uctx, f.text, fx, fy, '#ffffff', 9, 'center', '#ff44aa');
+    });
+    uctx.globalAlpha = 1;
+
+    // Floating texts (world-space)
+    floatingTexts.forEach(t => {
+        const tx = (t.x - camX) * S;
+        const ty = (t.y - camY) * S;
+        uctx.globalAlpha = Math.min(1, t.life / 15);
+        txt(uctx, t.text, tx, ty, t.color, 10, 'center', '#000', 3);
+    });
+    uctx.globalAlpha = 1;
 }
 
-// ============================================================
-// UI SCREENS
-// ============================================================
+function formatNum(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+    if (n >= 1000) return (n/1000).toFixed(1)+'K';
+    return n.toString();
+}
 
-function drawTitle() {
-    bctx.fillStyle = '#1a0a2e';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
+// ================================================================
+// UI SCREENS (Title, Select, Level Up, Game Over)
+// ================================================================
 
-    // Animated background stars
-    for (let i = 0; i < 40; i++) {
-        const sx = ((i * 73 + gameTime * 0.1) % GAME_W);
-        const sy = ((i * 47 + gameTime * 0.05) % GAME_H);
-        const pulse = Math.sin(gameTime * 0.05 + i) * 0.3 + 0.7;
-        bctx.globalAlpha = pulse * 0.6;
-        bctx.fillStyle = ['#ff44aa', '#44aaff', '#ffaa44', '#aa44ff'][i % 4];
-        bctx.fillRect(Math.floor(sx), Math.floor(sy), 1, 1);
+function drawUI_Title() {
+    uctx.clearRect(0, 0, UW, UH);
+
+    // Background
+    uctx.fillStyle = '#0a0018';
+    uctx.fillRect(0, 0, UW, UH);
+
+    // Animated stars
+    for (let i = 0; i < 60; i++) {
+        const sx = ((i*73+gameTime*0.3)%UW);
+        const sy = ((i*47+gameTime*0.15)%UH);
+        const pulse = Math.sin(gameTime*0.05+i)*0.3+0.7;
+        uctx.globalAlpha=pulse*0.6;
+        uctx.fillStyle=['#ff44aa','#44aaff','#ffaa44','#aa44ff'][i%4];
+        uctx.fillRect(Math.floor(sx),Math.floor(sy),2,2);
     }
-    bctx.globalAlpha = 1;
+    uctx.globalAlpha=1;
 
-    // Title glow
-    const pulse = Math.sin(gameTime * 0.04) * 0.2 + 0.8;
-    bctx.globalAlpha = pulse * 0.3;
-    bctx.fillStyle = '#ff44aa';
-    bctx.fillRect(GAME_W / 2 - 70, 40, 140, 20);
-    bctx.globalAlpha = 1;
+    // Title glow bg
+    const pulse = Math.sin(gameTime*0.04)*0.2+0.8;
+    uctx.globalAlpha=pulse*0.15;
+    const grad = uctx.createLinearGradient(UW/2-250, 80, UW/2+250, 160);
+    grad.addColorStop(0,'#ff44aa'); grad.addColorStop(1,'#aa44ff');
+    uctx.fillStyle=grad;
+    uctx.fillRect(UW/2-250, 80, 500, 80);
+    uctx.globalAlpha=1;
 
     // Title
-    bctx.fillStyle = '#ff44aa';
-    bctx.font = 'bold 16px monospace';
-    bctx.textAlign = 'center';
-    bctx.fillText('SUPERNOVA', GAME_W / 2, 55);
+    txtBangers(uctx, '✨ SUPERNOVA ✨', UW/2, 70, '#ff44aa', 72, 'center', '#000', 6);
+    txt(uctx, 'STAGE SURVIVORS', UW/2, 155, '#ffaacc', 18, 'center', '#220022', 4);
 
-    bctx.fillStyle = '#ffaacc';
-    bctx.font = '8px monospace';
-    bctx.fillText('STAGE SURVIVORS', GAME_W / 2, 70);
+    // Characters in a line
+    const names = ['MIHO 🦊','HYUNJU 🌙','SUJIN ⭐','SOHEE 🦋'];
+    const colors = ['#f7e065','#ff8844','#cc2244','#4488ff'];
+    const charIDs = ['miho','hyunju','sujin','sohee'];
+    const startX = UW/2 - 180;
 
-    // Draw all 4 members in a line
-    const chars = ['miho', 'hyunju', 'sujin', 'sohee'];
-    const charColors = ['#f7e065', '#ff8844', '#cc2244', '#4488ff'];
-    const startX = GAME_W / 2 - 50;
-
-    chars.forEach((c, i) => {
-        const sprite = renderSprite(c, PALETTES[c]);
+    // Draw pixel sprites scaled up
+    gctx.clearRect(0, 0, PW, PH);
+    charIDs.forEach((c, i) => {
+        const sprite = renderSprite(c);
         if (sprite) {
-            const bob = Math.sin(gameTime * 0.06 + i * 1.5) * 2;
-            bctx.drawImage(sprite, startX + i * 28, 90 + bob);
+            const bob = Math.sin(gameTime*0.06 + i*1.5)*4;
+            // Draw to a temp canvas and put on UI
+            const tmp = document.createElement('canvas');
+            tmp.width = 16*4; tmp.height = 20*4;
+            const tc = tmp.getContext('2d');
+            tc.imageSmoothingEnabled = false;
+            tc.drawImage(sprite, 0, 0, 16*4, 20*4);
+            uctx.drawImage(tmp, startX + i*100, 220 + bob);
         }
-        bctx.fillStyle = charColors[i];
-        bctx.font = '4px monospace';
-        bctx.fillText(CHARACTERS[i].name, startX + i * 28 + 8, 116);
+        txt(uctx, names[i], startX + i*100 + 32, 310, colors[i], 10, 'center', '#000', 3);
     });
 
-    // Subtitle
-    bctx.fillStyle = '#8866aa';
-    bctx.font = '5px monospace';
-    bctx.fillText('A K-pop Idol Survival Game', GAME_W / 2, 135);
+    // Tagline
+    txt(uctx, '🎤 Pick your bias. Survive the hate. Slay the stage. 💅', UW/2, 370, '#8866aa', 10, 'center', '#000', 2);
 
-    // Instructions
-    bctx.fillStyle = '#666688';
-    bctx.font = '5px monospace';
-    bctx.fillText('WASD / Arrows to move', GAME_W / 2, 160);
-    bctx.fillText('Auto-attack nearby enemies', GAME_W / 2, 170);
-    bctx.fillText('Collect XP gems to level up', GAME_W / 2, 180);
+    // Social media style features
+    txt(uctx, '📱 Social media themed  |  🔥 K-pop fandom vibes  |  ⭐ Deep skill trees', UW/2, 400, '#666688', 8, 'center', '#000', 2);
+
+    // Controls
+    txt(uctx, '🎮 WASD / Arrows to move  •  Auto-attack enemies', UW/2, 450, '#555577', 9, 'center', '#000', 2);
+    txt(uctx, '💎 Collect XP gems  •  Level up & choose powers', UW/2, 475, '#555577', 9, 'center', '#000', 2);
 
     // Start prompt
-    const blink = Math.sin(gameTime * 0.08) > 0;
+    const blink = Math.sin(gameTime*0.08) > 0;
     if (blink) {
-        bctx.fillStyle = '#ffffff';
-        bctx.font = '7px monospace';
-        bctx.fillText('PRESS SPACE TO START', GAME_W / 2, 215);
+        txtGlow(uctx, '👆 CLICK OR PRESS SPACE TO START 👆', UW/2, 540, '#ffffff', 14, 'center', '#ff44aa');
     }
+
+    // Version / hashtag
+    txt(uctx, '#SUPERNOVA_GAME  •  #STAN_SUPERNOVA', UW/2, UH-40, '#443355', 7, 'center');
 }
 
-function drawCharSelect() {
-    bctx.fillStyle = '#1a0a2e';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
+function drawUI_Select() {
+    uctx.clearRect(0, 0, UW, UH);
+    uctx.fillStyle = '#0a0018';
+    uctx.fillRect(0, 0, UW, UH);
 
-    bctx.fillStyle = '#ff88cc';
-    bctx.font = 'bold 10px monospace';
-    bctx.textAlign = 'center';
-    bctx.fillText('SELECT YOUR IDOL', GAME_W / 2, 20);
+    txtBangers(uctx, '💗 PICK YOUR BIAS 💗', UW/2, 15, '#ff88cc', 48, 'center', '#000', 5);
+    txt(uctx, '◀ A/D or Arrows ▶  •  SPACE to confirm  •  Click to pick', UW/2, 70, '#8866aa', 8, 'center', '#000', 2);
 
-    bctx.fillStyle = '#8866aa';
-    bctx.font = '5px monospace';
-    bctx.fillText('< A/D or Arrow Keys >  SPACE to confirm', GAME_W / 2, 32);
-
+    // 4 character cards
     for (let i = 0; i < 4; i++) {
         const c = CHARACTERS[i];
-        const bx = 30 + i * 70;
-        const by = 50;
-        const isSelected = i === selectedChar;
+        const bx = 60 + i * 215, by = 100;
+        const sel = i === selectedChar;
 
-        // Selection box
-        if (isSelected) {
-            const pulse = Math.sin(gameTime * 0.08) * 0.2 + 0.8;
-            bctx.fillStyle = `rgba(255, 68, 170, ${pulse * 0.3})`;
-            bctx.fillRect(bx - 4, by - 4, 68, 88);
-            bctx.strokeStyle = '#ff44aa';
-            bctx.lineWidth = 1;
-            bctx.strokeRect(bx - 4, by - 4, 68, 88);
+        // Card background
+        if (sel) {
+            const p2 = Math.sin(gameTime*0.08)*0.15+0.85;
+            uctx.fillStyle = `rgba(255,68,170,${p2*0.2})`;
+            uctx.fillRect(bx-4, by-4, 203, 340);
+            uctx.strokeStyle = c.color;
+            uctx.lineWidth = 3;
+            uctx.strokeRect(bx-4, by-4, 203, 340);
+        } else {
+            uctx.fillStyle = 'rgba(20,10,40,0.8)';
+            uctx.fillRect(bx, by, 195, 332);
+            uctx.strokeStyle = '#333';
+            uctx.lineWidth = 1;
+            uctx.strokeRect(bx, by, 195, 332);
         }
 
-        // Character sprite
-        const sprite = renderSprite(c.id, PALETTES[c.id]);
+        // Sprite
+        const sprite = renderSprite(c.id);
         if (sprite) {
-            const bob = isSelected ? Math.sin(gameTime * 0.08) * 2 : 0;
-            const scale = isSelected ? 2 : 1.5;
-            bctx.save();
-            bctx.imageSmoothingEnabled = false;
-            bctx.drawImage(sprite,
-                bx + 30 - sprite.width * scale / 2,
-                by + 5 + bob,
-                sprite.width * scale,
-                sprite.height * scale
-            );
-            bctx.restore();
+            const bob = sel ? Math.sin(gameTime*0.08)*4 : 0;
+            const sc = sel ? 5 : 4;
+            const tmp = document.createElement('canvas');
+            tmp.width = 16*sc; tmp.height = 20*sc;
+            const tc = tmp.getContext('2d');
+            tc.imageSmoothingEnabled = false;
+            tc.drawImage(sprite, 0, 0, 16*sc, 20*sc);
+            uctx.drawImage(tmp, bx + 97 - (16*sc)/2, by + 10 + bob);
         }
 
-        // Name
-        bctx.fillStyle = isSelected ? c.color : '#666';
-        bctx.font = isSelected ? 'bold 6px monospace' : '5px monospace';
-        bctx.textAlign = 'center';
-        bctx.fillText(c.name, bx + 30, by + 56);
+        // Name + emoji
+        const nameCol = sel ? c.color : '#666';
+        txt(uctx, c.emoji + ' ' + c.name, bx + 97, by + 120, nameCol, sel ? 14 : 11, 'center', '#000', 3);
 
         // Title
-        bctx.fillStyle = isSelected ? '#ccaadd' : '#444';
-        bctx.font = '4px monospace';
-        bctx.fillText(c.title, bx + 30, by + 64);
-    }
+        txt(uctx, c.title, bx + 97, by + 142, sel ? '#ccaadd' : '#444', 8, 'center', '#000', 2);
 
-    // Selected character details
-    const sel = CHARACTERS[selectedChar];
-    const detY = 145;
+        // Hashtag
+        txt(uctx, c.hashtag, bx + 97, by + 160, sel ? '#aa88cc' : '#333', 7, 'center');
 
-    bctx.fillStyle = '#221133';
-    bctx.fillRect(20, detY - 5, GAME_W - 40, 80);
-    bctx.strokeStyle = sel.color;
-    bctx.lineWidth = 0.5;
-    bctx.strokeRect(20, detY - 5, GAME_W - 40, 80);
+        if (sel) {
+            // Description quote
+            txt(uctx, c.desc, bx + 97, by + 182, '#aaaacc', 6, 'center', '#000', 2);
 
-    bctx.textAlign = 'left';
-    bctx.fillStyle = sel.color;
-    bctx.font = 'bold 7px monospace';
-    bctx.fillText(sel.name + ' - ' + sel.title, 28, detY + 8);
+            // Ability
+            txt(uctx, c.lightstick + ' ' + c.skills[0].name, bx + 97, by + 205, '#ffaacc', 9, 'center', '#000', 2);
+            txt(uctx, c.skills[0].desc, bx + 97, by + 222, '#8888aa', 6, 'center');
 
-    bctx.fillStyle = '#aaaacc';
-    bctx.font = '5px monospace';
-    bctx.fillText(sel.desc, 28, detY + 20);
+            // Stats bars
+            const stats = c.stats;
+            const statNames = ['⚡ SPD','❤️ HP','⚔️ ATK','🎯 RNG'];
+            const statVals = [stats.speed/4, stats.hp/7, stats.atk/2, stats.range/100];
+            statNames.forEach((name, idx) => {
+                const sy2 = by + 245 + idx * 20;
+                txt(uctx, name, bx + 10, sy2, '#888', 6, 'left');
+                uctx.fillStyle='#222'; uctx.fillRect(bx+75, sy2+2, 100, 8);
+                uctx.fillStyle=c.color; uctx.fillRect(bx+75, sy2+2, Math.floor(100*statVals[idx]), 8);
+                uctx.strokeStyle='#444'; uctx.lineWidth=1; uctx.strokeRect(bx+75, sy2+2, 100, 8);
+            });
 
-    bctx.fillStyle = '#ffaacc';
-    bctx.font = '5px monospace';
-    bctx.fillText('Ability: ' + sel.abilityName, 28, detY + 32);
-
-    bctx.fillStyle = '#8888aa';
-    bctx.fillText(sel.abilityDesc, 28, detY + 42);
-
-    // Stats bars
-    const stats = sel.stats;
-    const statNames = ['SPD', 'HP', 'ATK', 'RNG'];
-    const statVals = [stats.speed / 4, stats.hp / 7, stats.atk / 2, stats.range / 100];
-
-    statNames.forEach((name, idx) => {
-        const sx = 28;
-        const sy = detY + 52 + idx * 7;
-        bctx.fillStyle = '#666688';
-        bctx.font = '4px monospace';
-        bctx.textAlign = 'left';
-        bctx.fillText(name, sx, sy + 3);
-
-        bctx.fillStyle = '#333';
-        bctx.fillRect(sx + 22, sy, 40, 4);
-        bctx.fillStyle = sel.color;
-        bctx.fillRect(sx + 22, sy, Math.floor(40 * statVals[idx]), 4);
-    });
-}
-
-function drawLevelUp() {
-    // Dim background
-    bctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
-
-    bctx.fillStyle = '#ffdd44';
-    bctx.font = 'bold 10px monospace';
-    bctx.textAlign = 'center';
-    bctx.fillText('LEVEL UP!', GAME_W / 2, 30);
-
-    bctx.fillStyle = '#aaaacc';
-    bctx.font = '5px monospace';
-    bctx.fillText('Level ' + player.level + ' - Choose a power-up:', GAME_W / 2, 45);
-
-    // Draw choices
-    levelUpChoices.forEach((choice, i) => {
-        const bx = 40;
-        const by = 60 + i * 55;
-        const hover = mouseX >= bx && mouseX <= bx + 240 && mouseY >= by && mouseY <= by + 45;
-
-        bctx.fillStyle = hover ? '#2a1a3e' : '#1a0e2a';
-        bctx.fillRect(bx, by, 240, 45);
-        bctx.strokeStyle = hover ? choice.color : '#443366';
-        bctx.lineWidth = 1;
-        bctx.strokeRect(bx, by, 240, 45);
-
-        // Number key hint
-        bctx.fillStyle = '#ff88cc';
-        bctx.font = 'bold 8px monospace';
-        bctx.textAlign = 'left';
-        bctx.fillText((i + 1) + '.', bx + 6, by + 18);
-
-        // Name
-        bctx.fillStyle = choice.color;
-        bctx.font = 'bold 7px monospace';
-        bctx.fillText(choice.name, bx + 22, by + 15);
-
-        // Level indicator
-        const currentLvl = player.powers[choice.id];
-        bctx.fillStyle = '#666';
-        bctx.font = '4px monospace';
-        bctx.fillText('Lv.' + currentLvl + ' > ' + (currentLvl + 1), bx + 22, by + 24);
-
-        // Description
-        bctx.fillStyle = '#8888aa';
-        bctx.font = '5px monospace';
-        bctx.fillText(choice.desc, bx + 22, by + 36);
-    });
-}
-
-function drawGameOver_() {
-    bctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
-
-    bctx.fillStyle = '#ff4466';
-    bctx.font = 'bold 14px monospace';
-    bctx.textAlign = 'center';
-    bctx.fillText('GAME OVER', GAME_W / 2, 70);
-
-    if (player) {
-        bctx.fillStyle = player.charDef.color;
-        bctx.font = '7px monospace';
-        bctx.fillText(player.charDef.name, GAME_W / 2, 95);
-
-        // Draw sprite
-        const sprite = renderSprite(player.charId, PALETTES[player.charId]);
-        if (sprite) {
-            bctx.drawImage(sprite, GAME_W / 2 - sprite.width, 100, sprite.width * 2, sprite.height * 2);
+            // Fandom name
+            txt(uctx, '👥 Fandom: ' + c.fandom, bx + 97, by + 330 - 12, '#ff88cc', 6, 'center');
         }
     }
 
-    bctx.fillStyle = '#ffffff';
-    bctx.font = '6px monospace';
-    const secs = Math.floor(survivalTime / 60);
-    const mins = Math.floor(secs / 60);
-    const secStr = (secs % 60).toString().padStart(2, '0');
-    bctx.fillText('Time: ' + mins + ':' + secStr, GAME_W / 2, 150);
-    bctx.fillText('Kills: ' + killCount, GAME_W / 2, 162);
-    bctx.fillText('Level: ' + (player ? player.level : 1), GAME_W / 2, 174);
+    // Skill tree preview for selected character
+    const sel = CHARACTERS[selectedChar];
+    const treeY = 460;
+    uctx.fillStyle = 'rgba(10,5,25,0.9)';
+    uctx.fillRect(30, treeY, UW - 60, 230);
+    uctx.strokeStyle = sel.color;
+    uctx.lineWidth = 2;
+    uctx.strokeRect(30, treeY, UW - 60, 230);
 
-    const blink = Math.sin(gameTime * 0.08) > 0;
+    txt(uctx, '📋 SKILL TREE — ' + sel.name + ' ' + sel.emoji, UW/2, treeY + 8, sel.color, 11, 'center', '#000', 3);
+
+    sel.skills.forEach((sk, idx) => {
+        const sx2 = 55 + idx * 175;
+        const sy2 = treeY + 35;
+
+        // Skill card
+        uctx.fillStyle = 'rgba(30,15,50,0.8)';
+        uctx.fillRect(sx2, sy2, 165, 175);
+        uctx.strokeStyle = sk.color;
+        uctx.lineWidth = 1;
+        uctx.strokeRect(sx2, sy2, 165, 175);
+
+        // Emoji + name
+        txt(uctx, sk.emoji, sx2 + 82, sy2 + 5, '#fff', 16, 'center');
+        txt(uctx, sk.name, sx2 + 82, sy2 + 30, sk.color, 8, 'center', '#000', 2);
+        txt(uctx, sk.desc, sx2 + 82, sy2 + 48, '#8888aa', 5, 'center');
+
+        // Level progression
+        sk.levels.forEach((lv, li) => {
+            const ly = sy2 + 65 + li * 20;
+            const isFirst = li === 0 && idx === 0;
+            txt(uctx, (li+1) + '.', sx2 + 8, ly, isFirst ? '#ffdd44' : '#555', 5, 'left');
+            txt(uctx, lv, sx2 + 25, ly, isFirst ? '#ffdd44' : '#777', 5, 'left');
+        });
+
+        // Signature badge for first skill
+        if (idx === 0) {
+            txt(uctx, '🌟 SIGNATURE', sx2 + 82, sy2 + 160, '#ffdd44', 5, 'center');
+        }
+    });
+}
+
+function drawUI_LevelUp() {
+    // Overlay
+    uctx.fillStyle = 'rgba(0,0,0,0.75)';
+    uctx.fillRect(0, 0, UW, UH);
+
+    // Starburst effect
+    uctx.save();
+    uctx.translate(UW/2, UH/2);
+    uctx.rotate(gameTime * 0.005);
+    for (let i = 0; i < 12; i++) {
+        const a = (i/12) * Math.PI * 2;
+        uctx.globalAlpha = 0.03;
+        uctx.fillStyle = '#ffdd44';
+        uctx.beginPath();
+        uctx.moveTo(0, 0);
+        uctx.lineTo(Math.cos(a-0.05)*500, Math.sin(a-0.05)*500);
+        uctx.lineTo(Math.cos(a+0.05)*500, Math.sin(a+0.05)*500);
+        uctx.fill();
+    }
+    uctx.restore();
+    uctx.globalAlpha = 1;
+
+    // Title
+    const bounce = Math.sin(gameTime*0.1)*3;
+    txtBangers(uctx, '🎉 LEVEL UP! 🎉', UW/2, 30 + bounce, '#ffdd44', 52, 'center', '#000', 5);
+    txt(uctx, '⭐ Level ' + player.level + ' — Choose your power-up! ⭐', UW/2, 95, '#ccaaff', 10, 'center', '#000', 3);
+
+    // Subtitle with character
+    txt(uctx, player.charDef.emoji + ' ' + player.charDef.name + ' is leveling up!', UW/2, 120, player.charDef.color, 9, 'center', '#000', 2);
+
+    // Cards
+    levelUpChoices.forEach((choice, i) => {
+        const bx = 180, by = 170 + i * 115;
+        const hover = mouseX >= bx && mouseX <= bx + 600 && mouseY >= by && mouseY <= by + 100;
+        const cd = CHARACTERS[player.charIdx];
+        const isCharSkill = cd.skills.some(s => s.id === choice.id);
+
+        // Card bg
+        uctx.fillStyle = hover ? 'rgba(40,20,60,0.95)' : 'rgba(20,10,35,0.9)';
+        uctx.fillRect(bx, by, 600, 100);
+
+        // Gradient accent on left
+        const accentGrad = uctx.createLinearGradient(bx, by, bx + 8, by);
+        accentGrad.addColorStop(0, choice.color); accentGrad.addColorStop(1, 'transparent');
+        uctx.fillStyle = accentGrad;
+        uctx.fillRect(bx, by, 8, 100);
+
+        uctx.strokeStyle = hover ? choice.color : '#443366';
+        uctx.lineWidth = hover ? 3 : 1;
+        uctx.strokeRect(bx, by, 600, 100);
+
+        // Key hint
+        txt(uctx, '[' + (i+1) + ']', bx + 20, by + 8, '#ff88cc', 12, 'left', '#000', 3);
+
+        // Emoji
+        uctx.font = '28px serif';
+        uctx.textAlign = 'left';
+        uctx.fillStyle = '#fff';
+        uctx.textBaseline = 'top';
+        uctx.fillText(choice.emoji, bx + 65, by + 12);
+
+        // Name + type badge
+        txt(uctx, choice.name, bx + 105, by + 10, choice.color, 13, 'left', '#000', 3);
+
+        if (isCharSkill) {
+            txt(uctx, '🌟 SIGNATURE', bx + 105 + choice.name.length * 13 + 20, by + 12, '#ffdd44', 7, 'left', '#000', 2);
+        }
+
+        // Level indicator with dots
+        const curLv = player.powers[choice.id];
+        let lvText = 'Lv.' + curLv + ' → Lv.' + (curLv + 1);
+        txt(uctx, lvText, bx + 105, by + 32, '#aaaacc', 8, 'left', '#000', 2);
+
+        // Level dots
+        for (let d = 0; d < 5; d++) {
+            const dotX = bx + 250 + d * 18;
+            uctx.fillStyle = d < curLv ? choice.color : (d === curLv ? '#ffffff' : '#333');
+            uctx.fillRect(dotX, by + 34, 12, 6);
+            if (d === curLv) {
+                uctx.strokeStyle = '#fff';
+                uctx.lineWidth = 1;
+                uctx.strokeRect(dotX, by + 34, 12, 6);
+            }
+        }
+
+        // Description
+        txt(uctx, choice.desc, bx + 105, by + 52, '#8888aa', 8, 'left');
+
+        // Level-specific text
+        const charSkill = cd.skills.find(s => s.id === choice.id);
+        if (charSkill && charSkill.levels && charSkill.levels[curLv]) {
+            txt(uctx, '→ ' + charSkill.levels[curLv], bx + 105, by + 72, '#bbaadd', 7, 'left');
+        }
+    });
+
+    // Hint
+    txt(uctx, '🎮 Press 1, 2, or 3  •  Or click to choose', UW/2, UH - 60, '#666688', 8, 'center');
+}
+
+function drawUI_GameOver() {
+    uctx.fillStyle = 'rgba(0,0,0,0.85)';
+    uctx.fillRect(0, 0, UW, UH);
+
+    // Sad but stylish
+    txtBangers(uctx, '💔 GAME OVER 💔', UW/2, 60, '#ff4466', 56, 'center', '#000', 5);
+
+    if (player) {
+        const cd = player.charDef;
+
+        // Character
+        const sprite = renderSprite(player.charId);
+        if (sprite) {
+            const tmp = document.createElement('canvas');
+            tmp.width = 16*6; tmp.height = 20*6;
+            const tc = tmp.getContext('2d');
+            tc.imageSmoothingEnabled = false;
+            tc.drawImage(sprite, 0, 0, 16*6, 20*6);
+            uctx.globalAlpha = 0.7;
+            uctx.drawImage(tmp, UW/2 - 48, 140);
+            uctx.globalAlpha = 1;
+        }
+
+        txt(uctx, cd.emoji + ' ' + cd.name + ' — ' + cd.title, UW/2, 275, cd.color, 14, 'center', '#000', 3);
+
+        // Stats card
+        uctx.fillStyle = 'rgba(20,10,35,0.9)';
+        uctx.fillRect(UW/2-200, 310, 400, 210);
+        uctx.strokeStyle = '#ff44aa';
+        uctx.lineWidth = 2;
+        uctx.strokeRect(UW/2-200, 310, 400, 210);
+
+        txt(uctx, '📊 PERFORMANCE REPORT', UW/2, 320, '#ff88cc', 10, 'center', '#000', 2);
+
+        const secs = Math.floor(survivalTime/60);
+        const mins = Math.floor(secs/60);
+        const secStr = (secs%60).toString().padStart(2,'0');
+
+        const stats = [
+            ['⏱️ Time', mins + ':' + secStr],
+            ['💀 Total KO', killCount.toString()],
+            ['⭐ Level', player.level.toString()],
+            ['👥 Followers', formatNum(followers)],
+            ['🔥 Best Combo', comboCount.toString() + 'x'],
+        ];
+
+        stats.forEach((s, idx) => {
+            const sy = 348 + idx * 28;
+            txt(uctx, s[0], UW/2 - 180, sy, '#aaaacc', 9, 'left');
+            txt(uctx, s[1], UW/2 + 180, sy, '#ffffff', 11, 'right', '#000', 2);
+        });
+
+        // Social media style verdict
+        const verdict = killCount >= 100 ? '👑 LEGENDARY IDOL' :
+                        killCount >= 50 ? '⭐ RISING STAR' :
+                        killCount >= 25 ? '🎤 TRAINEE LEVEL' :
+                        '💪 KEEP PRACTICING';
+        txt(uctx, verdict, UW/2, 490, '#ffdd44', 12, 'center', '#000', 3);
+
+        txt(uctx, cd.hashtag + '  #SUPERNOVA_FOREVER', UW/2, 530, '#aa88cc', 8, 'center');
+    }
+
+    const blink = Math.sin(gameTime*0.08) > 0;
     if (blink) {
-        bctx.fillStyle = '#aaaacc';
-        bctx.font = '6px monospace';
-        bctx.fillText('PRESS SPACE TO CONTINUE', GAME_W / 2, 210);
+        txtGlow(uctx, '👆 PRESS SPACE FOR ANOTHER STAGE 👆', UW/2, UH - 80, '#ffffff', 12, 'center', '#ff44aa');
     }
 }
 
-function drawPaused_() {
-    bctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    bctx.fillRect(0, 0, GAME_W, GAME_H);
-
-    bctx.fillStyle = '#ffffff';
-    bctx.font = 'bold 12px monospace';
-    bctx.textAlign = 'center';
-    bctx.fillText('PAUSED', GAME_W / 2, GAME_H / 2 - 5);
-
-    bctx.fillStyle = '#888';
-    bctx.font = '5px monospace';
-    bctx.fillText('ESC to resume', GAME_W / 2, GAME_H / 2 + 10);
+function drawUI_Paused() {
+    uctx.fillStyle = 'rgba(0,0,0,0.65)';
+    uctx.fillRect(0, 0, UW, UH);
+    txtBangers(uctx, '⏸️ PAUSED', UW/2, UH/2 - 40, '#ffffff', 52, 'center', '#000', 5);
+    txt(uctx, 'Press ESC to resume', UW/2, UH/2 + 25, '#888', 10, 'center', '#000', 2);
 }
 
-// ============================================================
+// ================================================================
 // MAIN LOOP
-// ============================================================
-
-let score = 0;
+// ================================================================
 
 function update() {
-    gameTime++;
-    frameCount++;
-
+    gameTime++; frameCount++;
     if (state === State.PLAYING) {
-        updatePlayer();
-        updateProjectiles();
-        updateEnemies();
-        updateXPGems();
-        updateParticles();
-        updateFloatingTexts();
-        updateSpawning();
-        updateCamera();
+        updatePlayer(); updateProjectiles(); updateEnemies(); updateXPGems();
+        updateParticles(); updateFloatingTexts(); updateFanChants();
+        updateNotifications(); updateSpawning(); updateCamera();
     } else if (state === State.GAMEOVER) {
-        updateParticles();
+        updateParticles(); updateNotifications();
     }
 }
 
 function draw() {
-    // Draw to buffer
-    bctx.clearRect(0, 0, GAME_W, GAME_H);
-
     if (state === State.TITLE) {
-        drawTitle();
+        gctx.clearRect(0, 0, PW, PH);
+        drawUI_Title();
     } else if (state === State.SELECT) {
-        drawCharSelect();
+        gctx.clearRect(0, 0, PW, PH);
+        drawUI_Select();
     } else if (state === State.PLAYING || state === State.PAUSED || state === State.LEVELUP || state === State.GAMEOVER) {
-        drawFloor();
-        drawXPGems_();
-        drawEnemies_();
-        drawProjectiles_();
-        drawParticles_();
-        drawPlayer_();
-        drawFloatingTexts_();
-        drawHUD();
-
-        if (state === State.LEVELUP) drawLevelUp();
-        if (state === State.PAUSED) drawPaused_();
-        if (state === State.GAMEOVER) drawGameOver_();
+        drawPixelWorld();
+        drawUI_HUD();
+        if (state === State.LEVELUP) drawUI_LevelUp();
+        if (state === State.PAUSED) drawUI_Paused();
+        if (state === State.GAMEOVER) drawUI_GameOver();
     }
-
-    // Scale buffer to main canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(buf, 0, 0, GAME_W, GAME_H, 0, 0, canvas.width, canvas.height);
 }
 
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
+function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 gameLoop();

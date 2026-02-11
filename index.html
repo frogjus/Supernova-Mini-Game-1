@@ -3,30 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUPERNOVA: Stage Survivors</title>
+    <title>✨ SUPERNOVA: Stage Survivors ✨</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #1a0a2e;
+            background: #0a0015;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: monospace;
-            image-rendering: pixelated;
+            font-family: 'Press Start 2P', monospace;
         }
-        canvas {
-            display: block;
+        #wrap {
+            position: relative;
+            width: 960px;
+            height: 720px;
+        }
+        #gameCanvas, #uiCanvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 960px;
+            height: 720px;
+            border: 3px solid #ff44aa;
+            box-shadow: 0 0 60px rgba(255,68,170,0.5), 0 0 120px rgba(100,50,255,0.3), inset 0 0 60px rgba(255,68,170,0.1);
+            border-radius: 4px;
+        }
+        #gameCanvas {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            border: 2px solid #ff44aa;
-            box-shadow: 0 0 40px rgba(255, 68, 170, 0.4), 0 0 80px rgba(100, 50, 255, 0.2);
+        }
+        #uiCanvas {
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
+    <div id="wrap">
+        <canvas id="gameCanvas"></canvas>
+        <canvas id="uiCanvas"></canvas>
+    </div>
     <script src="game.js"></script>
 </body>
 </html>
