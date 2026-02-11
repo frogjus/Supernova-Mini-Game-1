@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supernova - Mini Game</title>
+    <title>SUPERNOVA: Stage Survivors</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #000;
+            background: #1a0a2e;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Courier New', monospace;
+            font-family: monospace;
+            image-rendering: pixelated;
         }
-
         canvas {
             display: block;
-            border: 1px solid #1a1a2e;
-            box-shadow: 0 0 30px rgba(255, 100, 50, 0.3);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            border: 2px solid #ff44aa;
+            box-shadow: 0 0 40px rgba(255, 68, 170, 0.4), 0 0 80px rgba(100, 50, 255, 0.2);
         }
     </style>
 </head>
