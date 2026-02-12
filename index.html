@@ -7,8 +7,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-void: #0A0A14;
+            --panel: #1A1630;
+            --text-primary: #FFF6FF;
+            --brand-pink: #FF79C6;
+            --brand-cyan: #6DE6FF;
+        }
         body {
-            background: #0d0d0d;
+            background: var(--bg-void);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -43,6 +50,7 @@
         <canvas id="gameCanvas"></canvas>
         <canvas id="uiCanvas"></canvas>
     </div>
+    <script src="content/game_content.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

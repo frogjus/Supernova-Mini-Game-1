@@ -19,6 +19,48 @@ gameCanvas.height = PH;
 uiCanvas.width = UW;
 uiCanvas.height = UH;
 
+// Runtime content + UI tokens
+let CONTENT = window.SUPERNOVA_CONTENT || {};
+let TOKENS = window.SUPERNOVA_TOKENS || null;
+let UI = {
+    bg: CONTENT.uiTokens?.bg || '#0A0A14',
+    panel: CONTENT.uiTokens?.panel || '#1A1630',
+    panelAlt: CONTENT.uiTokens?.panelAlt || '#241B3F',
+    text: CONTENT.uiTokens?.text || '#FFF6FF',
+    textMuted: CONTENT.uiTokens?.textMuted || '#D6C5F3',
+    pink: CONTENT.uiTokens?.brandPink || '#FF79C6',
+    rose: CONTENT.uiTokens?.brandRose || '#FF4FA3',
+    lilac: CONTENT.uiTokens?.brandLilac || '#B98CFF',
+    cyan: CONTENT.uiTokens?.brandCyan || '#6DE6FF',
+    success: CONTENT.uiTokens?.success || '#77F7BF',
+    danger: CONTENT.uiTokens?.danger || '#FF4C7D',
+    warning: CONTENT.uiTokens?.warning || '#FFB347',
+    quest: CONTENT.uiTokens?.quest || '#FFE38A',
+    lace: '#E6D7FF',
+};
+
+function applyTokenTheme(tokens) {
+    if (!tokens || !tokens.colors) return;
+    TOKENS = tokens;
+    UI = {
+        ...UI,
+        bg: tokens.colors.bg?.void || UI.bg,
+        panel: tokens.colors.bg?.panel || UI.panel,
+        panelAlt: tokens.colors.bg?.panel_alt || UI.panelAlt,
+        text: tokens.colors.text?.primary || UI.text,
+        textMuted: tokens.colors.text?.secondary || UI.textMuted,
+        pink: tokens.colors.brand?.pink || UI.pink,
+        rose: tokens.colors.brand?.rose || UI.rose,
+        lilac: tokens.colors.brand?.lilac || UI.lilac,
+        cyan: tokens.colors.brand?.cyan || UI.cyan,
+        success: tokens.colors.status?.success || UI.success,
+        danger: tokens.colors.status?.danger || UI.danger,
+        warning: tokens.colors.status?.warning || UI.warning,
+        quest: tokens.colors.motif?.crown || UI.quest,
+        lace: tokens.colors.motif?.lace || UI.lace,
+    };
+}
+
 // === ZINE UI TOOLKIT — Social Magazine Mashup ===
 // Typography: DM Serif Display (editorial headlines) + Inter (clean sans body)
 
@@ -165,15 +207,15 @@ function drawShareRow(ctx, x, y) {
     });
 }
 
-// Zine color palette — high contrast, magazine editorial
+// Tokenized palette bridge
 const Z = {
-    hot: '#ff6b6b', coral: '#ff8a65', peach: '#ffab91',
-    yellow: '#ffd54f', lime: '#c6ff00', mint: '#64ffda',
-    sky: '#40c4ff', blue: '#448aff', indigo: '#7c4dff',
-    purple: '#b388ff', pink: '#ff80ab', magenta: '#ff4081',
-    white: '#ffffff', cream: '#faf3e0', offwhite: '#e8e0d0',
-    dark: '#0d0d0d', darkCard: '#1a1a1a', darkGray: '#2a2a2a',
-    gray: '#888', lightGray: '#bbb', faint: 'rgba(255,255,255,0.06)',
+    hot: UI.danger, coral: UI.rose, peach: '#ffab91',
+    yellow: UI.warning, lime: '#c6ff00', mint: UI.success,
+    sky: UI.cyan, blue: '#448aff', indigo: '#7c4dff',
+    purple: UI.lilac, pink: UI.pink, magenta: UI.rose,
+    white: UI.text, cream: '#faf3e0', offwhite: '#e8e0d0',
+    dark: UI.bg, darkCard: UI.panel, darkGray: UI.panelAlt,
+    gray: '#A694C7', lightGray: UI.textMuted, faint: 'rgba(255,255,255,0.06)',
 };
 
 // === PALETTES (unified idol style — same face/body, unique colors) ===
@@ -191,6 +233,37 @@ const PALETTES = {
         5:'#e0e8f0', 6:'#c0d0e8', 7:'#1a1028', 8:'#ee8899', 9:'#88ddff',
         A:'#ffffff', B:'#7799bb', C:'#5577aa', D:'#5599ff', E:'#44ccaa', F:'#ffffff' },
 };
+
+
+function drawPixelPanel(ctx, x, y, w, h, opts = {}) {
+    const fill = opts.fill || UI.panel;
+    const border = opts.border || UI.textMuted;
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    if (opts.ribbon) {
+        ctx.fillStyle = opts.ribbon;
+        ctx.fillRect(x + 6, y - 4, Math.min(120, w - 12), 6);
+    }
+    if (opts.spikes) {
+        ctx.fillStyle = opts.spikes;
+        for (let i = 0; i < 4; i++) ctx.fillRect(x + w - 10 + i * 2, y + 4 + i * 4, 2, 2);
+    }
+}
+
+function drawHeartChip(ctx, x, y, text) {
+    drawPixelPanel(ctx, x, y, 72, 18, { fill: UI.panelAlt, border: UI.pink, ribbon: UI.pink });
+    sansBold(ctx, '♥ ' + text, x + 8, y + 4, UI.text, 8);
+}
+
+function getSkillCooldownRatio(skillId) {
+    if (!player) return 0;
+    if (skillId === 'overclock' && player.powers.overclock > 0 && player.overclockCD > 0) return Math.min(1, player.overclockCD / 900);
+    if (skillId === 'spiritForm' && player.spiritTimer > 0) return Math.min(1, player.spiritTimer / 90);
+    return 0;
+}
 
 // Shared body template — ALL idols have identical face, body, and legs
 const SPRITE_BODY = [
@@ -333,11 +406,57 @@ function fastRemove(arr, i) {
     arr.pop();
 }
 
+
+function applyRuntimeContent() {
+    const idolMap = Object.fromEntries((CONTENT.idols || []).map(i => [i.id, i]));
+    CHARACTERS = CHARACTERS.map(ch => {
+        const src = idolMap[ch.id];
+        if (!src) return ch;
+        const mapped = [];
+        (src.activeSkills || []).forEach(sk => mapped.push({ id: sk.id, name: sk.name, emoji:'✨', desc: sk.motif || sk.name, color: UI.pink,
+            levels:['Lv1','Lv2','Lv3','Lv4','Lv5'], effect: sk.effect || null }));
+        if (src.utilitySkill) mapped.push({ id: src.utilitySkill.id, name: src.utilitySkill.name, emoji:'💨', desc: src.utilitySkill.effect || 'utility', color: UI.cyan,
+            levels:['Lv1','Lv2','Lv3','Lv4','Lv5']});
+        (src.passives || []).forEach(sk => mapped.push({ id: sk.id, name: sk.name, emoji:'💠', desc: sk.effect || sk.name, color: UI.lilac,
+            levels:['Lv1','Lv2','Lv3','Lv4','Lv5'] }));
+        if (src.ultimate) mapped.push({ id: src.ultimate.id, name: src.ultimate.name, emoji:'👑', desc: src.ultimate.motif || src.ultimate.name, color: UI.warning,
+            levels:['Lv1','Lv2','Lv3','Lv4','Lv5']});
+        (src.skillBranches || []).forEach(sk => mapped.push({ id: sk.id, name: sk.name, emoji: sk.emoji || '✦', desc: sk.desc || sk.name, color: UI.rose,
+            levels:['Lv1','Lv2','Lv3','Lv4','Lv5'], effect: sk.effect || null, branch: sk.branch || 'core' }));
+        if (mapped.length >= 8) {
+            ch.skills = mapped.slice(0, 8);
+        }
+        return ch;
+    });
+
+    const mobDefs = CONTENT.gameplay?.enemies?.mobs;
+    if (Array.isArray(mobDefs) && mobDefs.length) ENEMY_TYPES = mobDefs;
+    const bossDefs = CONTENT.gameplay?.enemies?.bosses;
+    if (Array.isArray(bossDefs) && bossDefs.length) BOSS_TYPES = bossDefs;
+}
+
+async function bootstrapRuntimeData() {
+    try {
+        const [tokRes, contentRes] = await Promise.all([
+            fetch('art_direction/TOKENS.json').catch(() => null),
+            fetch('content/game_content.json').catch(() => null),
+        ]);
+        if (tokRes && tokRes.ok) applyTokenTheme(await tokRes.json());
+        if (contentRes && contentRes.ok) {
+            const serverContent = await contentRes.json();
+            CONTENT = { ...serverContent, ...CONTENT, gameplay: serverContent.gameplay || CONTENT.gameplay };
+        }
+    } catch (e) {
+        // graceful fallback to embedded window content
+    }
+    applyRuntimeContent();
+}
+
 // ================================================================
 // CHARACTER DEFINITIONS WITH DEEP SKILL TREES
 // ================================================================
 
-const CHARACTERS = [
+let CHARACTERS = [
     {
         id: 'miho', name: 'MIHO', emoji: '🦊',
         title: 'The Gumiho', hashtag: '#FoxQueen',
@@ -452,6 +571,9 @@ let notifications = [];
 let fanChants = [];
 let trendingTimer = 0, trendingText = '';
 let score = 0;
+let bossIntroTimer = 0, bossIntroText = '';
+let questModalOpen = false, chapterIdx = 0;
+let lastLoreCard = '';
 
 // === SOCIAL CAPTIONS ===
 const KILL_CHANTS = [
@@ -498,6 +620,7 @@ function handleKey(code) {
         else if (code === 'Escape') { state = State.TITLE; }
     } else if (state === State.PLAYING) {
         if (code === 'Escape') state = State.PAUSED;
+        else if (code === 'KeyQ') questModalOpen = !questModalOpen;
     } else if (state === State.PAUSED) {
         if (code === 'Escape' || code === 'Space') state = State.PLAYING;
     } else if (state === State.LEVELUP) {
@@ -539,6 +662,9 @@ function startGame() {
     followers = 0; comboCount = 0; comboTimer = 0; bestCombo = 0; score = 0;
     notifications = []; fanChants = []; trendingTimer = 0;
     nextBossTime = 3600; bossesKilled = 0;
+    bossIntroTimer = 0; bossIntroText = '';
+    questModalOpen = false; chapterIdx = 0;
+    lastLoreCard = CONTENT.story?.opening || '';
 
     const cd = CHARACTERS[selectedChar];
     player = {
@@ -653,6 +779,18 @@ function choosePowerUp(index) {
     else if (choice.id === 'feast') player.healPerKill = lv * 0.2 + 0.1;
     else if (choice.id === 'selfLove') player.regenTimer = 0;
 
+    if (choice.effect && typeof choice.effect === 'object') {
+        const stat = choice.effect.stat;
+        const p = Number(choice.effect.perLevel || 0);
+        if (stat === 'atk') player.dmgMult += p;
+        else if (stat === 'range') player.range += p;
+        else if (stat === 'atkSpeed') player.comboSpeedBonus += p;
+        else if (stat === 'hp') { player.maxHp += p; player.hp = Math.min(player.maxHp, player.hp + p); }
+        else if (stat === 'speed') player.speed += p;
+        else if (stat === 'crit') player.powers.critChance = (player.powers.critChance || 0) + p;
+        else if (stat === 'dr') player.damageReduction = (player.damageReduction || 0) + p;
+    }
+
     const n = choice.name + ' ~ Level ' + lv;
     addNotification(n, Z.hot);
     spawnFloatingText(player.x, player.y - 20, choice.emoji + ' ' + choice.name, Z.coral);
@@ -664,7 +802,7 @@ function choosePowerUp(index) {
 // ENEMY TYPES
 // ================================================================
 
-const ENEMY_TYPES = [
+let ENEMY_TYPES = [
     { id:'antifan', name:'Anti 🚫', w:8, h:8, hp:2, speed:0.8, damage:1, xp:1, color1:'#666688', color2:'#444466', emoji:'🚫' },
     { id:'hater', name:'Hater 💢', w:10, h:10, hp:4, speed:0.6, damage:1, xp:2, color1:'#884444', color2:'#662222', emoji:'💢' },
     { id:'sasaeng', name:'Sasaeng 📸', w:8, h:8, hp:3, speed:1.4, damage:1, xp:2, color1:'#886644', color2:'#664422', emoji:'📸' },
@@ -674,7 +812,7 @@ const ENEMY_TYPES = [
 ];
 
 // === BOSS TYPES ===
-const BOSS_TYPES = [
+let BOSS_TYPES = [
     { id:'netizen', name:'NETIZEN MOB', w:20, h:20, hp:60, speed:0.45, damage:2, xp:25,
       color1:'#8844cc', color2:'#6622aa', emoji:'👥' },
     { id:'scandal', name:'SCANDAL STORM', w:24, h:24, hp:120, speed:0.38, damage:3, xp:50,
@@ -713,18 +851,25 @@ function spawnBoss() {
     enemySet.add(bossEnemy);
 
     SFX.bossSpawn();
-    screenFlash = 12; screenFlashColor = '#ff2d78';
+    screenFlash = 12; screenFlashColor = UI.danger;
+    bossIntroTimer = 210;
+    bossIntroText = type.name + ' · HOLD THE STAGE';
     addNotification('BOSS INCOMING: ' + type.name + ' ' + type.emoji + ' 💀', Z.magenta);
 }
 
 function spawnEnemy() {
-    let ti;
-    const r = Math.random();
-    if (difficulty < 3) ti = r < 0.6 ? 0 : (r < 0.85 ? 2 : 1);
-    else if (difficulty < 6) ti = r < 0.2 ? 0 : (r < 0.4 ? 1 : (r < 0.6 ? 2 : (r < 0.8 ? 4 : (r < 0.95 ? 3 : 5))));
-    else ti = r < 0.1 ? 0 : (r < 0.25 ? 1 : (r < 0.4 ? 2 : (r < 0.6 ? 4 : (r < 0.8 ? 3 : 5))));
+    const sec = Math.floor(survivalTime / 60);
+    const pools = CONTENT.gameplay?.enemies?.wavePools || {};
+    const early = new Set(pools.early || []), mid = new Set(pools.mid || []), late = new Set(pools.late || []);
+    let poolName = sec < 90 ? 'early' : (sec < 240 ? 'mid' : 'late');
+    let pool = ENEMY_TYPES.filter(t => (poolName === 'early' ? early.has(t.id) : poolName === 'mid' ? mid.has(t.id) : late.has(t.id)));
+    if (!pool.length) pool = ENEMY_TYPES;
 
-    const type = ENEMY_TYPES[ti];
+    const totalWeight = pool.reduce((a,t)=>a+(t.weight||1),0);
+    let pick = Math.random() * totalWeight;
+    let type = pool[0];
+    for (const t of pool) { pick -= (t.weight||1); if (pick <= 0) { type = t; break; } }
+
     const hpMult = 1 + (difficulty-1) * 0.35;
     const side = Math.floor(Math.random()*4);
     const dist = 170, margin = 25;
@@ -740,7 +885,8 @@ function spawnEnemy() {
         x:ex, y:ey, type, hp:Math.ceil(type.hp*hpMult), maxHp:Math.ceil(type.hp*hpMult),
         speed:type.speed, damage:type.damage, xp:type.xp, w:type.w, h:type.h,
         flashTimer:0, phase:Math.random()*Math.PI*2,
-        frozen:0, scanned:false,
+        frozen:0, scanned:false, behavior:type.behavior || 'chaser',
+        aiTimer: Math.floor(Math.random()*60), shotCD: 0, dashCD: 0, teleportCD: 120,
     };
     enemies.push(newEnemy);
     enemySet.add(newEnemy);
@@ -875,7 +1021,9 @@ function updatePlayer() {
         player.x += dx*player.speed; player.y += dy*player.speed;
         if (dx<0) player.facingLeft=true; else if (dx>0) player.facingLeft=false;
         player.walkTimer++;
-        if (player.walkTimer>=10) { player.walkTimer=0; player.walkFrame=(player.walkFrame+1)%2; }
+        const runFrames = CONTENT.gameplay?.spriteSpecs?.runFrames || 6;
+        const stepFrames = Math.max(6, Math.floor(48 / runFrames));
+        if (player.walkTimer>=stepFrames) { player.walkTimer=0; player.walkFrame=(player.walkFrame+1)%2; }
     } else { player.walkFrame=0; player.walkTimer=0; }
 
     player.x=Math.max(8,Math.min(ARENA_W-8,player.x));
@@ -1060,7 +1208,8 @@ function updateProjectiles() {
 }
 
 function damageEnemy(e, dmg) {
-    e.hp -= dmg; e.flashTimer = 4;
+    const dealt = e.behavior === 'tank' ? dmg * (1 - (e.type.armor || 0.25)) : dmg;
+    e.hp -= dealt; e.flashTimer = 4;
     SFX.hit();
     spawnHitParticles(e.x, e.y, e.type.color1);
     if (e.hp <= 0) killEnemy(e);
@@ -1203,8 +1352,44 @@ function updateEnemies() {
         if (e.frozen > 0) { e.frozen--; if (e.flashTimer>0) e.flashTimer--; continue; }
 
         const dx=player.x-e.x, dy=player.y-e.y;
-        const d2=dx*dx+dy*dy;
-        if (d2>0) { const dist=Math.sqrt(d2); e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        let d2=dx*dx+dy*dy;
+        const dist = Math.sqrt(Math.max(1, d2));
+
+        e.aiTimer++;
+        if (e.behavior === 'ranged') {
+            const ideal = e.type.range || 90;
+            const dir = d2 > ideal*ideal ? 1 : -0.7;
+            e.x += (dx/dist) * e.speed * dir;
+            e.y += (dy/dist) * e.speed * dir;
+            e.shotCD--;
+            if (e.shotCD <= 0 && d2 < (ideal+20)*(ideal+20)) {
+                e.shotCD = 90;
+                if (player.invTimer<=0 && player.spiritTimer<=0) playerTakeDamage(Math.max(1, e.damage-1));
+                spawnHitParticles(player.x, player.y, UI.rose);
+            }
+        } else if (e.behavior === 'charger') {
+            e.dashCD--;
+            const mult = e.dashCD < 15 ? 2.2 : 1;
+            e.x += (dx/dist) * e.speed * mult;
+            e.y += (dy/dist) * e.speed * mult;
+            if (e.dashCD <= -80) e.dashCD = 120;
+        } else if (e.behavior === 'teleporter') {
+            e.teleportCD--;
+            if (e.teleportCD <= 0) {
+                const a = Math.random() * Math.PI * 2;
+                e.x = player.x + Math.cos(a) * 45;
+                e.y = player.y + Math.sin(a) * 45;
+                e.teleportCD = 140;
+            }
+            e.x += (dx/dist) * e.speed * 0.9;
+            e.y += (dy/dist) * e.speed * 0.9;
+        } else {
+            const slowTank = e.behavior === 'tank' ? 0.75 : 1;
+            e.x += (dx/dist) * e.speed * slowTank;
+            e.y += (dy/dist) * e.speed * slowTank;
+        }
+
+        d2 = (player.x-e.x)*(player.x-e.x) + (player.y-e.y)*(player.y-e.y);
         if (e.flashTimer>0) e.flashTimer--;
 
         // Hit player
@@ -1233,12 +1418,13 @@ function updateEnemies() {
 
 function playerTakeDamage(dmg) {
     if (player.invTimer>0 || player.spiritTimer>0) return;
-    player.hp -= dmg;
+    const reduced = Math.max(0.2, dmg * (1 - (player.damageReduction || 0)));
+    player.hp -= reduced;
     player.invTimer = 60;
     SFX.playerHit();
     screenFlash = 6; screenFlashColor = '#ff2244';
     spawnHitParticles(player.x,player.y,'#ff4466');
-    spawnFloatingText(player.x,player.y-12, '💔 -'+dmg, '#ff4466');
+    spawnFloatingText(player.x,player.y-12, '💔 -'+Math.ceil(reduced*10)/10, '#ff4466');
 
     // Spirit Form (Miho)
     if (player.powers.spiritForm > 0) {
@@ -1362,7 +1548,7 @@ function updateCamera() {
 // ================================================================
 
 function drawPixelWorld() {
-    gctx.fillStyle = '#0e0e12';
+    gctx.fillStyle = UI.bg;
     gctx.fillRect(0, 0, PW, PH);
 
     // Zine-textured floor — subtle dot grid like graph paper
@@ -1378,7 +1564,7 @@ function drawPixelWorld() {
         // Occasional color splash
         if ((wx*7+wy*13)%19===0) {
             const pulse=Math.sin(gameTime*0.02+wx+wy)*0.2+0.2;
-            const colors=['#ff6b6b','#ffd54f','#40c4ff','#ff80ab'];
+            const colors=[UI.rose,UI.warning,UI.cyan,UI.pink];
             gctx.globalAlpha=pulse*0.04;
             gctx.fillStyle=colors[(wx+wy)%colors.length];
             gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
@@ -1401,7 +1587,7 @@ function drawPixelWorld() {
         if(gx<-5||gx>PW+5||gy<-5||gy>PH+5) return;
         const pulse=Math.sin(gameTime*0.1+g.x)*0.3+0.7;
         gctx.globalAlpha=pulse*(g.life<60?g.life/60:1);
-        gctx.fillStyle='#dd88ff';
+        gctx.fillStyle=UI.lilac;
         gctx.fillRect(gx-1,gy-2,3,1); gctx.fillRect(gx-2,gy-1,5,1);
         gctx.fillRect(gx-1,gy,3,1); gctx.fillRect(gx,gy+1,1,1); gctx.fillRect(gx,gy-3,1,1);
         gctx.fillStyle='#ffddff'; gctx.fillRect(gx,gy-1,1,1);
@@ -1474,6 +1660,12 @@ function drawPixelWorld() {
             gctx.fillRect(ex-2,ey-2,1,1); gctx.fillRect(ex+1,ey-2,1,1);
             // Mouth
             gctx.fillStyle='#000'; gctx.fillRect(ex-1,ey+1,3,1);
+
+            // Behavior silhouette marker
+            if (e.behavior === 'ranged') { gctx.fillStyle = UI.cyan; gctx.fillRect(ex-1, ey-e.h/2-2, 3, 1); }
+            if (e.behavior === 'charger') { gctx.fillStyle = UI.warning; gctx.fillRect(ex-3, ey+2, 6, 1); }
+            if (e.behavior === 'tank') { gctx.fillStyle = UI.lace; gctx.fillRect(ex-3, ey-1, 6, 3); }
+            if (e.behavior === 'teleporter') { gctx.fillStyle = UI.pink; gctx.fillRect(ex-1, ey+3, 3, 1); }
 
             // Scanned indicator
             if (e.scanned) {
@@ -1590,11 +1782,10 @@ function drawUI_HUD() {
     if (!player) return;
     const cd = player.charDef;
 
-    // === IG STORY-STYLE TOP — no bar, floating elements ===
-    // Character tag — tape label, slightly rotated
-    drawTape(uctx, 8, 6, 130, 24, 'rgba(255,107,107,0.5)', -1.5);
-    sansBold(uctx, cd.emoji + ' ' + cd.name, 16, 10, '#fff', 12);
-    sans(uctx, cd.hashtag, 16, 34, 'rgba(255,255,255,0.4)', 9);
+    // === TOP LEFT: identity plate ===
+    drawPixelPanel(uctx, 10, 8, 138, 34, { fill: UI.panelAlt, border: UI.pink, ribbon: UI.pink });
+    sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 11);
+    sans(uctx, cd.hashtag, 18, 28, UI.textMuted, 8);
 
     // HP — raw text, no bar frame, just highlighter
     const hpR = player.hp/player.maxHp;
@@ -1617,10 +1808,9 @@ function drawUI_HUD() {
     drawSticker(uctx, 'EP.' + difficulty, UW - 80, 40, 3, 11);
     sans(uctx, 'EP.' + difficulty, UW - 95, 36, 'rgba(255,255,255,0.35)', 10, 'left', 700);
 
-    // Followers — social metric, tape-style
-    drawTape(uctx, UW - 160, 6, 80, 20, 'rgba(255,213,84,0.4)', 1.2);
-    sansBold(uctx, formatNum(followers), UW - 152, 9, Z.white, 10);
-    sans(uctx, 'follows', UW - 105, 9, 'rgba(255,255,255,0.5)', 9);
+    // Followers — chip panel
+    drawHeartChip(uctx, UW - 166, 8, formatNum(followers));
+    sans(uctx, 'follows', UW - 92, 13, UI.textMuted, 8);
 
     // KO — bottom of top cluster
     sans(uctx, killCount + ' KOs', UW - 152, 30, 'rgba(255,255,255,0.35)', 9, 'left', 600);
@@ -1637,13 +1827,22 @@ function drawUI_HUD() {
     const activeBoss = enemies.find(e => e.boss);
     if (activeBoss) {
         const bossY = comboCount >= 3 ? 106 : 68;
-        drawCutout(uctx, UW/2 - 200, bossY, 400, 40, 'rgba(255,60,80,0.12)', -0.5);
-        serif(uctx, activeBoss.bossType.name, UW/2, bossY + 2, Z.hot, 14, 'center');
-        // HP raw bar
+        drawPixelPanel(uctx, UW/2 - 202, bossY, 404, 44, { fill: 'rgba(56,19,43,0.9)', border: UI.danger, spikes: UI.warning });
+        serif(uctx, activeBoss.bossType.name, UW/2, bossY + 4, Z.hot, 14, 'center');
         const bhr = activeBoss.hp / activeBoss.maxHp;
-        uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(UW/2 - 180, bossY + 24, 360, 5);
-        uctx.fillStyle = Z.hot; uctx.fillRect(UW/2 - 180, bossY + 24, 360 * bhr, 5);
-        sans(uctx, Math.ceil(activeBoss.hp) + '/' + activeBoss.maxHp, UW/2, bossY + 31, 'rgba(255,255,255,0.4)', 8, 'center', 500);
+        uctx.fillStyle = 'rgba(255,255,255,0.08)'; uctx.fillRect(UW/2 - 180, bossY + 26, 360, 6);
+        uctx.fillStyle = UI.danger; uctx.fillRect(UW/2 - 180, bossY + 26, 360 * bhr, 6);
+        sans(uctx, Math.ceil(activeBoss.hp) + '/' + activeBoss.maxHp, UW/2, bossY + 34, UI.textMuted, 8, 'center', 500);
+    }
+
+    if (bossIntroTimer > 0) {
+        const pulse = 0.8 + Math.sin(gameTime * 0.08) * 0.2;
+        uctx.globalAlpha = pulse;
+        drawPixelPanel(uctx, UW/2 - 200, 134, 400, 34, { fill: UI.panel, border: UI.warning, ribbon: UI.warning, spikes: UI.danger });
+        sansBold(uctx, 'BOSS INTRO', UW/2 - 178, 139, UI.bg, 8);
+        serif(uctx, bossIntroText, UW/2, 144, UI.text, 14, 'center');
+        uctx.globalAlpha = 1;
+        bossIntroTimer--;
     }
 
     // === BOTTOM: Skill icons — raw emoji row, no frame ===
@@ -1651,19 +1850,27 @@ function drawUI_HUD() {
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
     if (activeSkills.length > 0) {
-        const iconY = UH - 40;
-        const totalW = activeSkills.length * 36;
+        const iconTile = CONTENT.gameplay?.uiLayout?.skillIcon || 34;
+        const iconY = UH - (iconTile + 18);
+        const totalW = activeSkills.length * (iconTile + 6);
         const startX = (UW - totalW) / 2;
 
         activeSkills.forEach((sk, idx) => {
-            const ix = startX + idx * 36;
+            const ix = startX + idx * (iconTile + 6);
             const lv = player.powers[sk.id];
-            uctx.font = '18px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-            uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, ix + 16, iconY);
-            // Level pips — tiny dots
-            for (let d = 0; d < lv; d++) {
-                uctx.fillStyle = Z.yellow;
-                uctx.fillRect(ix + 6 + d * 6, iconY + 24, 4, 2);
+            drawPixelPanel(uctx, ix, iconY, iconTile, iconTile, { fill: UI.panelAlt, border: UI.lilac });
+            const iconGrid = CONTENT.gameplay?.iconRules?.grid || 16;
+            uctx.font = `${Math.max(12, iconGrid)}px serif`; uctx.textAlign='center'; uctx.textBaseline='top';
+            uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + Math.floor(iconTile/2), iconY + 6);
+            for (let d = 0; d < Math.min(lv, 4); d++) {
+                uctx.fillStyle = UI.warning;
+                uctx.fillRect(ix + 5 + d * 7, iconY + 28, 5, 2);
+            }
+            const cdRatio = getSkillCooldownRatio(sk.id);
+            if (cdRatio > 0.01) {
+                const h = Math.floor(iconTile * cdRatio);
+                uctx.fillStyle = 'rgba(14, 10, 28, 0.65)';
+                uctx.fillRect(ix, iconY, iconTile, h);
             }
         });
     }
@@ -1691,6 +1898,12 @@ function drawUI_HUD() {
         sans(uctx, trendingText, 16, UH - 58, 'rgba(255,255,255,0.3)', 9, 'left', 400);
         uctx.globalAlpha = 1;
     }
+
+    // Quest / story access hint
+    drawPixelPanel(uctx, UW - 248, UH - 50, 236, 24, { fill: UI.panel, border: UI.quest, ribbon: UI.quest });
+    const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
+    sansBold(uctx, '[Q] QUEST', UW - 238, UH - 42, UI.bg, 8);
+    sans(uctx, chapter ? chapter.title : 'CHAPTER', UW - 170, UH - 41, UI.text, 8);
 
     // Fan chants (world-space) — raw text, no glow
     fanChants.forEach(f => {
@@ -2070,7 +2283,8 @@ function drawUI_GameOver() {
 
         // === LEFT: Character portrait cutout ===
         drawCutout(uctx, 30, 130, 260, 320, '#141418', -1);
-        const goScaled = getScaledSprite(player.charId, 8);
+        const uiScale = Math.max(6, Math.min(10, Math.round((CONTENT.gameplay?.spriteSpecs?.playerBaseSize?.[0] || 16)/2)));
+        const goScaled = getScaledSprite(player.charId, uiScale);
         if (goScaled) {
             const bob = Math.sin(gameTime * 0.04) * 3;
             uctx.save();
@@ -2159,6 +2373,23 @@ function drawUI_GameOver() {
     sans(uctx, '004', UW - 40, UH - 24, 'rgba(255,255,255,0.12)', 9, 'right', 300);
 }
 
+
+function drawUI_QuestModal() {
+    const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
+    const lore = lastLoreCard || (CONTENT.story?.loreCards || [])[0] || '';
+    uctx.fillStyle = 'rgba(8,8,16,0.78)';
+    uctx.fillRect(0, 0, UW, UH);
+    drawPixelPanel(uctx, UW/2 - 260, UH/2 - 150, 520, 300, { fill: UI.panel, border: UI.quest, ribbon: UI.quest, spikes: UI.danger });
+    sansBold(uctx, 'QUEST / STORY PROMPT', UW/2 - 236, UH/2 - 140, UI.bg, 9);
+    serif(uctx, chapter ? chapter.title : 'CHAPTER', UW/2, UH/2 - 105, UI.text, 28, 'center');
+    sans(uctx, chapter ? chapter.objective : 'Hold the stage and survive.', UW/2, UH/2 - 64, UI.textMuted, 12, 'center', 600);
+
+    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 16, 440, 88, { fill: UI.panelAlt, border: UI.pink });
+    sansBold(uctx, 'LORE CARD', UW/2 - 200, UH/2 - 7, UI.pink, 9);
+    sans(uctx, lore, UW/2 - 200, UH/2 + 20, UI.text, 12, 'left', 500);
+    sans(uctx, 'Press Q to close', UW/2, UH/2 + 96, UI.textMuted, 10, 'center', 500);
+}
+
 function drawUI_Paused() {
     // === STORY OVERLAY — minimal, magazine interstitial ===
     uctx.fillStyle = 'rgba(10, 10, 14, 0.8)';
@@ -2189,6 +2420,15 @@ function drawUI_Paused() {
 
 function update() {
     gameTime++; frameCount++;
+    if (player && state === State.PLAYING) {
+        const sec = Math.floor(survivalTime / 60);
+        const chapters = CONTENT.story?.chapters || [];
+        if (chapterIdx + 1 < chapters.length && sec >= chapters[chapterIdx + 1].t) {
+            chapterIdx++;
+            lastLoreCard = (CONTENT.story?.loreCards || [])[chapterIdx % Math.max(1, (CONTENT.story?.loreCards || []).length)] || '';
+            addNotification(chapters[chapterIdx].title + ' unlocked', UI.quest);
+        }
+    }
     if (state === State.PLAYING) {
         updatePlayer(); updateProjectiles(); updateEnemies(); updateXPGems();
         updateParticles(); updateFloatingTexts(); updateFanChants();
@@ -2211,8 +2451,10 @@ function draw() {
         if (state === State.LEVELUP) drawUI_LevelUp();
         if (state === State.PAUSED) drawUI_Paused();
         if (state === State.GAMEOVER) drawUI_GameOver();
+        if (state === State.PLAYING && questModalOpen) drawUI_QuestModal();
     }
 }
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
+bootstrapRuntimeData();
 gameLoop();

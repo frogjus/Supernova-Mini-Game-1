@@ -1,0 +1,968 @@
+{
+  "version": "1.0.0",
+  "theme": "princessy-edgy cyber-fairytale k-pop rebellion",
+  "idols": [
+    {
+      "id": "miho",
+      "name": "Miho",
+      "fantasy": "Fox-princess striker who weaponizes charm and feints.",
+      "silhouette": "Large twin-tail fox mane, ear-crown silhouette, heart-glove hand pose.",
+      "activeSkills": [
+        {
+          "id": "fox_fire",
+          "name": "Fox Fire",
+          "motif": "flame hearts",
+          "cooldown": 4,
+          "cost": 12,
+          "scaling": "95% ATK x 3 seekers"
+        },
+        {
+          "id": "nine_tail_sweep",
+          "name": "Nine-Tail Sweep",
+          "motif": "crescent tails",
+          "cooldown": 8,
+          "cost": 20,
+          "scaling": "130% ATK AoE"
+        },
+        {
+          "id": "charm_lock",
+          "name": "Charm Lock",
+          "motif": "pink sigil",
+          "cooldown": 12,
+          "cost": 24,
+          "scaling": "2.5s root + 15% vuln"
+        },
+        {
+          "id": "mirror_step",
+          "name": "Mirror Step",
+          "motif": "glitch afterimages",
+          "cooldown": 6,
+          "cost": 16,
+          "scaling": "dash + 80% slash"
+        }
+      ],
+      "utilitySkill": {
+        "id": "velvet_dodge",
+        "name": "Velvet Dodge",
+        "cooldown": 5,
+        "effect": "short iframe sidestep"
+      },
+      "passives": [
+        {
+          "id": "stage_hypnosis",
+          "name": "Stage Hypnosis",
+          "effect": "nearby enemies lose 8% speed"
+        },
+        {
+          "id": "golden_instinct",
+          "name": "Golden Instinct",
+          "effect": "crit chance scales with combo"
+        }
+      ],
+      "ultimate": {
+        "id": "throne_of_nine",
+        "name": "Throne of Nine",
+        "motif": "crown ring + tail storm",
+        "cooldown": 45,
+        "cost": 100,
+        "scaling": "8 hits x 70% + execute pulse"
+      },
+      "synergy": [
+        "Pairs with Sohee shields for safe tail channels.",
+        "Sujin scan amplifies execute thresholds."
+      ],
+      "skillBranches": [
+        {
+          "id": "crownRush",
+          "name": "Crown Rush",
+          "emoji": "\ud83d\udc51",
+          "desc": "Dash slash with crown trail",
+          "branch": "aggression",
+          "effect": {
+            "stat": "atk",
+            "perLevel": 0.08
+          }
+        },
+        {
+          "id": "ribbonSnare",
+          "name": "Ribbon Snare",
+          "emoji": "\ud83c\udf80",
+          "desc": "Short root around target",
+          "branch": "control",
+          "effect": {
+            "stat": "range",
+            "perLevel": 4
+          }
+        },
+        {
+          "id": "glitchPetals",
+          "name": "Glitch Petals",
+          "emoji": "\u2728",
+          "desc": "On kill petals burst",
+          "branch": "combo",
+          "effect": {
+            "stat": "atkSpeed",
+            "perLevel": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "hyunju",
+      "name": "Hyunju",
+      "fantasy": "Dreamwave empath who controls tempo and sustain.",
+      "silhouette": "Long flowing wave hair, soft cape sleeves, star hair clip.",
+      "activeSkills": [
+        {
+          "id": "heart_wave",
+          "name": "Heart Wave",
+          "motif": "circular heart pulse",
+          "cooldown": 6,
+          "cost": 16,
+          "scaling": "100% ATK radial knockback"
+        },
+        {
+          "id": "daydream_field",
+          "name": "Daydream Field",
+          "motif": "cloud hearts",
+          "cooldown": 10,
+          "cost": 22,
+          "scaling": "slow zone + 22 DPS"
+        },
+        {
+          "id": "empathy_link",
+          "name": "Empathy Link",
+          "motif": "ribbon lines",
+          "cooldown": 11,
+          "cost": 24,
+          "scaling": "linked targets share 35% damage"
+        },
+        {
+          "id": "rose_filter",
+          "name": "Rose Filter",
+          "motif": "soft lens frame",
+          "cooldown": 9,
+          "cost": 18,
+          "scaling": "enemy accuracy down 25%"
+        }
+      ],
+      "utilitySkill": {
+        "id": "float_step",
+        "name": "Float Step",
+        "cooldown": 7,
+        "effect": "short hover ignores floor hazards"
+      },
+      "passives": [
+        {
+          "id": "comfort_chorus",
+          "name": "Comfort Chorus",
+          "effect": "team regen +6% when stationary"
+        },
+        {
+          "id": "idol_aura",
+          "name": "Idol Aura",
+          "effect": "followers gained +20%"
+        }
+      ],
+      "ultimate": {
+        "id": "inner_world",
+        "name": "Inner World",
+        "motif": "blossom dome",
+        "cooldown": 50,
+        "cost": 100,
+        "scaling": "massive heal + enemy confusion"
+      },
+      "synergy": [
+        "Miho thrives in slowed packs.",
+        "Sujin beam lines enemies inside Daydream zones."
+      ],
+      "skillBranches": [
+        {
+          "id": "tiaraWard",
+          "name": "Tiara Ward",
+          "emoji": "\ud83d\udc8e",
+          "desc": "Periodic guard pulse",
+          "branch": "defense",
+          "effect": {
+            "stat": "hp",
+            "perLevel": 0.2
+          }
+        },
+        {
+          "id": "laceNova",
+          "name": "Lace Nova",
+          "emoji": "\ud83e\ude84",
+          "desc": "Lace wave on dodge",
+          "branch": "control",
+          "effect": {
+            "stat": "range",
+            "perLevel": 4
+          }
+        },
+        {
+          "id": "chorusLink",
+          "name": "Chorus Link",
+          "emoji": "\ud83c\udfa4",
+          "desc": "Chain combo bonus",
+          "branch": "support",
+          "effect": {
+            "stat": "atk",
+            "perLevel": 0.06
+          }
+        }
+      ]
+    },
+    {
+      "id": "sujin",
+      "name": "Sujin",
+      "fantasy": "Precision techno-princess with laser choreography.",
+      "silhouette": "Sharp bob cut, angular sleeves, neon accessory cuts.",
+      "activeSkills": [
+        {
+          "id": "star_beam",
+          "name": "Star Beam",
+          "motif": "laser lance",
+          "cooldown": 4,
+          "cost": 10,
+          "scaling": "140% piercing shot"
+        },
+        {
+          "id": "data_scan",
+          "name": "Data Scan",
+          "motif": "target frame",
+          "cooldown": 8,
+          "cost": 14,
+          "scaling": "marks target +25% damage taken"
+        },
+        {
+          "id": "algorithm_burst",
+          "name": "Algorithm Burst",
+          "motif": "binary petals",
+          "cooldown": 10,
+          "cost": 18,
+          "scaling": "3-hit combo 75% each"
+        },
+        {
+          "id": "overclock",
+          "name": "Overclock",
+          "motif": "glitch crown",
+          "cooldown": 16,
+          "cost": 28,
+          "scaling": "fire rate +100% for 4s"
+        }
+      ],
+      "utilitySkill": {
+        "id": "phase_slide",
+        "name": "Phase Slide",
+        "cooldown": 6,
+        "effect": "micro-teleport through threats"
+      },
+      "passives": [
+        {
+          "id": "combo_kernel",
+          "name": "Combo Kernel",
+          "effect": "each 10 combo grants +4% ATK speed"
+        },
+        {
+          "id": "cold_focus",
+          "name": "Cold Focus",
+          "effect": "first hit on full HP target crits"
+        }
+      ],
+      "ultimate": {
+        "id": "viral_code",
+        "name": "Viral Code",
+        "motif": "neon glyph bloom",
+        "cooldown": 48,
+        "cost": 100,
+        "scaling": "infects wave, chain detonations"
+      },
+      "synergy": [
+        "Sets up Sohee peel with pre-marked elites.",
+        "Hyunju utility sustains overclock windows."
+      ],
+      "skillBranches": [
+        {
+          "id": "chromeArc",
+          "name": "Chrome Arc",
+          "emoji": "\u2699\ufe0f",
+          "desc": "Arc slash follow-up",
+          "branch": "aggression",
+          "effect": {
+            "stat": "atk",
+            "perLevel": 0.09
+          }
+        },
+        {
+          "id": "signalMine",
+          "name": "Signal Mine",
+          "emoji": "\ud83d\udce1",
+          "desc": "Deploy mine on crit",
+          "branch": "control",
+          "effect": {
+            "stat": "crit",
+            "perLevel": 0.02
+          }
+        },
+        {
+          "id": "pixelLock",
+          "name": "Pixel Lock",
+          "emoji": "\ud83e\uddf7",
+          "desc": "Lock enemy movement",
+          "branch": "utility",
+          "effect": {
+            "stat": "atkSpeed",
+            "perLevel": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "sohee",
+      "name": "Sohee",
+      "fantasy": "Guardian ballerina with butterfly shields and clutch saves.",
+      "silhouette": "Long straight hair, layered skirt, butterfly/cape contour.",
+      "activeSkills": [
+        {
+          "id": "aura_shield",
+          "name": "Aura Shield",
+          "motif": "heart wing barrier",
+          "cooldown": 5,
+          "cost": 12,
+          "scaling": "shield HP = 18% max HP"
+        },
+        {
+          "id": "breakthrough",
+          "name": "Breakthrough",
+          "motif": "crown charge line",
+          "cooldown": 8,
+          "cost": 16,
+          "scaling": "dash thrust 120%"
+        },
+        {
+          "id": "quiet_strength",
+          "name": "Quiet Strength",
+          "motif": "stacking sigils",
+          "cooldown": 11,
+          "cost": 18,
+          "scaling": "self buff ramps over time"
+        },
+        {
+          "id": "butterfly_effect",
+          "name": "Butterfly Effect",
+          "motif": "wing shatter",
+          "cooldown": 13,
+          "cost": 24,
+          "scaling": "shield pop AoE + slow"
+        }
+      ],
+      "utilitySkill": {
+        "id": "guard_step",
+        "name": "Guard Step",
+        "cooldown": 4,
+        "effect": "reposition + taunt pulse"
+      },
+      "passives": [
+        {
+          "id": "self_love",
+          "name": "Self-Love",
+          "effect": "periodic regen and cleanse"
+        },
+        {
+          "id": "steady_heart",
+          "name": "Steady Heart",
+          "effect": "reduced damage during revive windows"
+        }
+      ],
+      "ultimate": {
+        "id": "sanctuary_stage",
+        "name": "Sanctuary Stage",
+        "motif": "lace dome + crown beacon",
+        "cooldown": 52,
+        "cost": 100,
+        "scaling": "team barrier + reflect"
+      },
+      "synergy": [
+        "Frontline anchor for Miho dives.",
+        "Enables Sujin turret-like ultimate channel."
+      ],
+      "skillBranches": [
+        {
+          "id": "wingAegis",
+          "name": "Wing Aegis",
+          "emoji": "\ud83e\udebd",
+          "desc": "Extra shield orbit",
+          "branch": "defense",
+          "effect": {
+            "stat": "hp",
+            "perLevel": 0.25
+          }
+        },
+        {
+          "id": "crownGuard",
+          "name": "Crown Guard",
+          "emoji": "\ud83d\udee1\ufe0f",
+          "desc": "Damage reduction aura",
+          "branch": "defense",
+          "effect": {
+            "stat": "dr",
+            "perLevel": 0.03
+          }
+        },
+        {
+          "id": "neonStep",
+          "name": "Neon Step",
+          "emoji": "\ud83d\udca0",
+          "desc": "Step leaves damage trail",
+          "branch": "mobility",
+          "effect": {
+            "stat": "speed",
+            "perLevel": 0.05
+          }
+        }
+      ]
+    }
+  ],
+  "enemies": {
+    "mobs": [
+      {
+        "id": "flash_stalker",
+        "name": "Flash Stalker",
+        "fantasy": "camera-obsessed lurker",
+        "silhouette": "hunched lens-head",
+        "palette": "slate + red LED",
+        "attacks": "quick dash flash",
+        "telegraph": "thin cone + blink",
+        "drops": "shutter shards",
+        "needs": "8x10 sprite, flash VFX"
+      },
+      {
+        "id": "tabloid_runner",
+        "name": "Tabloid Runner",
+        "fantasy": "headline chaser",
+        "silhouette": "paper stack cape",
+        "palette": "newsprint gray + magenta",
+        "attacks": "boomerang pages",
+        "telegraph": "arc paper trail",
+        "drops": "ink scraps",
+        "needs": "10x10 sprite, page projectile"
+      },
+      {
+        "id": "comment_wasp",
+        "name": "Comment Wasp",
+        "fantasy": "toxic buzz unit",
+        "silhouette": "winged chat bubble",
+        "palette": "violet + acid pink",
+        "attacks": "zigzag sting",
+        "telegraph": "V path",
+        "drops": "buzz cores",
+        "needs": "8x8 sprite, zigzag trail"
+      },
+      {
+        "id": "gatekeeper_knight",
+        "name": "Gatekeeper Knight",
+        "fantasy": "opinion wall",
+        "silhouette": "shield icon block",
+        "palette": "lilac armor + dark core",
+        "attacks": "front block shove",
+        "telegraph": "rect push lane",
+        "drops": "lock sigils",
+        "needs": "12x12 sprite, shield hit"
+      },
+      {
+        "id": "fancam_leech",
+        "name": "Fancam Leech",
+        "fantasy": "attention drain orb",
+        "silhouette": "floating lens orb",
+        "palette": "cyan rim + black center",
+        "attacks": "beam tether",
+        "telegraph": "line tether",
+        "drops": "view chips",
+        "needs": "9x9 sprite, tether line"
+      },
+      {
+        "id": "spoiler_imp",
+        "name": "Spoiler Imp",
+        "fantasy": "plot-ruin sprite",
+        "silhouette": "jagged paper imp",
+        "palette": "rose + ink black",
+        "attacks": "burst packets",
+        "telegraph": "cross burst",
+        "drops": "glitch petals",
+        "needs": "8x9 sprite, burst VFX"
+      },
+      {
+        "id": "doomscroll_slug",
+        "name": "Doomscroll Slug",
+        "fantasy": "slow debuff crawler",
+        "silhouette": "long blob with phone",
+        "palette": "desat purple + neon text",
+        "attacks": "trail slow goo",
+        "telegraph": "path stain",
+        "drops": "battery gel",
+        "needs": "12x8 sprite, trail tile"
+      },
+      {
+        "id": "leak_rat",
+        "name": "Leak Rat",
+        "fantasy": "file-snatching nuisance",
+        "silhouette": "small hooded rodent",
+        "palette": "gray + pink eyes",
+        "attacks": "steal XP nibble",
+        "telegraph": "tiny jump arc",
+        "drops": "cache crumbs",
+        "needs": "8x8 sprite, hop anim"
+      },
+      {
+        "id": "echo_fan",
+        "name": "Echo Fan",
+        "fantasy": "chant-loop drone",
+        "silhouette": "speaker backpack",
+        "palette": "teal + magenta",
+        "attacks": "shockwave clap",
+        "telegraph": "ring pulse",
+        "drops": "amp screws",
+        "needs": "10x11 sprite, wave ring"
+      },
+      {
+        "id": "receipt_hunter",
+        "name": "Receipt Hunter",
+        "fantasy": "expose-seeker",
+        "silhouette": "long coat + note spear",
+        "palette": "sepia + crimson",
+        "attacks": "thrust + pin",
+        "telegraph": "line jab",
+        "drops": "receipt strips",
+        "needs": "11x12 sprite, jab frame"
+      }
+    ],
+    "elites": [
+      {
+        "id": "paparazzi_rig",
+        "name": "Paparazzi Rig",
+        "fantasy": "camera mech elite",
+        "mechanic": "multi-flash barrage"
+      },
+      {
+        "id": "trending_executor",
+        "name": "Trending Executor",
+        "fantasy": "algorithm enforcer",
+        "mechanic": "marks hottest target"
+      },
+      {
+        "id": "archive_warden",
+        "name": "Archive Warden",
+        "fantasy": "deletes pickups",
+        "mechanic": "zone denial"
+      },
+      {
+        "id": "reply_hydra",
+        "name": "Reply Hydra",
+        "fantasy": "splitting comment swarm",
+        "mechanic": "duplicates on hit"
+      },
+      {
+        "id": "blacklist_duelist",
+        "name": "Blacklist Duelist",
+        "fantasy": "single-target hunter",
+        "mechanic": "telegraphed dash chains"
+      }
+    ],
+    "bosses": [
+      {
+        "id": "queen_of_clickbait",
+        "name": "Queen of Clickbait",
+        "arena": "neon newsroom",
+        "intro": "Every crown has a scandal.",
+        "telegraphs": "headline slashes, camera cones",
+        "drops": "crown core alpha"
+      },
+      {
+        "id": "mr_algorithm",
+        "name": "Mr. Algorithm",
+        "arena": "data cathedral",
+        "intro": "I decide what they see.",
+        "telegraphs": "grid locks, ranking beams",
+        "drops": "crown core beta"
+      },
+      {
+        "id": "director_cut",
+        "name": "Director Cut",
+        "arena": "broken stage set",
+        "intro": "Say it again, but louder.",
+        "telegraphs": "spotlight snipes, clap shockwaves",
+        "drops": "crown core gamma"
+      },
+      {
+        "id": "glass_prince",
+        "name": "Glass Prince",
+        "arena": "mirror hall",
+        "intro": "Reflection is a weapon.",
+        "telegraphs": "mirror clones, shard rain",
+        "drops": "crown core delta"
+      },
+      {
+        "id": "midnight_forum",
+        "name": "Midnight Forum",
+        "arena": "floating chat abyss",
+        "intro": "Consensus becomes cage.",
+        "telegraphs": "vote circles, thread chains",
+        "drops": "crown core epsilon"
+      },
+      {
+        "id": "the_disbander",
+        "name": "The Disbander",
+        "arena": "fractured throne stage",
+        "intro": "End of story.",
+        "telegraphs": "phase tears, void wedges",
+        "drops": "royal core omega"
+      }
+    ]
+  },
+  "story": {
+    "opening": "On comeback night, the city\u2019s attention economy mutates into a haunted stage-net. The idols must reclaim the spotlight shard by shard.",
+    "chapters": [
+      {
+        "id": 1,
+        "name": "Neon Lobby",
+        "beat": "First crowd turns hostile; idols learn to weaponize choreography."
+      },
+      {
+        "id": 2,
+        "name": "Mall of Mirrors",
+        "beat": "False reflections spread rumors that become enemies."
+      },
+      {
+        "id": 3,
+        "name": "Broadcast Ruins",
+        "beat": "Signal towers scramble identity and split the team."
+      },
+      {
+        "id": 4,
+        "name": "Archive Understage",
+        "beat": "Deleted memories surface as elite hunters."
+      },
+      {
+        "id": 5,
+        "name": "Crownline Citadel",
+        "beat": "Final procession to the fracture throne."
+      }
+    ],
+    "midBossBeats": [
+      "A hijacked fan-chant becomes an attack pattern.",
+      "A leaked rehearsal clip unlocks hidden route.",
+      "The group reclaims synchronized ultimate timing."
+    ],
+    "idolArcs": {
+      "miho": "Learns confidence without performance mask.",
+      "hyunju": "Turns empathy from burden into battlefield control.",
+      "sujin": "Lets precision coexist with trust in teammates.",
+      "sohee": "Steps from support shadow into chosen leader."
+    },
+    "loreCards": [
+      "The city trends in cycles; crowns are just cached attention.",
+      "A fan-light can guide or blind depending on who holds it.",
+      "Every rumor leaves a footprint in the signal fog.",
+      "Archived songs still hum under the stage floor.",
+      "They said princesses wait to be saved. They recompiled the script.",
+      "A perfect image cracks fastest under live lights.",
+      "The loudest boos become bass when synced.",
+      "Tiaras are antennas for courage, not approval.",
+      "In this city, silence is a stealth mechanic.",
+      "Final boss truth: disbandment is a narrative, not fate."
+    ]
+  },
+  "nextIterations": [
+    "Replace placeholder enemy sprites with full silhouette-tested sheets.",
+    "Add per-character UI skin accents while keeping core component geometry identical.",
+    "Implement icon atlas at 16x16 and remove emoji fallback from combat HUD.",
+    "Tune telegraph timings for all 6 bosses in playtests.",
+    "Add accessibility presets: high contrast and reduced FX motion."
+  ],
+  "gameplay": {
+    "spriteSpecs": {
+      "playerBaseSize": [
+        16,
+        20
+      ],
+      "idleFrames": 4,
+      "runFrames": 6,
+      "castFrames": 4,
+      "ultimateFrames": 6
+    },
+    "iconRules": {
+      "grid": 16,
+      "outline": 1,
+      "fillTones": 2
+    },
+    "uiLayout": {
+      "hudGutter": 12,
+      "skillIcon": 34,
+      "panelBorder": 1
+    },
+    "enemies": {
+      "mobs": [
+        {
+          "id": "flash_stalker",
+          "name": "Flash Stalker",
+          "w": 8,
+          "h": 8,
+          "hp": 3,
+          "speed": 1.1,
+          "damage": 1,
+          "xp": 2,
+          "color1": "#7A6B99",
+          "color2": "#C26AC9",
+          "emoji": "\ud83d\udcf8",
+          "behavior": "charger",
+          "weight": 1.1
+        },
+        {
+          "id": "tabloid_runner",
+          "name": "Tabloid Runner",
+          "w": 10,
+          "h": 8,
+          "hp": 4,
+          "speed": 1.0,
+          "damage": 1,
+          "xp": 2,
+          "color1": "#6F5B7B",
+          "color2": "#E487B2",
+          "emoji": "\ud83d\udcf0",
+          "behavior": "ranged",
+          "range": 90,
+          "weight": 1.0
+        },
+        {
+          "id": "comment_wasp",
+          "name": "Comment Wasp",
+          "w": 7,
+          "h": 7,
+          "hp": 2,
+          "speed": 1.5,
+          "damage": 1,
+          "xp": 2,
+          "color1": "#5F4B84",
+          "color2": "#B98CFF",
+          "emoji": "\ud83d\udcac",
+          "behavior": "swarm",
+          "weight": 1.2
+        },
+        {
+          "id": "gatekeeper_knight",
+          "name": "Gatekeeper Knight",
+          "w": 12,
+          "h": 12,
+          "hp": 10,
+          "speed": 0.5,
+          "damage": 2,
+          "xp": 4,
+          "color1": "#4B4C72",
+          "color2": "#9EA1D8",
+          "emoji": "\ud83d\udee1\ufe0f",
+          "behavior": "tank",
+          "armor": 0.35,
+          "weight": 0.8
+        },
+        {
+          "id": "fancam_leech",
+          "name": "Fancam Leech",
+          "w": 9,
+          "h": 9,
+          "hp": 5,
+          "speed": 0.9,
+          "damage": 1,
+          "xp": 3,
+          "color1": "#3A5F8A",
+          "color2": "#6DE6FF",
+          "emoji": "\ud83d\udcf1",
+          "behavior": "ranged",
+          "range": 110,
+          "weight": 1.0
+        },
+        {
+          "id": "spoiler_imp",
+          "name": "Spoiler Imp",
+          "w": 8,
+          "h": 9,
+          "hp": 4,
+          "speed": 1.3,
+          "damage": 1,
+          "xp": 3,
+          "color1": "#6B3C5C",
+          "color2": "#FF79C6",
+          "emoji": "\ud83d\ude08",
+          "behavior": "teleporter",
+          "weight": 0.9
+        },
+        {
+          "id": "doomscroll_slug",
+          "name": "Doomscroll Slug",
+          "w": 12,
+          "h": 8,
+          "hp": 8,
+          "speed": 0.45,
+          "damage": 2,
+          "xp": 3,
+          "color1": "#4D415F",
+          "color2": "#8C77A6",
+          "emoji": "\ud83d\udcdc",
+          "behavior": "tank",
+          "armor": 0.2,
+          "weight": 0.9
+        },
+        {
+          "id": "leak_rat",
+          "name": "Leak Rat",
+          "w": 8,
+          "h": 8,
+          "hp": 3,
+          "speed": 1.25,
+          "damage": 1,
+          "xp": 2,
+          "color1": "#5C5664",
+          "color2": "#E48AA2",
+          "emoji": "\ud83d\udc00",
+          "behavior": "charger",
+          "weight": 1.1
+        },
+        {
+          "id": "echo_fan",
+          "name": "Echo Fan",
+          "w": 10,
+          "h": 11,
+          "hp": 6,
+          "speed": 0.85,
+          "damage": 2,
+          "xp": 3,
+          "color1": "#375C6D",
+          "color2": "#7EE6D3",
+          "emoji": "\ud83d\udce2",
+          "behavior": "ranged",
+          "range": 95,
+          "weight": 1.0
+        },
+        {
+          "id": "receipt_hunter",
+          "name": "Receipt Hunter",
+          "w": 11,
+          "h": 12,
+          "hp": 7,
+          "speed": 0.75,
+          "damage": 2,
+          "xp": 4,
+          "color1": "#6D4A58",
+          "color2": "#FFB1A1",
+          "emoji": "\ud83e\uddfe",
+          "behavior": "charger",
+          "weight": 0.95
+        }
+      ],
+      "bosses": [
+        {
+          "id": "queen_of_clickbait",
+          "name": "QUEEN OF CLICKBAIT",
+          "w": 22,
+          "h": 22,
+          "hp": 120,
+          "speed": 0.4,
+          "damage": 3,
+          "xp": 60,
+          "color1": "#A84CCF",
+          "color2": "#E37BC1",
+          "emoji": "\ud83d\udc51",
+          "behavior": "boss_press"
+        },
+        {
+          "id": "mr_algorithm",
+          "name": "MR ALGORITHM",
+          "w": 24,
+          "h": 24,
+          "hp": 180,
+          "speed": 0.36,
+          "damage": 3,
+          "xp": 80,
+          "color1": "#5B63C8",
+          "color2": "#8DE8FF",
+          "emoji": "\ud83e\udde0",
+          "behavior": "boss_beam"
+        },
+        {
+          "id": "director_cut",
+          "name": "DIRECTOR CUT",
+          "w": 26,
+          "h": 26,
+          "hp": 230,
+          "speed": 0.34,
+          "damage": 4,
+          "xp": 95,
+          "color1": "#C34D6A",
+          "color2": "#F19B7E",
+          "emoji": "\ud83c\udfac",
+          "behavior": "boss_dash"
+        },
+        {
+          "id": "glass_prince",
+          "name": "GLASS PRINCE",
+          "w": 28,
+          "h": 28,
+          "hp": 280,
+          "speed": 0.32,
+          "damage": 4,
+          "xp": 110,
+          "color1": "#6D6EC7",
+          "color2": "#C3D2FF",
+          "emoji": "\ud83e\ude9e",
+          "behavior": "boss_clone"
+        },
+        {
+          "id": "midnight_forum",
+          "name": "MIDNIGHT FORUM",
+          "w": 30,
+          "h": 30,
+          "hp": 340,
+          "speed": 0.3,
+          "damage": 5,
+          "xp": 130,
+          "color1": "#523E79",
+          "color2": "#B98CFF",
+          "emoji": "\ud83c\udf0c",
+          "behavior": "boss_vote"
+        },
+        {
+          "id": "the_disbander",
+          "name": "THE DISBANDER",
+          "w": 34,
+          "h": 34,
+          "hp": 420,
+          "speed": 0.28,
+          "damage": 6,
+          "xp": 180,
+          "color1": "#7A345E",
+          "color2": "#FF6FA6",
+          "emoji": "\ud83d\udc80",
+          "behavior": "boss_final"
+        }
+      ],
+      "wavePools": {
+        "early": [
+          "comment_wasp",
+          "flash_stalker",
+          "leak_rat"
+        ],
+        "mid": [
+          "tabloid_runner",
+          "fancam_leech",
+          "echo_fan",
+          "gatekeeper_knight"
+        ],
+        "late": [
+          "spoiler_imp",
+          "doomscroll_slug",
+          "receipt_hunter",
+          "gatekeeper_knight"
+        ]
+      }
+    }
+  }
+}
