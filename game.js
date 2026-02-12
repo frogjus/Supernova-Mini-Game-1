@@ -565,19 +565,32 @@ function handleKey(code) {
 function handleClick() {
     if (state === State.TITLE) { state = State.SELECT; SFX.select(); }
     else if (state === State.SELECT) {
+        // Zine cover layout — hero char is on left, click hero area to start
+        // Click on thumbnail chars to switch selection
+        const basePositions = [{x:430, y:46}, {x:580, y:52}, {x:730, y:42}];
+        let thumbIdx = 0;
         for (let i = 0; i < 4; i++) {
-            const bx = 60 + i * 215, by = 160;
-            if (mouseX >= bx && mouseX <= bx + 195 && mouseY >= by && mouseY <= by + 280) {
-                selectedChar = i; SFX.select(); startGame(); return;
+            if (i === selectedChar) continue;
+            const pos = basePositions[thumbIdx];
+            if (pos && mouseX >= pos.x - 10 && mouseX <= pos.x + 90 && mouseY >= pos.y - 10 && mouseY <= pos.y + 120) {
+                selectedChar = i; SFX.select(); return;
             }
+            thumbIdx++;
+        }
+        // Click hero area or anywhere else to start
+        if (mouseX >= 20 && mouseX <= 400 && mouseY >= 40 && mouseY <= 460) {
+            startGame(); return;
         }
     } else if (state === State.LEVELUP) {
         for (let i = 0; i < levelUpChoices.length; i++) {
-            const bx = 180, by = 175 + i * 110;
-            if (mouseX >= bx && mouseX <= bx + 600 && mouseY >= by && mouseY <= by + 95) {
+            const bx = 80 + i * 4, by = 140 + i * 130;
+            const cw = 800 - i * 8;
+            if (mouseX >= bx && mouseX <= bx + cw && mouseY >= by && mouseY <= by + 115) {
                 choosePowerUp(i); return;
             }
         }
+    } else if (state === State.GAMEOVER) {
+        state = State.TITLE;
     }
 }
 
