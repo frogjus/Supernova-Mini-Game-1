@@ -216,9 +216,10 @@ function getScaledSprite(name, scale) {
     return c;
 }
 
-// === AUDIO ===
+// === AUDIO (throttled to prevent lag) ===
 const SFX = (() => {
     let ctx = null;
+    const lastPlayed = {};
     function getCtx() { if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
     function tone(f,d,t='square',v=0.07,fEnd=null) {
         try { const c=getCtx(),o=c.createOscillator(),g=c.createGain();
@@ -234,24 +235,44 @@ const SFX = (() => {
         g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
         s.connect(g);g.connect(c.destination);s.start(); } catch(e){}
     }
+    function throttled(name, minFrames, fn) {
+        return () => {
+            const now = frameCount || 0;
+            if (now - (lastPlayed[name]||0) < minFrames) return;
+            lastPlayed[name] = now;
+            fn();
+        };
+    }
     return {
-        hit(){tone(300,0.08,'square',0.05,100);},
-        kill(){noise(0.12,0.07);tone(200,0.12,'square',0.05,80);},
+        hit: throttled('hit', 3, ()=>tone(300,0.08,'square',0.05,100)),
+        kill: throttled('kill', 2, ()=>{noise(0.12,0.07);tone(200,0.12,'square',0.05,80);}),
         levelUp(){tone(523,0.1,'square',0.08);setTimeout(()=>tone(659,0.1,'square',0.08),100);setTimeout(()=>tone(784,0.15,'square',0.08),200);setTimeout(()=>tone(1047,0.2,'square',0.08),300);},
-        pickup(){tone(600,0.06,'sine',0.05,900);},
+        pickup: throttled('pickup', 4, ()=>tone(600,0.06,'sine',0.05,900)),
         playerHit(){tone(150,0.2,'sawtooth',0.07,50);noise(0.12,0.05);},
         select(){tone(440,0.06,'square',0.05,660);},
         start(){tone(262,0.1,'square',0.06);setTimeout(()=>tone(330,0.1,'square',0.06),100);setTimeout(()=>tone(392,0.1,'square',0.06),200);setTimeout(()=>tone(523,0.18,'square',0.06),300);},
         gameOver(){tone(392,0.2,'sawtooth',0.07,200);setTimeout(()=>tone(262,0.3,'sawtooth',0.07,100),250);setTimeout(()=>tone(196,0.5,'sawtooth',0.07,60),550);},
-        foxFire(){tone(800,0.1,'sine',0.05,400);},
-        heartWave(){tone(500,0.12,'triangle',0.05,300);},
-        starBeam(){tone(200,0.08,'square',0.04,800);},
+        foxFire: throttled('foxFire', 5, ()=>tone(800,0.1,'sine',0.05,400)),
+        heartWave: throttled('heartWave', 5, ()=>tone(500,0.12,'triangle',0.05,300)),
+        starBeam: throttled('starBeam', 5, ()=>tone(200,0.08,'square',0.04,800)),
         shieldUp(){tone(300,0.15,'sine',0.04,600);},
-        fanChant(){tone(660,0.06,'square',0.04);setTimeout(()=>tone(880,0.06,'square',0.04),70);},
+        fanChant: throttled('fanChant', 10, ()=>{tone(660,0.06,'square',0.04);setTimeout(()=>tone(880,0.06,'square',0.04),70);}),
         bossSpawn(){tone(100,0.3,'sawtooth',0.09,50);setTimeout(()=>tone(150,0.25,'sawtooth',0.09,80),150);setTimeout(()=>tone(200,0.3,'sawtooth',0.09,100),300);},
         bossKill(){tone(523,0.15,'square',0.1);setTimeout(()=>tone(659,0.15,'square',0.1),100);setTimeout(()=>tone(784,0.15,'square',0.1),200);setTimeout(()=>tone(1047,0.3,'square',0.1),300);setTimeout(()=>noise(0.2,0.08),400);},
     };
 })();
+
+// === PERFORMANCE: Array caps & fast removal ===
+const MAX_PARTICLES = 200;
+const MAX_PROJECTILES = 300;
+const MAX_FANCHANTS = 10;
+const MAX_FLOATING = 20;
+const enemySet = new Set(); // O(1) alive-check for homing
+
+function fastRemove(arr, i) {
+    arr[i] = arr[arr.length - 1];
+    arr.pop();
+}
 
 // ================================================================
 // CHARACTER DEFINITIONS WITH DEEP SKILL TREES
@@ -496,6 +517,7 @@ function startGame() {
     }
 
     projectiles = []; enemies = []; xpGems = []; particles = []; floatingTexts = [];
+    enemySet.clear();
 
     addNotification('🎤 ' + cd.name + ' takes the stage!', cd.color);
     addNotification('💗 ' + cd.fandom + ' are cheering!', '#ff88cc');
@@ -622,13 +644,15 @@ function spawnBoss() {
     ex = Math.max(30, Math.min(ARENA_W - 30, ex));
     ey = Math.max(30, Math.min(ARENA_H - 30, ey));
 
-    enemies.push({
+    const bossEnemy = {
         x: ex, y: ey, type,
         hp: Math.ceil(type.hp * hpMult), maxHp: Math.ceil(type.hp * hpMult),
         speed: type.speed, damage: type.damage, xp: type.xp, w: type.w, h: type.h,
         flashTimer: 0, phase: 0, frozen: 0, scanned: false,
         boss: true, bossType: type,
-    });
+    };
+    enemies.push(bossEnemy);
+    enemySet.add(bossEnemy);
 
     SFX.bossSpawn();
     screenFlash = 12; screenFlashColor = '#ff2d78';
@@ -654,12 +678,14 @@ function spawnEnemy() {
     ex = Math.max(10,Math.min(ARENA_W-10,ex));
     ey = Math.max(10,Math.min(ARENA_H-10,ey));
 
-    enemies.push({
+    const newEnemy = {
         x:ex, y:ey, type, hp:Math.ceil(type.hp*hpMult), maxHp:Math.ceil(type.hp*hpMult),
         speed:type.speed, damage:type.damage, xp:type.xp, w:type.w, h:type.h,
         flashTimer:0, phase:Math.random()*Math.PI*2,
         frozen:0, scanned:false,
-    });
+    };
+    enemies.push(newEnemy);
+    enemySet.add(newEnemy);
 }
 
 // ================================================================
@@ -735,24 +761,43 @@ function fireAuraBlast(dm) {
 
 function fireNineTails(dm) {
     const lv = player.powers.nineTails;
-    const count = Math.min(lv + 1, 5);
     const range = 28 + lv * 5;
-    enemies.forEach(e => {
-        if (Math.hypot(e.x-player.x, e.y-player.y) < range) {
-            damageEnemy(e, player.atk * lv * 0.7 * dm);
+    const r2 = range * range;
+    const tailDmg = player.atk * lv * 0.7 * dm;
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx=e.x-player.x, dy=e.y-player.y;
+        if (dx*dx+dy*dy < r2) damageEnemy(e, tailDmg);
+    }
+    if (particles.length < MAX_PARTICLES) {
+        const count = Math.min(Math.min(lv + 1, 5), MAX_PARTICLES - particles.length);
+        for (let i = 0; i < count; i++) {
+            const a = Math.random()*Math.PI*2;
+            particles.push({ x:player.x+Math.cos(a)*range, y:player.y+Math.sin(a)*range,
+                vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#f7e065', size:2 });
         }
-    });
-    // Tail sweep particles
-    for (let i = 0; i < count * 2; i++) {
-        const a = Math.random()*Math.PI*2;
-        particles.push({ x:player.x+Math.cos(a)*range, y:player.y+Math.sin(a)*range,
-            vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#f7e065', size:2 });
     }
 }
 
 function findNearest(count, range) {
-    return enemies.map(e=>({e,d:Math.hypot(e.x-player.x,e.y-player.y)}))
-        .filter(o=>o.d<range).sort((a,b)=>a.d-b.d).slice(0,count).map(o=>o.e);
+    const r2 = range * range;
+    const result = [];
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx = e.x - player.x, dy = e.y - player.y;
+        const d2 = dx*dx + dy*dy;
+        if (d2 < r2) {
+            if (result.length < count) {
+                result.push({e, d2});
+                if (result.length === count) result.sort((a,b)=>a.d2-b.d2);
+            } else if (d2 < result[count-1].d2) {
+                result[count-1] = {e, d2};
+                result.sort((a,b)=>a.d2-b.d2);
+            }
+        }
+    }
+    if (result.length < count) result.sort((a,b)=>a.d2-b.d2);
+    return result.map(o=>o.e);
 }
 
 // ================================================================
@@ -835,13 +880,18 @@ function updatePlayer() {
     // Daydream slow aura (Hyunju)
     if (player.powers.daydream > 0) {
         const r = 30 + player.powers.daydream * 10;
-        enemies.forEach(e => {
-            if (Math.hypot(e.x-player.x,e.y-player.y) < r) {
-                e.speed = e.type.speed * (0.6 - player.powers.daydream * 0.05);
-                if (player.powers.daydream >= 4 && frameCount%30===0) damageEnemy(e, player.atk*0.2);
+        const r2 = r * r;
+        const slowFactor = 0.6 - player.powers.daydream * 0.05;
+        const doDmg = player.powers.daydream >= 4 && frameCount%30===0;
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const e = enemies[ei];
+            const dx=e.x-player.x, dy=e.y-player.y;
+            if (dx*dx+dy*dy < r2) {
+                e.speed = e.type.speed * slowFactor;
+                if (doDmg) damageEnemy(e, player.atk*0.2);
             } else { e.speed = e.type.speed; }
-        });
-        if (frameCount%4===0) {
+        }
+        if (frameCount%8===0 && particles.length < MAX_PARTICLES) {
             const a=Math.random()*Math.PI*2;
             particles.push({x:player.x+Math.cos(a)*r, y:player.y+Math.sin(a)*r,
                 vx:0, vy:-0.3, life:20, color:'#aaccff', size:1.5});
@@ -851,35 +901,49 @@ function updatePlayer() {
     // Stage Presence damage aura
     if (player.powers.dmgAura > 0 && frameCount%15===0) {
         const r = 25 + player.powers.dmgAura * 5;
-        enemies.forEach(e => {
-            if (Math.hypot(e.x-player.x,e.y-player.y)<r) damageEnemy(e, player.atk*player.powers.dmgAura*0.3);
-        });
-        for (let i=0;i<4;i++) {
-            const a=Math.random()*Math.PI*2;
-            particles.push({x:player.x+Math.cos(a)*r, y:player.y+Math.sin(a)*r,
-                vx:Math.cos(a)*0.3,vy:Math.sin(a)*0.3,life:12,color:'#ffdd88',size:1});
+        const r2 = r * r;
+        const auraDmg = player.atk*player.powers.dmgAura*0.3;
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const e = enemies[ei];
+            const dx=e.x-player.x, dy=e.y-player.y;
+            if (dx*dx+dy*dy<r2) damageEnemy(e, auraDmg);
+        }
+        if (particles.length < MAX_PARTICLES) {
+            const count = Math.min(2, MAX_PARTICLES - particles.length);
+            for (let i=0;i<count;i++) {
+                const a=Math.random()*Math.PI*2;
+                particles.push({x:player.x+Math.cos(a)*r, y:player.y+Math.sin(a)*r,
+                    vx:Math.cos(a)*0.3,vy:Math.sin(a)*0.3,life:12,color:'#ffdd88',size:1});
+            }
         }
     }
 
     // Charm freeze (Miho)
     if (player.powers.charm > 0) {
-        const chance = player.powers.charm * 0.04 + 0.06;
-        enemies.forEach(e => {
-            if (e.frozen <= 0 && Math.hypot(e.x-player.x,e.y-player.y) < player.range + 20) {
-                if (Math.random() < chance * 0.02) {
+        const chance = (player.powers.charm * 0.04 + 0.06) * 0.02;
+        const cr = player.range + 20;
+        const cr2 = cr * cr;
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const e = enemies[ei];
+            if (e.frozen <= 0) {
+                const dx=e.x-player.x, dy=e.y-player.y;
+                if (dx*dx+dy*dy < cr2 && Math.random() < chance) {
                     e.frozen = 60 + player.powers.charm * 15;
                 }
             }
-        });
+        }
     }
 
     // Inner World healing (Hyunju)
     if (player.powers.innerWorld > 0 && frameCount%60===0) {
         const heal = player.powers.innerWorld * 0.08 + 0.1;
         player.hp = Math.min(player.maxHp, player.hp + heal);
-        for (let i=0;i<3;i++) {
-            particles.push({x:player.x+(Math.random()-0.5)*20, y:player.y+(Math.random()-0.5)*20,
-                vx:0,vy:-0.5,life:25,color:'#ffbbdd',size:1.5});
+        if (particles.length < MAX_PARTICLES) {
+            const count = Math.min(2, MAX_PARTICLES - particles.length);
+            for (let i=0;i<count;i++) {
+                particles.push({x:player.x+(Math.random()-0.5)*20, y:player.y+(Math.random()-0.5)*20,
+                    vx:0,vy:-0.5,life:25,color:'#ffbbdd',size:1.5});
+            }
         }
     }
 
@@ -896,11 +960,12 @@ function updatePlayer() {
 }
 
 function updateProjectiles() {
-    for (let i = projectiles.length-1; i >= 0; i--) {
+    let i = projectiles.length;
+    while (i-- > 0) {
         const p = projectiles[i];
         p.life--;
 
-        if (p.homing && p.target && enemies.includes(p.target)) {
+        if (p.homing && p.target && enemySet.has(p.target)) {
             const dx=p.target.x-p.x, dy=p.target.y-p.y, d=Math.hypot(dx,dy);
             if (d>0) { p.vx+=(dx/d)*0.3; p.vy+=(dy/d)*0.3;
                 const spd=Math.hypot(p.vx,p.vy); if(spd>4){p.vx=(p.vx/spd)*4;p.vy=(p.vy/spd)*4;} }
@@ -908,25 +973,32 @@ function updateProjectiles() {
 
         p.x+=p.vx; p.y+=p.vy;
 
-        if (frameCount%3===0) particles.push({x:p.x+(Math.random()-0.5)*2, y:p.y+(Math.random()-0.5)*2,
-            vx:-p.vx*0.08, vy:-p.vy*0.08, life:8, color:p.color, size:p.size*0.4});
+        // Reduced trail particles (every 5 frames, only if under cap)
+        if (frameCount%5===0 && particles.length < MAX_PARTICLES) {
+            particles.push({x:p.x+(Math.random()-0.5)*2, y:p.y+(Math.random()-0.5)*2,
+                vx:-p.vx*0.08, vy:-p.vy*0.08, life:8, color:p.color, size:p.size*0.4});
+        }
 
-        if (p.life<=0||p.x<-20||p.x>ARENA_W+20||p.y<-20||p.y>ARENA_H+20) { projectiles.splice(i,1); continue; }
+        if (p.life<=0||p.x<-20||p.x>ARENA_W+20||p.y<-20||p.y>ARENA_H+20) { fastRemove(projectiles,i); continue; }
 
+        let hit = false;
         for (let j=enemies.length-1;j>=0;j--) {
             const e=enemies[j];
-            if (Math.hypot(p.x-e.x,p.y-e.y) < e.w/2+p.size) {
+            const dx=p.x-e.x, dy=p.y-e.y;
+            if (dx*dx+dy*dy < (e.w/2+p.size)*(e.w/2+p.size)) {
                 const bonus = e.scanned ? (1 + player.powers.dataScan * 0.12) : 1;
                 damageEnemy(e, p.damage * bonus * (1 + player.quietStrBonus));
-                // Algorithm speed bonus
                 if (player.powers.algorithm > 0) {
                     player.comboSpeedBonus = Math.min(player.powers.algorithm * 2 + 3, player.comboSpeedBonus + player.powers.algorithm);
                 }
-                if (p.pierce>0) { p.pierce--; p.damage*=0.8; } else { projectiles.splice(i,1); }
+                if (p.pierce>0) { p.pierce--; p.damage*=0.8; } else { fastRemove(projectiles,i); }
+                hit = true;
                 break;
             }
         }
     }
+    // Enforce cap
+    if (projectiles.length > MAX_PROJECTILES) projectiles.length = MAX_PROJECTILES;
 }
 
 function damageEnemy(e, dmg) {
@@ -966,14 +1038,19 @@ function killEnemy(e) {
     // Viral Code explosion (Sujin)
     if (player.powers.viralCode > 0) {
         const r = 15 + player.powers.viralCode * 8;
+        const r2 = r * r;
         const vdmg = player.atk * player.powers.viralCode * 0.5;
-        enemies.forEach(e2 => {
-            if (e2 !== e && Math.hypot(e2.x-e.x, e2.y-e.y) < r) damageEnemy(e2, vdmg);
-        });
-        for (let i=0;i<6;i++) {
-            const a=Math.random()*Math.PI*2;
-            particles.push({x:e.x+Math.cos(a)*r*0.5,y:e.y+Math.sin(a)*r*0.5,
-                vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:15,color:'#ff44aa',size:2});
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const e2 = enemies[ei];
+            if (e2 !== e) { const dx=e2.x-e.x, dy=e2.y-e.y; if (dx*dx+dy*dy < r2) damageEnemy(e2, vdmg); }
+        }
+        if (particles.length < MAX_PARTICLES) {
+            const count = Math.min(3, MAX_PARTICLES - particles.length);
+            for (let i=0;i<count;i++) {
+                const a=Math.random()*Math.PI*2;
+                particles.push({x:e.x+Math.cos(a)*r*0.5,y:e.y+Math.sin(a)*r*0.5,
+                    vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:15,color:'#ff44aa',size:2});
+            }
         }
     }
 
@@ -984,18 +1061,19 @@ function killEnemy(e) {
         let lastX = e.x, lastY = e.y, hit = 0;
         const hitSet = new Set();
         for (let c = 0; c < chains && hit < chains; c++) {
-            let nearest = null, nearDist = 50 + player.powers.empathy * 10;
-            enemies.forEach(e2 => {
+            let nearest = null, nearDist2 = (50 + player.powers.empathy * 10) ** 2;
+            for (let ei = 0; ei < enemies.length; ei++) {
+                const e2 = enemies[ei];
                 if (!hitSet.has(e2)) {
-                    const d = Math.hypot(e2.x-lastX, e2.y-lastY);
-                    if (d < nearDist) { nearest = e2; nearDist = d; }
+                    const dx=e2.x-lastX, dy=e2.y-lastY;
+                    const d2 = dx*dx+dy*dy;
+                    if (d2 < nearDist2) { nearest = e2; nearDist2 = d2; }
                 }
-            });
+            }
             if (nearest) {
                 hitSet.add(nearest);
                 damageEnemy(nearest, chainDmg);
-                // Chain lightning visual
-                particles.push({x:(lastX+nearest.x)/2,y:(lastY+nearest.y)/2,vx:0,vy:0,life:8,color:'#ff88cc',size:2});
+                if (particles.length < MAX_PARTICLES) particles.push({x:(lastX+nearest.x)/2,y:(lastY+nearest.y)/2,vx:0,vy:0,life:8,color:'#ff88cc',size:2});
                 lastX = nearest.x; lastY = nearest.y; hit++;
             }
         }
@@ -1004,9 +1082,12 @@ function killEnemy(e) {
     // Data Scan (Sujin) - scan nearby on kill
     if (player.powers.dataScan > 0) {
         const scanR = player.powers.dataScan >= 3 ? 60 : 35;
-        enemies.forEach(e2 => {
-            if (Math.hypot(e2.x-e.x, e2.y-e.y) < scanR) e2.scanned = true;
-        });
+        const scanR2 = scanR * scanR;
+        for (let ei = 0; ei < enemies.length; ei++) {
+            const e2 = enemies[ei];
+            const dx=e2.x-e.x, dy=e2.y-e.y;
+            if (dx*dx+dy*dy < scanR2) e2.scanned = true;
+        }
     }
 
     // Boss kill rewards
@@ -1024,12 +1105,15 @@ function killEnemy(e) {
                 xp: Math.ceil(e.xp / 5), life: 600, size: 5
             });
         }
-        // Big death explosion
-        for (let i = 0; i < 25; i++) {
-            const a = Math.random() * Math.PI * 2;
-            particles.push({ x: e.x, y: e.y, vx: Math.cos(a) * (Math.random() * 4 + 1),
-                vy: Math.sin(a) * (Math.random() * 4 + 1), life: 30 + Math.random() * 20,
-                color: e.type.color1, size: Math.random() * 3 + 2 });
+        // Big death explosion (reduced from 25)
+        if (particles.length < MAX_PARTICLES) {
+            const count = Math.min(12, MAX_PARTICLES - particles.length);
+            for (let i = 0; i < count; i++) {
+                const a = Math.random() * Math.PI * 2;
+                particles.push({ x: e.x, y: e.y, vx: Math.cos(a) * (Math.random() * 4 + 1),
+                    vy: Math.sin(a) * (Math.random() * 4 + 1), life: 30 + Math.random() * 20,
+                    color: e.type.color1, size: Math.random() * 3 + 2 });
+            }
         }
     }
 
@@ -1037,44 +1121,55 @@ function killEnemy(e) {
     xpGems.push({ x:e.x+(Math.random()-0.5)*6, y:e.y+(Math.random()-0.5)*6,
         xp:e.xp, life:600, size:Math.min(3+e.xp, 6) });
 
-    // Death particles
-    for (let i=0;i<10;i++) {
-        const a=Math.random()*Math.PI*2;
-        particles.push({x:e.x,y:e.y,vx:Math.cos(a)*(Math.random()*2.5+0.5),
-            vy:Math.sin(a)*(Math.random()*2.5+0.5),life:20+Math.random()*10,color:e.type.color1,size:Math.random()*2+1});
+    // Death particles (reduced from 10)
+    if (particles.length < MAX_PARTICLES) {
+        const count = Math.min(4, MAX_PARTICLES - particles.length);
+        for (let i=0;i<count;i++) {
+            const a=Math.random()*Math.PI*2;
+            particles.push({x:e.x,y:e.y,vx:Math.cos(a)*(Math.random()*2.5+0.5),
+                vy:Math.sin(a)*(Math.random()*2.5+0.5),life:20+Math.random()*10,color:e.type.color1,size:Math.random()*2+1});
+        }
     }
 
     const idx = enemies.indexOf(e);
-    if (idx >= 0) enemies.splice(idx, 1);
+    if (idx >= 0) { enemies[idx] = enemies[enemies.length - 1]; enemies.pop(); }
+    enemySet.delete(e);
 }
 
 function updateEnemies() {
+    const shieldCount = player.shields.length;
     for (let i = enemies.length-1; i >= 0; i--) {
         const e = enemies[i];
         e.phase += 0.03;
 
-        if (e.frozen > 0) { e.frozen--; continue; }
+        if (e.frozen > 0) { e.frozen--; if (e.flashTimer>0) e.flashTimer--; continue; }
 
-        const dx=player.x-e.x, dy=player.y-e.y, dist=Math.hypot(dx,dy);
-        if (dist>0) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        const dx=player.x-e.x, dy=player.y-e.y;
+        const d2=dx*dx+dy*dy;
+        if (d2>0) { const dist=Math.sqrt(d2); e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
         if (e.flashTimer>0) e.flashTimer--;
 
         // Hit player
-        if (player.invTimer<=0 && player.spiritTimer<=0 && dist<10) playerTakeDamage(e.damage);
+        if (player.invTimer<=0 && player.spiritTimer<=0 && d2<100) playerTakeDamage(e.damage);
 
-        // Shields
-        player.shields.forEach(s => {
-            const sx=player.x+Math.cos(s.angle)*s.dist, sy=player.y+Math.sin(s.angle)*s.dist;
-            if (Math.hypot(e.x-sx,e.y-sy) < e.w/2+5) {
-                const shieldDmg = player.atk * (player.powers.auraShield||1) * 0.6;
-                damageEnemy(e, shieldDmg);
-                // Butterfly Effect
-                if (player.powers.butterfly > 0 && Math.random() < player.powers.butterfly * 0.05 + 0.05) {
-                    player.shields.push({angle:Math.random()*Math.PI*2, dist:28});
-                    setTimeout(() => { if(player.shields.length>player.powers.auraShield+2) player.shields.pop(); }, 3000);
+        // Shields (only check if shields exist)
+        if (shieldCount > 0) {
+            for (let si = 0; si < shieldCount; si++) {
+                const s = player.shields[si];
+                const sx=player.x+Math.cos(s.angle)*s.dist, sy=player.y+Math.sin(s.angle)*s.dist;
+                const sdx=e.x-sx, sdy=e.y-sy;
+                const sr = e.w/2+5;
+                if (sdx*sdx+sdy*sdy < sr*sr) {
+                    const shieldDmg = player.atk * (player.powers.auraShield||1) * 0.6;
+                    damageEnemy(e, shieldDmg);
+                    if (player.powers.butterfly > 0 && Math.random() < player.powers.butterfly * 0.05 + 0.05) {
+                        player.shields.push({angle:Math.random()*Math.PI*2, dist:28});
+                        setTimeout(() => { if(player.shields.length>player.powers.auraShield+2) player.shields.pop(); }, 3000);
+                    }
+                    break;
                 }
             }
-        });
+        }
     }
 }
 
@@ -1100,7 +1195,8 @@ function gameOver() {
     state = State.GAMEOVER;
     SFX.gameOver();
     screenFlash = 20; screenFlashColor = '#ff0044';
-    for (let i=0;i<40;i++) {
+    const count = Math.min(20, MAX_PARTICLES - particles.length);
+    for (let i=0;i<count;i++) {
         const a=Math.random()*Math.PI*2;
         particles.push({x:player.x,y:player.y,vx:Math.cos(a)*(Math.random()*3+1),
             vy:Math.sin(a)*(Math.random()*3+1),life:35+Math.random()*20,color:player.charDef.color,size:Math.random()*3+1});
@@ -1109,45 +1205,55 @@ function gameOver() {
 
 function updateXPGems() {
     const magR = 30 + (player.powers.magnetRange||0) * 15;
-    for (let i=xpGems.length-1;i>=0;i--) {
+    const magR2 = magR * magR;
+    let i = xpGems.length;
+    while (i-- > 0) {
         const g=xpGems[i]; g.life--;
-        const dx=player.x-g.x, dy=player.y-g.y, d=Math.hypot(dx,dy);
-        if (d<magR) { const sp=2+(magR-d)/magR*3; g.x+=(dx/d)*sp; g.y+=(dy/d)*sp; }
-        if (d<8) { player.xp+=g.xp; SFX.pickup(); xpGems.splice(i,1); continue; }
-        if (g.life<=0) xpGems.splice(i,1);
+        const dx=player.x-g.x, dy=player.y-g.y, d2=dx*dx+dy*dy;
+        if (d2<magR2) { const d=Math.sqrt(d2); const sp=2+(magR-d)/magR*3; g.x+=(dx/d)*sp; g.y+=(dy/d)*sp; }
+        if (d2<64) { player.xp+=g.xp; SFX.pickup(); fastRemove(xpGems,i); continue; }
+        if (g.life<=0) fastRemove(xpGems,i);
     }
 }
 
 function updateParticles() {
-    for (let i=particles.length-1;i>=0;i--) {
+    let i = particles.length;
+    while (i-- > 0) {
         const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vx*=0.95; p.vy*=0.95; p.life--;
-        if (p.life<=0) particles.splice(i,1);
+        if (p.life<=0) fastRemove(particles,i);
     }
 }
 
 function updateFloatingTexts() {
-    for (let i=floatingTexts.length-1;i>=0;i--) {
+    let i = floatingTexts.length;
+    while (i-- > 0) {
         const t=floatingTexts[i]; t.y-=0.5; t.life--;
-        if (t.life<=0) floatingTexts.splice(i,1);
+        if (t.life<=0) fastRemove(floatingTexts,i);
     }
+    if (floatingTexts.length > MAX_FLOATING) floatingTexts.length = MAX_FLOATING;
 }
 
 function updateFanChants() {
-    for (let i=fanChants.length-1;i>=0;i--) {
+    let i = fanChants.length;
+    while (i-- > 0) {
         const f=fanChants[i]; f.y+=f.vy; f.life--;
-        if (f.life<=0) fanChants.splice(i,1);
+        if (f.life<=0) fastRemove(fanChants,i);
     }
+    if (fanChants.length > MAX_FANCHANTS) fanChants.length = MAX_FANCHANTS;
 }
 
 function updateNotifications() {
-    for (let i=notifications.length-1;i>=0;i--) {
+    let i = notifications.length;
+    while (i-- > 0) {
         notifications[i].life--;
-        if (notifications[i].life<=0) notifications.splice(i,1);
+        if (notifications[i].life<=0) fastRemove(notifications,i);
     }
 }
 
 function spawnHitParticles(x,y,color) {
-    for (let i=0;i<5;i++) {
+    if (particles.length >= MAX_PARTICLES) return;
+    const count = Math.min(3, MAX_PARTICLES - particles.length);
+    for (let i=0;i<count;i++) {
         const a=Math.random()*Math.PI*2;
         particles.push({x,y,vx:Math.cos(a)*(Math.random()*1.5+0.5),vy:Math.sin(a)*(Math.random()*1.5+0.5),
             life:12,color,size:Math.random()+1});
@@ -1180,7 +1286,10 @@ function updateSpawning() {
         for (let i=0;i<count;i++) spawnEnemy();
         spawnTimer = baseRate;
     }
-    if (enemies.length > 120) enemies.splice(0, enemies.length-120);
+    if (enemies.length > 120) {
+        for (let i = 0; i < enemies.length - 120; i++) enemySet.delete(enemies[i]);
+        enemies.splice(0, enemies.length-120);
+    }
 }
 
 function updateCamera() {
