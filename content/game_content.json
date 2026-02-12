@@ -1,0 +1,151 @@
+{
+  "version": "1.0.0",
+  "theme": "princessy-edgy cyber-fairytale k-pop rebellion",
+  "idols": [
+    {
+      "id": "miho",
+      "name": "Miho",
+      "fantasy": "Fox-princess striker who weaponizes charm and feints.",
+      "silhouette": "Large twin-tail fox mane, ear-crown silhouette, heart-glove hand pose.",
+      "activeSkills": [
+        {"id":"fox_fire","name":"Fox Fire","motif":"flame hearts","cooldown":4,"cost":12,"scaling":"95% ATK x 3 seekers"},
+        {"id":"nine_tail_sweep","name":"Nine-Tail Sweep","motif":"crescent tails","cooldown":8,"cost":20,"scaling":"130% ATK AoE"},
+        {"id":"charm_lock","name":"Charm Lock","motif":"pink sigil","cooldown":12,"cost":24,"scaling":"2.5s root + 15% vuln"},
+        {"id":"mirror_step","name":"Mirror Step","motif":"glitch afterimages","cooldown":6,"cost":16,"scaling":"dash + 80% slash"}
+      ],
+      "utilitySkill": {"id":"velvet_dodge","name":"Velvet Dodge","cooldown":5,"effect":"short iframe sidestep"},
+      "passives": [
+        {"id":"stage_hypnosis","name":"Stage Hypnosis","effect":"nearby enemies lose 8% speed"},
+        {"id":"golden_instinct","name":"Golden Instinct","effect":"crit chance scales with combo"}
+      ],
+      "ultimate": {"id":"throne_of_nine","name":"Throne of Nine","motif":"crown ring + tail storm","cooldown":45,"cost":100,"scaling":"8 hits x 70% + execute pulse"},
+      "synergy": ["Pairs with Sohee shields for safe tail channels.", "Sujin scan amplifies execute thresholds."]
+    },
+    {
+      "id": "hyunju",
+      "name": "Hyunju",
+      "fantasy": "Dreamwave empath who controls tempo and sustain.",
+      "silhouette": "Long flowing wave hair, soft cape sleeves, star hair clip.",
+      "activeSkills": [
+        {"id":"heart_wave","name":"Heart Wave","motif":"circular heart pulse","cooldown":6,"cost":16,"scaling":"100% ATK radial knockback"},
+        {"id":"daydream_field","name":"Daydream Field","motif":"cloud hearts","cooldown":10,"cost":22,"scaling":"slow zone + 22 DPS"},
+        {"id":"empathy_link","name":"Empathy Link","motif":"ribbon lines","cooldown":11,"cost":24,"scaling":"linked targets share 35% damage"},
+        {"id":"rose_filter","name":"Rose Filter","motif":"soft lens frame","cooldown":9,"cost":18,"scaling":"enemy accuracy down 25%"}
+      ],
+      "utilitySkill": {"id":"float_step","name":"Float Step","cooldown":7,"effect":"short hover ignores floor hazards"},
+      "passives": [
+        {"id":"comfort_chorus","name":"Comfort Chorus","effect":"team regen +6% when stationary"},
+        {"id":"idol_aura","name":"Idol Aura","effect":"followers gained +20%"}
+      ],
+      "ultimate": {"id":"inner_world","name":"Inner World","motif":"blossom dome","cooldown":50,"cost":100,"scaling":"massive heal + enemy confusion"},
+      "synergy": ["Miho thrives in slowed packs.", "Sujin beam lines enemies inside Daydream zones."]
+    },
+    {
+      "id": "sujin",
+      "name": "Sujin",
+      "fantasy": "Precision techno-princess with laser choreography.",
+      "silhouette": "Sharp bob cut, angular sleeves, neon accessory cuts.",
+      "activeSkills": [
+        {"id":"star_beam","name":"Star Beam","motif":"laser lance","cooldown":4,"cost":10,"scaling":"140% piercing shot"},
+        {"id":"data_scan","name":"Data Scan","motif":"target frame","cooldown":8,"cost":14,"scaling":"marks target +25% damage taken"},
+        {"id":"algorithm_burst","name":"Algorithm Burst","motif":"binary petals","cooldown":10,"cost":18,"scaling":"3-hit combo 75% each"},
+        {"id":"overclock","name":"Overclock","motif":"glitch crown","cooldown":16,"cost":28,"scaling":"fire rate +100% for 4s"}
+      ],
+      "utilitySkill": {"id":"phase_slide","name":"Phase Slide","cooldown":6,"effect":"micro-teleport through threats"},
+      "passives": [
+        {"id":"combo_kernel","name":"Combo Kernel","effect":"each 10 combo grants +4% ATK speed"},
+        {"id":"cold_focus","name":"Cold Focus","effect":"first hit on full HP target crits"}
+      ],
+      "ultimate": {"id":"viral_code","name":"Viral Code","motif":"neon glyph bloom","cooldown":48,"cost":100,"scaling":"infects wave, chain detonations"},
+      "synergy": ["Sets up Sohee peel with pre-marked elites.", "Hyunju utility sustains overclock windows."]
+    },
+    {
+      "id": "sohee",
+      "name": "Sohee",
+      "fantasy": "Guardian ballerina with butterfly shields and clutch saves.",
+      "silhouette": "Long straight hair, layered skirt, butterfly/cape contour.",
+      "activeSkills": [
+        {"id":"aura_shield","name":"Aura Shield","motif":"heart wing barrier","cooldown":5,"cost":12,"scaling":"shield HP = 18% max HP"},
+        {"id":"breakthrough","name":"Breakthrough","motif":"crown charge line","cooldown":8,"cost":16,"scaling":"dash thrust 120%"},
+        {"id":"quiet_strength","name":"Quiet Strength","motif":"stacking sigils","cooldown":11,"cost":18,"scaling":"self buff ramps over time"},
+        {"id":"butterfly_effect","name":"Butterfly Effect","motif":"wing shatter","cooldown":13,"cost":24,"scaling":"shield pop AoE + slow"}
+      ],
+      "utilitySkill": {"id":"guard_step","name":"Guard Step","cooldown":4,"effect":"reposition + taunt pulse"},
+      "passives": [
+        {"id":"self_love","name":"Self-Love","effect":"periodic regen and cleanse"},
+        {"id":"steady_heart","name":"Steady Heart","effect":"reduced damage during revive windows"}
+      ],
+      "ultimate": {"id":"sanctuary_stage","name":"Sanctuary Stage","motif":"lace dome + crown beacon","cooldown":52,"cost":100,"scaling":"team barrier + reflect"},
+      "synergy": ["Frontline anchor for Miho dives.", "Enables Sujin turret-like ultimate channel."]
+    }
+  ],
+  "enemies": {
+    "mobs": [
+      {"id":"flash_stalker","name":"Flash Stalker","fantasy":"camera-obsessed lurker","silhouette":"hunched lens-head","palette":"slate + red LED","attacks":"quick dash flash","telegraph":"thin cone + blink","drops":"shutter shards","needs":"8x10 sprite, flash VFX"},
+      {"id":"tabloid_runner","name":"Tabloid Runner","fantasy":"headline chaser","silhouette":"paper stack cape","palette":"newsprint gray + magenta","attacks":"boomerang pages","telegraph":"arc paper trail","drops":"ink scraps","needs":"10x10 sprite, page projectile"},
+      {"id":"comment_wasp","name":"Comment Wasp","fantasy":"toxic buzz unit","silhouette":"winged chat bubble","palette":"violet + acid pink","attacks":"zigzag sting","telegraph":"V path","drops":"buzz cores","needs":"8x8 sprite, zigzag trail"},
+      {"id":"gatekeeper_knight","name":"Gatekeeper Knight","fantasy":"opinion wall","silhouette":"shield icon block","palette":"lilac armor + dark core","attacks":"front block shove","telegraph":"rect push lane","drops":"lock sigils","needs":"12x12 sprite, shield hit"},
+      {"id":"fancam_leech","name":"Fancam Leech","fantasy":"attention drain orb","silhouette":"floating lens orb","palette":"cyan rim + black center","attacks":"beam tether","telegraph":"line tether","drops":"view chips","needs":"9x9 sprite, tether line"},
+      {"id":"spoiler_imp","name":"Spoiler Imp","fantasy":"plot-ruin sprite","silhouette":"jagged paper imp","palette":"rose + ink black","attacks":"burst packets","telegraph":"cross burst","drops":"glitch petals","needs":"8x9 sprite, burst VFX"},
+      {"id":"doomscroll_slug","name":"Doomscroll Slug","fantasy":"slow debuff crawler","silhouette":"long blob with phone","palette":"desat purple + neon text","attacks":"trail slow goo","telegraph":"path stain","drops":"battery gel","needs":"12x8 sprite, trail tile"},
+      {"id":"leak_rat","name":"Leak Rat","fantasy":"file-snatching nuisance","silhouette":"small hooded rodent","palette":"gray + pink eyes","attacks":"steal XP nibble","telegraph":"tiny jump arc","drops":"cache crumbs","needs":"8x8 sprite, hop anim"},
+      {"id":"echo_fan","name":"Echo Fan","fantasy":"chant-loop drone","silhouette":"speaker backpack","palette":"teal + magenta","attacks":"shockwave clap","telegraph":"ring pulse","drops":"amp screws","needs":"10x11 sprite, wave ring"},
+      {"id":"receipt_hunter","name":"Receipt Hunter","fantasy":"expose-seeker","silhouette":"long coat + note spear","palette":"sepia + crimson","attacks":"thrust + pin","telegraph":"line jab","drops":"receipt strips","needs":"11x12 sprite, jab frame"}
+    ],
+    "elites": [
+      {"id":"paparazzi_rig","name":"Paparazzi Rig","fantasy":"camera mech elite","mechanic":"multi-flash barrage"},
+      {"id":"trending_executor","name":"Trending Executor","fantasy":"algorithm enforcer","mechanic":"marks hottest target"},
+      {"id":"archive_warden","name":"Archive Warden","fantasy":"deletes pickups","mechanic":"zone denial"},
+      {"id":"reply_hydra","name":"Reply Hydra","fantasy":"splitting comment swarm","mechanic":"duplicates on hit"},
+      {"id":"blacklist_duelist","name":"Blacklist Duelist","fantasy":"single-target hunter","mechanic":"telegraphed dash chains"}
+    ],
+    "bosses": [
+      {"id":"queen_of_clickbait","name":"Queen of Clickbait","arena":"neon newsroom","intro":"Every crown has a scandal.","telegraphs":"headline slashes, camera cones","drops":"crown core alpha"},
+      {"id":"mr_algorithm","name":"Mr. Algorithm","arena":"data cathedral","intro":"I decide what they see.","telegraphs":"grid locks, ranking beams","drops":"crown core beta"},
+      {"id":"director_cut","name":"Director Cut","arena":"broken stage set","intro":"Say it again, but louder.","telegraphs":"spotlight snipes, clap shockwaves","drops":"crown core gamma"},
+      {"id":"glass_prince","name":"Glass Prince","arena":"mirror hall","intro":"Reflection is a weapon.","telegraphs":"mirror clones, shard rain","drops":"crown core delta"},
+      {"id":"midnight_forum","name":"Midnight Forum","arena":"floating chat abyss","intro":"Consensus becomes cage.","telegraphs":"vote circles, thread chains","drops":"crown core epsilon"},
+      {"id":"the_disbander","name":"The Disbander","arena":"fractured throne stage","intro":"End of story.","telegraphs":"phase tears, void wedges","drops":"royal core omega"}
+    ]
+  },
+  "story": {
+    "opening": "On comeback night, the city’s attention economy mutates into a haunted stage-net. The idols must reclaim the spotlight shard by shard.",
+    "chapters": [
+      {"id":1,"name":"Neon Lobby","beat":"First crowd turns hostile; idols learn to weaponize choreography."},
+      {"id":2,"name":"Mall of Mirrors","beat":"False reflections spread rumors that become enemies."},
+      {"id":3,"name":"Broadcast Ruins","beat":"Signal towers scramble identity and split the team."},
+      {"id":4,"name":"Archive Understage","beat":"Deleted memories surface as elite hunters."},
+      {"id":5,"name":"Crownline Citadel","beat":"Final procession to the fracture throne."}
+    ],
+    "midBossBeats": [
+      "A hijacked fan-chant becomes an attack pattern.",
+      "A leaked rehearsal clip unlocks hidden route.",
+      "The group reclaims synchronized ultimate timing."
+    ],
+    "idolArcs": {
+      "miho": "Learns confidence without performance mask.",
+      "hyunju": "Turns empathy from burden into battlefield control.",
+      "sujin": "Lets precision coexist with trust in teammates.",
+      "sohee": "Steps from support shadow into chosen leader."
+    },
+    "loreCards": [
+      "The city trends in cycles; crowns are just cached attention.",
+      "A fan-light can guide or blind depending on who holds it.",
+      "Every rumor leaves a footprint in the signal fog.",
+      "Archived songs still hum under the stage floor.",
+      "They said princesses wait to be saved. They recompiled the script.",
+      "A perfect image cracks fastest under live lights.",
+      "The loudest boos become bass when synced.",
+      "Tiaras are antennas for courage, not approval.",
+      "In this city, silence is a stealth mechanic.",
+      "Final boss truth: disbandment is a narrative, not fate."
+    ]
+  },
+  "nextIterations": [
+    "Replace placeholder enemy sprites with full silhouette-tested sheets.",
+    "Add per-character UI skin accents while keeping core component geometry identical.",
+    "Implement icon atlas at 16x16 and remove emoji fallback from combat HUD.",
+    "Tune telegraph timings for all 6 bosses in playtests.",
+    "Add accessibility presets: high contrast and reduced FX motion."
+  ]
+}
