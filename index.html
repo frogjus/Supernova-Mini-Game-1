@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ SUPERNOVA: Stage Survivors ✨</title>
+    <title>SUPERNOVA: Stage Survivors</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&family=Outfit:wght@400;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700;800&family=Press+Start+2P&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0a0015;
+            background: linear-gradient(145deg, #1a0a1e 0%, #2d1028 25%, #1e0e2a 50%, #281530 75%, #1a0a1e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Press Start 2P', monospace;
+            font-family: 'Playfair Display', serif;
         }
         #wrap {
             position: relative;
@@ -26,17 +26,22 @@
             top: 0; left: 0;
             width: 960px;
             height: 720px;
-            border: 2px solid transparent;
-            border-image: linear-gradient(135deg, #ff2d78, #8b5cf6, #22d3ee, #ff2d78) 1;
-            box-shadow: 0 0 80px rgba(255,45,120,0.4), 0 0 160px rgba(139,92,246,0.25), inset 0 0 80px rgba(255,45,120,0.08);
-            border-radius: 0px;
+            border: 2px solid rgba(255, 200, 220, 0.35);
+            border-radius: 12px;
+            box-shadow:
+                0 0 40px rgba(255, 182, 203, 0.2),
+                0 0 80px rgba(200, 150, 200, 0.12),
+                0 0 120px rgba(255, 200, 220, 0.06),
+                inset 0 0 60px rgba(255, 182, 203, 0.04);
         }
         #gameCanvas {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
+            border-radius: 12px;
         }
         #uiCanvas {
             pointer-events: none;
+            border-radius: 12px;
         }
     </style>
 </head>
