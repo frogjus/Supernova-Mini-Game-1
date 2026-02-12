@@ -23,18 +23,42 @@ uiCanvas.height = UH;
 const CONTENT = window.SUPERNOVA_CONTENT || {};
 const UI = {
     bg: CONTENT.uiTokens?.bg || '#0A0A14',
+    bgStage: '#111126',
     panel: CONTENT.uiTokens?.panel || '#1A1630',
     panelAlt: CONTENT.uiTokens?.panelAlt || '#241B3F',
+    surfaceCard: '#2F2352',
+    surfaceCardSoft: '#3A2C62',
+    surfaceChip: '#4A3774',
+    surfaceChrome: '#C8D6FF',
     text: CONTENT.uiTokens?.text || '#FFF6FF',
-    textMuted: CONTENT.uiTokens?.textMuted || '#D6C5F3',
+    textSecondary: '#D6C5F3',
+    textMuted: CONTENT.uiTokens?.textMuted || '#A694C7',
+    textInverse: '#1A1230',
     pink: CONTENT.uiTokens?.brandPink || '#FF79C6',
     rose: CONTENT.uiTokens?.brandRose || '#FF4FA3',
     lilac: CONTENT.uiTokens?.brandLilac || '#B98CFF',
+    violet: '#8F66FF',
+    mint: '#89FFD1',
     cyan: CONTENT.uiTokens?.brandCyan || '#6DE6FF',
     success: CONTENT.uiTokens?.success || '#77F7BF',
     danger: CONTENT.uiTokens?.danger || '#FF4C7D',
     warning: CONTENT.uiTokens?.warning || '#FFB347',
+    heal: '#89FFD1',
+    info: '#78C7FF',
+    cooldown: '#7A6B99',
     quest: CONTENT.uiTokens?.quest || '#FFE38A',
+    motifHeart: '#FF93C8',
+    motifCrown: '#FFE38A',
+    motifRibbon: '#FF8FCF',
+    motifLace: '#E6D7FF',
+    motifSpike: '#A7A0C8',
+    motifGlitch: '#46D8FF',
+    scrim: 'rgba(8, 8, 16, 0.78)',
+    panelScrim: 'rgba(21, 15, 40, 0.84)',
+    overlayCooldown: 'rgba(16, 13, 28, 0.65)',
+    dangerGlow: 'rgba(255, 76, 125, 0.35)',
+    focusGlow: 'rgba(109, 230, 255, 0.3)',
+    borderUI: '#E8D8FF',
 };
 
 // === ZINE UI TOOLKIT — Social Magazine Mashup ===
@@ -78,7 +102,7 @@ function drawTape(ctx, x, y, w, h, color, angle) {
     ctx.save();
     ctx.translate(x + w/2, y + h/2);
     ctx.rotate((angle || 0) * Math.PI / 180);
-    ctx.fillStyle = color || 'rgba(255, 230, 100, 0.45)';
+    ctx.fillStyle = color || UI.motifCrown + '73';
     ctx.fillRect(-w/2, -h/2, w, h);
     // Tape shine stripe
     ctx.fillStyle = 'rgba(255,255,255,0.12)';
@@ -89,7 +113,7 @@ function drawTape(ctx, x, y, w, h, color, angle) {
 // Highlighter underline
 function drawHighlight(ctx, x, y, w, h, color) {
     ctx.save();
-    ctx.fillStyle = color || 'rgba(255, 200, 60, 0.35)';
+    ctx.fillStyle = color || UI.motifCrown + '59';
     ctx.fillRect(x - 2, y, w + 4, h);
     ctx.restore();
 }
@@ -149,10 +173,10 @@ function drawReactionBar(ctx, x, y, reactions) {
 function drawPullQuote(ctx, x, y, text, color, size) {
     ctx.save();
     // Decorative left bar
-    ctx.fillStyle = color || '#ff6b6b';
+    ctx.fillStyle = color || UI.danger;
     ctx.fillRect(x, y, 3, (size||28) + 6);
     // Quote text
-    serif(ctx, text, x + 14, y, color || '#ff6b6b', size || 28, 'left', true);
+    serif(ctx, text, x + 14, y, color || UI.danger, size || 28, 'left', true);
     ctx.restore();
 }
 
@@ -161,7 +185,7 @@ function drawCutout(ctx, x, y, w, h, fill, rotation) {
     ctx.save();
     ctx.translate(x + w/2, y + h/2);
     ctx.rotate((rotation || 0) * Math.PI / 180);
-    ctx.fillStyle = fill || '#1a1a2e';
+    ctx.fillStyle = fill || UI.panel;
     ctx.beginPath();
     ctx.moveTo(-w/2+2, -h/2);
     ctx.lineTo(w/2, -h/2+1);
@@ -185,14 +209,149 @@ function drawShareRow(ctx, x, y) {
 
 // Tokenized palette bridge
 const Z = {
-    hot: UI.danger, coral: UI.rose, peach: '#ffab91',
-    yellow: UI.warning, lime: '#c6ff00', mint: UI.success,
-    sky: UI.cyan, blue: '#448aff', indigo: '#7c4dff',
+    hot: UI.danger, coral: UI.rose, peach: UI.motifRibbon,
+    yellow: UI.warning, lime: UI.mint, mint: UI.success,
+    sky: UI.cyan, blue: UI.info, indigo: UI.violet,
     purple: UI.lilac, pink: UI.pink, magenta: UI.rose,
-    white: UI.text, cream: '#faf3e0', offwhite: '#e8e0d0',
+    white: UI.text, cream: UI.motifLace, offwhite: UI.textSecondary,
     dark: UI.bg, darkCard: UI.panel, darkGray: UI.panelAlt,
-    gray: '#A694C7', lightGray: UI.textMuted, faint: 'rgba(255,255,255,0.06)',
+    gray: UI.textMuted, lightGray: UI.textSecondary, faint: 'rgba(255,255,255,0.06)',
 };
+
+// === PIXEL ICON ATLAS — 16x16 pixel art for skill HUD ===
+// Each icon is a 16x16 grid encoded as hex strings (0=transparent, 1=outline, 2=fill, 3=highlight)
+const PIXEL_ICONS = {
+    heart: [
+        '0000000000000000','0001100000110000','0012320001232000','0123332012333200',
+        '0123333323333200','0123333333333200','0012333333332000','0001233333320000',
+        '0000123333200000','0000012332000000','0000001320000000','0000000100000000',
+        '0000000000000000','0000000000000000','0000000000000000','0000000000000000',
+    ],
+    crown: [
+        '0000000000000000','0010000100001000','0010000100001000','0012000120001200',
+        '0012000120001200','0012200122012200','0012320123212200','0012333233312200',
+        '0012333333312200','0011222222211000','0001233333210000','0001222222210000',
+        '0000111111100000','0000000000000000','0000000000000000','0000000000000000',
+    ],
+    flame: [
+        '0000000300000000','0000003300000000','0000013310000000','0000123321000000',
+        '0001233332100000','0012333233210000','0123332233321000','0123320123321000',
+        '0123320012332000','0123330012332000','0012333323320000','0001233333200000',
+        '0000123332000000','0000012320000000','0000001100000000','0000000000000000',
+    ],
+    star: [
+        '0000000300000000','0000000300000000','0000001310000000','0000001310000000',
+        '0000012321000000','0111123332111000','0012333333321000','0001233333210000',
+        '0000123332000000','0001233233100000','0001232012310000','0012310001321000',
+        '0012100000121000','0011000000011000','0000000000000000','0000000000000000',
+    ],
+    shield: [
+        '0000000000000000','0001111111100000','0012333333210000','0123333333321000',
+        '0123333333321000','0123333333321000','0123333333321000','0012333333210000',
+        '0012333333210000','0001233332100000','0001233332100000','0000123321000000',
+        '0000012310000000','0000001100000000','0000000000000000','0000000000000000',
+    ],
+    beam: [
+        '0000000000000000','0000000000000000','0000000000001000','0000000000013100',
+        '0000000001232100','0000000123332100','0001123333332100','0123333333332100',
+        '0123333333332100','0001123333332100','0000000123332100','0000000001232100',
+        '0000000000013100','0000000000001000','0000000000000000','0000000000000000',
+    ],
+    fox: [
+        '0010000000001000','0012100000012100','0012310000123100','0012332001233100',
+        '0012333213333100','0012333333333100','0012333333333100','0001233333332000',
+        '0001233133332000','0000123113321000','0000012332100000','0000001221000000',
+        '0000001221000000','0000000110000000','0000000000000000','0000000000000000',
+    ],
+    music: [
+        '0000000000000000','0000001111100000','0000001233200000','0000001200000000',
+        '0000001200000000','0000001200000000','0000001200000000','0000001200000000',
+        '0000001200000000','0000001200000000','0001231200000000','0012332200000000',
+        '0012332000000000','0001210000000000','0000100000000000','0000000000000000',
+    ],
+    sparkle: [
+        '0000000100000000','0000000300000000','0000000100000000','0000001310000000',
+        '0000000100000000','0100001310000100','0031013331013000','0001333333310000',
+        '0031013331013000','0100001310000100','0000000100000000','0000001310000000',
+        '0000000100000000','0000000300000000','0000000100000000','0000000000000000',
+    ],
+    bolt: [
+        '0000000000000000','0000001111000000','0000012321000000','0000123210000000',
+        '0001232100000000','0012321000000000','0123333331000000','0012333321000000',
+        '0000012321000000','0000012321000000','0000123210000000','0001232100000000',
+        '0012321000000000','0012310000000000','0001100000000000','0000000000000000',
+    ],
+};
+
+// Map skill IDs to pixel icon names + colors
+const SKILL_ICON_MAP = {
+    foxFire: { icon: 'flame', c1: '#ff8844', c2: '#ffcc66' },
+    nineTails: { icon: 'fox', c1: '#f7e065', c2: '#fff0a0' },
+    charm: { icon: 'sparkle', c1: '#ff66aa', c2: '#ffaadd' },
+    spiritForm: { icon: 'fox', c1: '#ddaaff', c2: '#eeddff' },
+    feast: { icon: 'heart', c1: '#ff4466', c2: '#ff8899' },
+    heartWave: { icon: 'heart', c1: '#ff6688', c2: '#ffaacc' },
+    daydream: { icon: 'sparkle', c1: '#aaccff', c2: '#ddeeff' },
+    empathy: { icon: 'bolt', c1: '#ff88cc', c2: '#ffbbee' },
+    moodRing: { icon: 'star', c1: '#ffaa44', c2: '#ffdd88' },
+    innerWorld: { icon: 'heart', c1: '#ffbbdd', c2: '#ffddef' },
+    starBeam: { icon: 'beam', c1: '#ffdd44', c2: '#ffee88' },
+    dataScan: { icon: 'beam', c1: '#44aaff', c2: '#88ccff' },
+    algorithm: { icon: 'bolt', c1: '#88ff88', c2: '#bbffbb' },
+    overclock: { icon: 'bolt', c1: '#ff8844', c2: '#ffbb88' },
+    viralCode: { icon: 'sparkle', c1: '#ff44aa', c2: '#ff88cc' },
+    auraShield: { icon: 'shield', c1: '#88ccff', c2: '#bbddff' },
+    quietStr: { icon: 'star', c1: '#aaddff', c2: '#ddeeff' },
+    breakthrough: { icon: 'star', c1: '#ffdd44', c2: '#ffee88' },
+    selfLove: { icon: 'heart', c1: '#44aaff', c2: '#88ccff' },
+    butterfly: { icon: 'sparkle', c1: '#bb88ff', c2: '#ddbbff' },
+    speedBoost: { icon: 'bolt', c1: '#44ff88', c2: '#88ffbb' },
+    hpBoost: { icon: 'heart', c1: '#ff4466', c2: '#ff8899' },
+    magnetRange: { icon: 'sparkle', c1: '#dd88ff', c2: '#eebbff' },
+    critChance: { icon: 'music', c1: '#ffaa44', c2: '#ffdd88' },
+    multiShot: { icon: 'star', c1: '#44ddff', c2: '#88eeff' },
+    dmgAura: { icon: 'sparkle', c1: '#ffdd88', c2: '#ffeeaa' },
+    lightstick: { icon: 'flame', c1: '#ffffaa', c2: '#ffffdd' },
+    fancam: { icon: 'heart', c1: '#ff88cc', c2: '#ffbbee' },
+};
+
+// Render a pixel icon to a cached canvas
+const iconCache = {};
+function getPixelIcon(iconName, c1, c2) {
+    const key = iconName + c1 + c2;
+    if (iconCache[key]) return iconCache[key];
+    const data = PIXEL_ICONS[iconName];
+    if (!data) return null;
+    const c = document.createElement('canvas');
+    c.width = 16; c.height = 16;
+    const cx = c.getContext('2d');
+    const colors = { '0': null, '1': '#000000', '2': c1, '3': c2 };
+    for (let y = 0; y < data.length; y++) {
+        for (let x = 0; x < data[y].length; x++) {
+            const col = colors[data[y][x]];
+            if (col) { cx.fillStyle = col; cx.fillRect(x, y, 1, 1); }
+        }
+    }
+    iconCache[key] = c;
+    return c;
+}
+
+// Draw a diamond/gem shape for level indicators
+function drawGemChip(ctx, cx, cy, filled, color) {
+    ctx.fillStyle = filled ? color : 'rgba(255,255,255,0.08)';
+    // Diamond shape: 5px wide, 7px tall
+    ctx.fillRect(cx, cy - 3, 1, 1);
+    ctx.fillRect(cx - 1, cy - 2, 3, 1);
+    ctx.fillRect(cx - 2, cy - 1, 5, 1);
+    ctx.fillRect(cx - 2, cy, 5, 1);
+    ctx.fillRect(cx - 1, cy + 1, 3, 1);
+    ctx.fillRect(cx, cy + 2, 1, 1);
+    if (filled) {
+        // Highlight pixel
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillRect(cx - 1, cy - 2, 1, 1);
+    }
+}
 
 // === PALETTES (unified idol style — same face/body, unique colors) ===
 const PALETTES = {
@@ -219,6 +378,18 @@ function drawPixelPanel(ctx, x, y, w, h, opts = {}) {
     ctx.strokeStyle = border;
     ctx.lineWidth = 1;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    // Lace corner decorations — princessy pixel notches
+    if (!opts.noLace && w > 16 && h > 16) {
+        ctx.fillStyle = border;
+        // Top-left lace
+        ctx.fillRect(x+1, y+1, 3, 1); ctx.fillRect(x+1, y+2, 1, 2);
+        // Top-right lace
+        ctx.fillRect(x+w-4, y+1, 3, 1); ctx.fillRect(x+w-2, y+2, 1, 2);
+        // Bottom-left lace
+        ctx.fillRect(x+1, y+h-2, 3, 1); ctx.fillRect(x+1, y+h-4, 1, 2);
+        // Bottom-right lace
+        ctx.fillRect(x+w-4, y+h-2, 3, 1); ctx.fillRect(x+w-2, y+h-4, 1, 2);
+    }
     if (opts.ribbon) {
         ctx.fillStyle = opts.ribbon;
         ctx.fillRect(x + 6, y - 4, Math.min(120, w - 12), 6);
@@ -670,7 +841,7 @@ function addFanChant(x, y) {
 function triggerLevelUp() {
     SFX.levelUp();
     state = State.LEVELUP;
-    screenFlash = 15; screenFlashColor = '#ffdd44';
+    screenFlash = 15; screenFlashColor = UI.motifCrown;
 
     const cd = CHARACTERS[player.charIdx];
 
@@ -734,12 +905,12 @@ function choosePowerUp(index) {
 // ================================================================
 
 const ENEMY_TYPES = [
-    { id:'antifan', name:'Anti 🚫', w:8, h:8, hp:2, speed:0.8, damage:1, xp:1, color1:'#666688', color2:'#444466', emoji:'🚫' },
-    { id:'hater', name:'Hater 💢', w:10, h:10, hp:4, speed:0.6, damage:1, xp:2, color1:'#884444', color2:'#662222', emoji:'💢' },
-    { id:'sasaeng', name:'Sasaeng 📸', w:8, h:8, hp:3, speed:1.4, damage:1, xp:2, color1:'#886644', color2:'#664422', emoji:'📸' },
-    { id:'critic', name:'Critic 📝', w:12, h:12, hp:8, speed:0.4, damage:2, xp:4, color1:'#445566', color2:'#223344', emoji:'📝' },
-    { id:'troll', name:'Troll 👺', w:9, h:9, hp:5, speed:1.0, damage:1, xp:3, color1:'#558844', color2:'#336622', emoji:'👺' },
-    { id:'dispatch', name:'Dispatch 📰', w:11, h:11, hp:6, speed:0.9, damage:2, xp:4, color1:'#666666', color2:'#444444', emoji:'📰' },
+    { id:'antifan', name:'Anti', w:7, h:9, hp:2, speed:0.8, damage:1, xp:1, color1:'#5A5478', color2:'#3A2C62', emoji:'🚫', shape:'tall' },
+    { id:'hater', name:'Hater', w:11, h:8, hp:4, speed:0.6, damage:1, xp:2, color1:'#994455', color2:'#6E2233', emoji:'💢', shape:'wide' },
+    { id:'sasaeng', name:'Sasaeng', w:7, h:7, hp:3, speed:1.4, damage:1, xp:2, color1:'#8A6B4A', color2:'#5E4530', emoji:'📸', shape:'diamond' },
+    { id:'critic', name:'Critic', w:13, h:11, hp:8, speed:0.4, damage:2, xp:4, color1:'#4A5D6E', color2:'#2C3A48', emoji:'📝', shape:'wide' },
+    { id:'troll', name:'Troll', w:9, h:10, hp:5, speed:1.0, damage:1, xp:3, color1:'#4A7744', color2:'#2E5528', emoji:'👺', shape:'tall' },
+    { id:'dispatch', name:'Dispatch', w:10, h:10, hp:6, speed:0.9, damage:2, xp:4, color1:'#6B6B78', color2:'#464654', emoji:'📰', shape:'square' },
 ];
 
 // === BOSS TYPES ===
@@ -777,6 +948,7 @@ function spawnBoss() {
         speed: type.speed, damage: type.damage, xp: type.xp, w: type.w, h: type.h,
         flashTimer: 0, phase: 0, frozen: 0, scanned: false,
         boss: true, bossType: type,
+        telegraphTimer: 0, telegraphX: 0, telegraphY: 0,
     };
     enemies.push(bossEnemy);
     enemySet.add(bossEnemy);
@@ -827,7 +999,7 @@ function fireProjectiles() {
 
     const crit = Math.random() < (player.powers.critChance * 0.12);
     const dm = (crit ? 2.5 : 1) * player.dmgMult;
-    if (crit) spawnFloatingText(player.x, player.y - 14, '⚡ CRIT!', '#ffdd44');
+    if (crit) spawnFloatingText(player.x, player.y - 14, 'CRIT!', UI.motifCrown);
 
     const id = player.charId;
     if (id === 'miho' || player.powers.foxFire > 0) fireFoxFire(dm);
@@ -1160,7 +1332,10 @@ function killEnemy(e) {
     if (comboCount === 50) addNotification('50x combo 👑 LEGENDARY RUN', Z.yellow);
 
     // Gumiho's Feast heal
-    if (player.healPerKill > 0) {
+    if (player.healPerKill > 0 && player.hp < player.maxHp) {
+        player.hp = Math.min(player.maxHp, player.hp + player.healPerKill);
+        if (Math.random() < 0.3) spawnFloatingText(player.x, player.y - 14, '+' + player.healPerKill.toFixed(1), UI.mint, 'heal');
+    } else if (player.healPerKill > 0) {
         player.hp = Math.min(player.maxHp, player.hp + player.healPerKill);
     }
 
@@ -1223,7 +1398,7 @@ function killEnemy(e) {
     if (e.boss) {
         bossesKilled++;
         addNotification(e.bossType.name + ' DOWN 👑 absolutely bodied', Z.yellow);
-        screenFlash = 15; screenFlashColor = '#ffdd44';
+        screenFlash = 15; screenFlashColor = UI.motifCrown;
         SFX.bossKill();
         followers += e.xp * 50;
         score += e.xp * 50;
@@ -1278,6 +1453,18 @@ function updateEnemies() {
         if (d2>0) { const dist=Math.sqrt(d2); e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
         if (e.flashTimer>0) e.flashTimer--;
 
+        // Boss telegraph — pulsing AoE warning before attack
+        if (e.boss) {
+            if (e.telegraphTimer > 0) {
+                e.telegraphTimer--;
+            } else if (d2 < 3600 && Math.random() < 0.005) {
+                // Start telegraph: 45 frames warning at player's current position
+                e.telegraphTimer = 45;
+                e.telegraphX = player.x;
+                e.telegraphY = player.y;
+            }
+        }
+
         // Hit player
         if (player.invTimer<=0 && player.spiritTimer<=0 && d2<100) playerTakeDamage(e.damage);
 
@@ -1307,9 +1494,9 @@ function playerTakeDamage(dmg) {
     player.hp -= dmg;
     player.invTimer = 60;
     SFX.playerHit();
-    screenFlash = 6; screenFlashColor = '#ff2244';
-    spawnHitParticles(player.x,player.y,'#ff4466');
-    spawnFloatingText(player.x,player.y-12, '💔 -'+dmg, '#ff4466');
+    screenFlash = 6; screenFlashColor = UI.danger;
+    spawnHitParticles(player.x,player.y,UI.danger);
+    spawnFloatingText(player.x,player.y-12, '-'+dmg, UI.danger, 'damage');
 
     // Spirit Form (Miho)
     if (player.powers.spiritForm > 0) {
@@ -1323,7 +1510,7 @@ function playerTakeDamage(dmg) {
 function gameOver() {
     state = State.GAMEOVER;
     SFX.gameOver();
-    screenFlash = 20; screenFlashColor = '#ff0044';
+    screenFlash = 20; screenFlashColor = UI.danger;
     const count = Math.min(20, MAX_PARTICLES - particles.length);
     for (let i=0;i<count;i++) {
         const a=Math.random()*Math.PI*2;
@@ -1389,7 +1576,7 @@ function spawnHitParticles(x,y,color) {
     }
 }
 
-function spawnFloatingText(x,y,text,color) { floatingTexts.push({x,y,text,color,life:45}); }
+function spawnFloatingText(x,y,text,color,type) { floatingTexts.push({x,y,text,color,life:45,type:type||'normal'}); }
 
 function updateSpawning() {
     survivalTime++;
@@ -1433,7 +1620,7 @@ function updateCamera() {
 // ================================================================
 
 function drawPixelWorld() {
-    gctx.fillStyle = '#0e0e12';
+    gctx.fillStyle = UI.bg;
     gctx.fillRect(0, 0, PW, PH);
 
     // Zine-textured floor — subtle dot grid like graph paper
@@ -1441,7 +1628,7 @@ function drawPixelWorld() {
     const sx = -(camX%ts), sy = -(camY%ts);
     for (let gx=sx;gx<PW+ts;gx+=ts) for (let gy=sy;gy<PH+ts;gy+=ts) {
         const wx=Math.floor((gx+camX)/ts), wy=Math.floor((gy+camY)/ts);
-        gctx.fillStyle = (wx+wy)%2===0 ? '#111118' : '#0e0e14';
+        gctx.fillStyle = (wx+wy)%2===0 ? UI.bgStage : UI.bg;
         gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
         // Dot grid intersection
         gctx.fillStyle='rgba(255,255,255,0.04)';
@@ -1449,7 +1636,7 @@ function drawPixelWorld() {
         // Occasional color splash
         if ((wx*7+wy*13)%19===0) {
             const pulse=Math.sin(gameTime*0.02+wx+wy)*0.2+0.2;
-            const colors=['#ff6b6b','#ffd54f','#40c4ff','#ff80ab'];
+            const colors=[UI.danger, UI.motifCrown, UI.cyan, UI.motifHeart];
             gctx.globalAlpha=pulse*0.04;
             gctx.fillStyle=colors[(wx+wy)%colors.length];
             gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
@@ -1461,7 +1648,7 @@ function drawPixelWorld() {
     for (let i = 0; i < 2; i++) {
         const beamX = ((gameTime * 0.5 + i * 180) % (PW + 100)) - 50;
         gctx.globalAlpha = 0.02;
-        gctx.fillStyle = ['#ff6b6b','#40c4ff'][i];
+        gctx.fillStyle = [UI.danger, UI.cyan][i];
         gctx.fillRect(Math.floor(beamX) - 10, 0, 20, PH);
         gctx.globalAlpha = 1;
     }
@@ -1472,10 +1659,10 @@ function drawPixelWorld() {
         if(gx<-5||gx>PW+5||gy<-5||gy>PH+5) return;
         const pulse=Math.sin(gameTime*0.1+g.x)*0.3+0.7;
         gctx.globalAlpha=pulse*(g.life<60?g.life/60:1);
-        gctx.fillStyle='#dd88ff';
+        gctx.fillStyle=UI.lilac;
         gctx.fillRect(gx-1,gy-2,3,1); gctx.fillRect(gx-2,gy-1,5,1);
         gctx.fillRect(gx-1,gy,3,1); gctx.fillRect(gx,gy+1,1,1); gctx.fillRect(gx,gy-3,1,1);
-        gctx.fillStyle='#ffddff'; gctx.fillRect(gx,gy-1,1,1);
+        gctx.fillStyle=UI.motifLace; gctx.fillRect(gx,gy-1,1,1);
         gctx.globalAlpha=1;
     });
 
@@ -1498,9 +1685,9 @@ function drawPixelWorld() {
             gctx.fillStyle='rgba(0,0,0,0.35)';
             gctx.fillRect(ex-e.w/2+2,ey+e.h/2+1,e.w-4,3);
             // Body
-            gctx.fillStyle = frozen ? '#88ccff' : (flash ? '#ffffff' : e.type.color1);
+            gctx.fillStyle = frozen ? UI.info : (flash ? '#ffffff' : e.type.color1);
             gctx.fillRect(ex-e.w/2,ey-e.h/2,e.w,e.h);
-            gctx.fillStyle = frozen ? '#aaddff' : (flash ? '#ffdddd' : e.type.color2);
+            gctx.fillStyle = frozen ? UI.cyan : (flash ? UI.motifHeart : e.type.color2);
             gctx.fillRect(ex-e.w/2+2,ey-e.h/2+2,e.w-4,e.h-4);
             // Inner pattern
             gctx.fillStyle = e.type.color1;
@@ -1510,9 +1697,9 @@ function drawPixelWorld() {
             }
             gctx.globalAlpha = 1;
             // Boss face (larger, angrier)
-            gctx.fillStyle = flash?'#ff0000':'#ff2244';
+            gctx.fillStyle = flash ? UI.danger : UI.danger;
             gctx.fillRect(ex-5,ey-4,3,3); gctx.fillRect(ex+3,ey-4,3,3);
-            gctx.fillStyle='#ff0000';
+            gctx.fillStyle=UI.danger;
             gctx.fillRect(ex-4,ey-5,2,1); gctx.fillRect(ex+3,ey-5,2,1);
             gctx.fillStyle='#000';
             gctx.fillRect(ex-3,ey+2,7,2);
@@ -1523,39 +1710,85 @@ function drawPixelWorld() {
             gctx.globalAlpha = 0.5 + Math.sin(gameTime*0.1)*0.3;
             gctx.strokeRect(ex-e.w/2-1,ey-e.h/2-1,e.w+2,e.h+2);
             gctx.globalAlpha = 1;
+
+            // Boss telegraph — pulsing AoE danger circle
+            if (e.telegraphTimer > 0) {
+                const tx = Math.floor(e.telegraphX - camX), ty = Math.floor(e.telegraphY - camY);
+                const progress = 1 - (e.telegraphTimer / 45);
+                const radius = 16 + progress * 8;
+                const pulse = Math.sin(gameTime * 0.3) * 0.15 + 0.35;
+                // Outer danger glow
+                gctx.globalAlpha = pulse * progress;
+                gctx.fillStyle = UI.motifSpike;
+                gctx.beginPath(); gctx.arc(tx, ty, radius + 3, 0, Math.PI * 2); gctx.fill();
+                // Inner danger circle
+                gctx.globalAlpha = (0.2 + progress * 0.3);
+                gctx.fillStyle = UI.danger;
+                gctx.beginPath(); gctx.arc(tx, ty, radius, 0, Math.PI * 2); gctx.fill();
+                // Spike accents around edge (4 small squares)
+                gctx.fillStyle = UI.motifSpike;
+                for (let si = 0; si < 4; si++) {
+                    const sa = (si / 4) * Math.PI * 2 + gameTime * 0.1;
+                    gctx.fillRect(tx + Math.cos(sa) * radius - 1, ty + Math.sin(sa) * radius - 1, 2, 2);
+                }
+                gctx.globalAlpha = 1;
+            }
         } else {
             // === REGULAR ENEMY RENDERING ===
             // Shadow
             gctx.fillStyle='rgba(0,0,0,0.25)';
             gctx.fillRect(ex-e.w/2+1,ey+e.h/2,e.w-2,2);
-            // Body with rounded look (outer then inner)
-            gctx.fillStyle = frozen ? '#88ccff' : (flash ? '#ffffff' : e.type.color1);
-            gctx.fillRect(ex-e.w/2,ey-e.h/2+1,e.w,e.h-2);
-            gctx.fillRect(ex-e.w/2+1,ey-e.h/2,e.w-2,e.h);
-            gctx.fillStyle = frozen ? '#aaddff' : (flash ? '#ffdddd' : e.type.color2);
-            gctx.fillRect(ex-e.w/2+1,ey-e.h/2+1,e.w-2,e.h-2);
+            // Body — shape varies by enemy type
+            const outerCol = frozen ? UI.info : (flash ? '#ffffff' : e.type.color1);
+            const innerCol = frozen ? UI.cyan : (flash ? UI.motifHeart : e.type.color2);
+            const sh = e.type.shape || 'square';
+            if (sh === 'diamond') {
+                // Diamond shape
+                gctx.fillStyle = outerCol;
+                gctx.fillRect(ex-1, ey-e.h/2, 3, 1);
+                gctx.fillRect(ex-e.w/2+1, ey-1, e.w-2, 3);
+                gctx.fillRect(ex-1, ey+e.h/2-1, 3, 1);
+                for (let dy = -e.h/2+1; dy < e.h/2; dy++) {
+                    const ratio = 1 - Math.abs(dy) / (e.h/2);
+                    const hw = Math.floor(e.w/2 * ratio);
+                    gctx.fillRect(ex-hw, ey+dy, hw*2+1, 1);
+                }
+                gctx.fillStyle = innerCol;
+                for (let dy = -e.h/2+2; dy < e.h/2-1; dy++) {
+                    const ratio = 1 - Math.abs(dy) / (e.h/2);
+                    const hw = Math.max(0, Math.floor(e.w/2 * ratio) - 1);
+                    if (hw > 0) gctx.fillRect(ex-hw, ey+dy, hw*2+1, 1);
+                }
+            } else {
+                // Standard rect (tall, wide, square — just different w/h proportions)
+                gctx.fillStyle = outerCol;
+                gctx.fillRect(ex-e.w/2,ey-e.h/2+1,e.w,e.h-2);
+                gctx.fillRect(ex-e.w/2+1,ey-e.h/2,e.w-2,e.h);
+                gctx.fillStyle = innerCol;
+                gctx.fillRect(ex-e.w/2+1,ey-e.h/2+1,e.w-2,e.h-2);
+            }
             // Highlight
             gctx.fillStyle = 'rgba(255,255,255,0.12)';
             gctx.fillRect(ex-e.w/2+1,ey-e.h/2+1,e.w-2,Math.floor(e.h/3));
             // Eyes (pixel art style)
-            gctx.fillStyle = flash?'#ff0000':'#ff3344';
+            gctx.fillStyle = flash ? UI.danger : UI.danger;
             gctx.fillRect(ex-2,ey-2,2,2); gctx.fillRect(ex+1,ey-2,2,2);
             // Eye glint
-            gctx.fillStyle = '#ffffff';
+            gctx.fillStyle = UI.text;
             gctx.fillRect(ex-2,ey-2,1,1); gctx.fillRect(ex+1,ey-2,1,1);
             // Mouth
             gctx.fillStyle='#000'; gctx.fillRect(ex-1,ey+1,3,1);
 
             // Scanned indicator
             if (e.scanned) {
-                gctx.strokeStyle='#44aaff'; gctx.lineWidth=0.5;
+                gctx.strokeStyle=UI.info; gctx.lineWidth=0.5;
                 gctx.strokeRect(ex-e.w/2-1,ey-e.h/2-1,e.w+2,e.h+2);
             }
 
             if (e.maxHp>3) {
                 const bw=e.w, hr=e.hp/e.maxHp;
-                gctx.fillStyle='#111'; gctx.fillRect(ex-bw/2,ey-e.h/2-4,bw,2);
-                gctx.fillStyle=hr>0.5?'#44ff44':(hr>0.25?'#ffaa00':'#ff3344');
+                gctx.fillStyle=UI.bg; gctx.fillRect(ex-bw/2,ey-e.h/2-4,bw,2);
+                gctx.fillStyle=hr>0.5?UI.success:(hr>0.25?UI.warning:UI.danger);
                 gctx.fillRect(ex-bw/2,ey-e.h/2-4,Math.ceil(bw*hr),2);
             }
         }
@@ -1597,7 +1830,7 @@ function drawPixelWorld() {
         if (player.powers.dmgAura>0) {
             const r=25+player.powers.dmgAura*5;
             gctx.globalAlpha=Math.sin(gameTime*0.08)*0.1+0.15;
-            gctx.fillStyle='#ffdd44';
+            gctx.fillStyle=UI.motifCrown;
             gctx.beginPath(); gctx.arc(px,py,r,0,Math.PI*2); gctx.fill();
             gctx.globalAlpha=1;
         }
@@ -1606,7 +1839,7 @@ function drawPixelWorld() {
         if (player.powers.daydream>0) {
             const r=30+player.powers.daydream*10;
             gctx.globalAlpha=0.08;
-            gctx.fillStyle='#aaccff';
+            gctx.fillStyle=UI.info;
             gctx.beginPath(); gctx.arc(px,py,r,0,Math.PI*2); gctx.fill();
             gctx.globalAlpha=1;
         }
@@ -1614,10 +1847,10 @@ function drawPixelWorld() {
         // Shields
         player.shields.forEach(s => {
             const sx=px+Math.cos(s.angle)*s.dist, sy=py+Math.sin(s.angle)*s.dist;
-            gctx.fillStyle='#88ccff';
+            gctx.fillStyle=UI.info;
             gctx.globalAlpha=0.7+Math.sin(gameTime*0.1)*0.3;
             gctx.fillRect(Math.floor(sx)-3,Math.floor(sy)-3,6,6);
-            gctx.fillStyle='#bbddff';
+            gctx.fillStyle=UI.cyan;
             gctx.fillRect(Math.floor(sx)-1,Math.floor(sy)-1,2,2);
             gctx.globalAlpha=1;
         });
@@ -1625,7 +1858,7 @@ function drawPixelWorld() {
         // Spirit form glow
         if (player.spiritTimer > 0) {
             gctx.globalAlpha = 0.3 + Math.sin(gameTime*0.2)*0.1;
-            gctx.fillStyle = '#ddaaff';
+            gctx.fillStyle = UI.lilac;
             gctx.beginPath(); gctx.arc(px,py,12,0,Math.PI*2); gctx.fill();
             gctx.globalAlpha = 0.5;
         }
@@ -1668,8 +1901,8 @@ function drawUI_HUD() {
 
     // HP — raw text, no bar frame, just highlighter
     const hpR = player.hp/player.maxHp;
-    const hpCol = hpR>0.5 ? Z.hot : (hpR>0.25 ? Z.yellow : '#ff2244');
-    drawHighlight(uctx, 158, 10, 110 * hpR, 14, hpR>0.5 ? 'rgba(255,107,107,0.25)' : 'rgba(255,34,68,0.3)');
+    const hpCol = hpR>0.5 ? UI.danger : (hpR>0.25 ? UI.warning : UI.danger);
+    drawHighlight(uctx, 158, 10, 110 * hpR, 14, hpR>0.5 ? UI.danger + '40' : UI.danger + '4D');
     sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp + ' HP', 162, 10, hpCol, 11);
 
     // XP — minimal line
@@ -1717,37 +1950,71 @@ function drawUI_HUD() {
     if (bossIntroTimer > 0) {
         const pulse = 0.8 + Math.sin(gameTime * 0.08) * 0.2;
         uctx.globalAlpha = pulse;
-        drawPixelPanel(uctx, UW/2 - 200, 134, 400, 34, { fill: UI.panel, border: UI.warning, ribbon: UI.warning, spikes: UI.danger });
-        sansBold(uctx, 'BOSS INTRO', UW/2 - 178, 139, UI.bg, 8);
-        serif(uctx, bossIntroText, UW/2, 144, UI.text, 14, 'center');
+        drawPixelPanel(uctx, UW/2 - 200, 134, 400, 40, { fill: UI.panel, border: UI.warning, ribbon: UI.warning, spikes: UI.danger });
+        // Chrome frame + warning stripe per telegraph_patterns.boss_intro
+        uctx.fillStyle = UI.surfaceChrome;
+        uctx.fillRect(UW/2 - 199, 135, 398, 2);
+        uctx.fillRect(UW/2 - 199, 172, 398, 2);
+        // Warning stripe accents (alternating spike pattern)
+        uctx.fillStyle = UI.motifSpike;
+        for (let si = 0; si < 20; si++) {
+            uctx.fillRect(UW/2 - 198 + si * 20, 135, 10, 2);
+            uctx.fillRect(UW/2 - 188 + si * 20, 172, 10, 2);
+        }
+        sansBold(uctx, 'BOSS INCOMING', UW/2 - 178, 141, UI.surfaceChrome, 8);
+        serif(uctx, bossIntroText, UW/2, 150, UI.text, 14, 'center');
         uctx.globalAlpha = 1;
         bossIntroTimer--;
     }
 
-    // === BOTTOM: Skill icons — raw emoji row, no frame ===
+    // === BOTTOM: Skill icons — pixel icon rail ===
     const cd2 = CHARACTERS[player.charIdx];
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
     if (activeSkills.length > 0) {
-        const iconY = UH - 52;
+        const iconY = UH - 56;
         const totalW = activeSkills.length * 40;
         const startX = (UW - totalW) / 2;
 
         activeSkills.forEach((sk, idx) => {
             const ix = startX + idx * 40;
             const lv = player.powers[sk.id];
-            drawPixelPanel(uctx, ix, iconY, 34, 34, { fill: UI.panelAlt, border: UI.lilac });
-            uctx.font = '16px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-            uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + 17, iconY + 6);
-            for (let d = 0; d < Math.min(lv, 4); d++) {
-                uctx.fillStyle = UI.warning;
-                uctx.fillRect(ix + 5 + d * 7, iconY + 28, 5, 2);
+            drawPixelPanel(uctx, ix, iconY, 34, 38, { fill: UI.panelAlt, border: UI.lilac });
+
+            // Pixel icon instead of emoji
+            const iconInfo = SKILL_ICON_MAP[sk.id];
+            if (iconInfo) {
+                const iconCanvas = getPixelIcon(iconInfo.icon, iconInfo.c1, iconInfo.c2);
+                if (iconCanvas) {
+                    uctx.imageSmoothingEnabled = false;
+                    uctx.drawImage(iconCanvas, ix + 9, iconY + 3, 16, 16);
+                    uctx.imageSmoothingEnabled = true;
+                }
+            } else {
+                // Fallback to emoji for unmapped skills
+                uctx.font = '14px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+                uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + 17, iconY + 4);
             }
+
+            // Level gems — diamond chips instead of rectangle pips
+            const maxGems = Math.max(lv, 4);
+            const gemsToShow = Math.min(maxGems, 7);
+            const gemStartX = ix + 17 - Math.floor(gemsToShow * 3);
+            for (let d = 0; d < gemsToShow; d++) {
+                drawGemChip(uctx, gemStartX + d * 6, iconY + 28, d < lv, UI.motifCrown);
+            }
+
+            // Cooldown wipe — vertical dark wipe from top
             const cdRatio = getSkillCooldownRatio(sk.id);
             if (cdRatio > 0.01) {
-                const h = Math.floor(34 * cdRatio);
-                uctx.fillStyle = 'rgba(14, 10, 28, 0.65)';
-                uctx.fillRect(ix, iconY, 34, h);
+                const wipeH = Math.floor(38 * cdRatio);
+                uctx.fillStyle = UI.overlayCooldown;
+                uctx.fillRect(ix + 1, iconY + 1, 32, wipeH);
+                // Wipe edge line
+                if (wipeH < 36) {
+                    uctx.fillStyle = UI.cooldown;
+                    uctx.fillRect(ix + 1, iconY + wipeH, 32, 1);
+                }
             }
         });
     }
@@ -1790,11 +2057,28 @@ function drawUI_HUD() {
     });
     uctx.globalAlpha = 1;
 
-    // Floating texts (world-space)
+    // Floating texts (world-space) — with damage/heal prefix sprites
     floatingTexts.forEach(t => {
         const tx = (t.x - camX) * S, ty = (t.y - camY) * S;
         uctx.globalAlpha = Math.min(1, t.life / 15);
-        sansBold(uctx, t.text, tx, ty, t.color, 10, 'center');
+        if (t.type === 'damage') {
+            // Rose-red slash mark prefix (diagonal 2-3px line)
+            uctx.fillStyle = UI.danger;
+            uctx.fillRect(tx - 20, ty + 1, 2, 1);
+            uctx.fillRect(tx - 19, ty + 3, 2, 1);
+            uctx.fillRect(tx - 18, ty + 5, 2, 1);
+            sansBold(uctx, t.text, tx, ty, t.color, 10, 'center');
+        } else if (t.type === 'heal') {
+            // Mint heart prefix (3x3 pixel heart)
+            uctx.fillStyle = UI.mint;
+            uctx.fillRect(tx - 22, ty + 1, 1, 1); uctx.fillRect(tx - 20, ty + 1, 1, 1);
+            uctx.fillRect(tx - 23, ty + 2, 5, 1);
+            uctx.fillRect(tx - 22, ty + 3, 3, 1);
+            uctx.fillRect(tx - 21, ty + 4, 1, 1);
+            sansBold(uctx, t.text, tx, ty, t.color, 10, 'center');
+        } else {
+            sansBold(uctx, t.text, tx, ty, t.color, 10, 'center');
+        }
     });
     uctx.globalAlpha = 1;
 
@@ -1820,18 +2104,18 @@ function drawUI_Title() {
     drawGrain(uctx, UW, UH, 0.04);
 
     // Big hero cutout — overlapping, rotated slightly
-    drawCutout(uctx, 30, 20, 500, 340, '#141418', -0.8);
-    drawCutout(uctx, 460, 50, 480, 280, '#18181e', 1.2);
+    drawCutout(uctx, 30, 20, 500, 340, UI.panel, -0.8);
+    drawCutout(uctx, 460, 50, 480, 280, UI.panelAlt, 1.2);
 
     // === MAIN HEADLINE — editorial serif, massive ===
     serif(uctx, 'SUPERNOVA', 50, 35, Z.white, 82, 'left');
     // Highlighter accent on subtitle
-    drawHighlight(uctx, 50, 128, 260, 26, 'rgba(255,107,107,0.3)');
+    drawHighlight(uctx, 50, 128, 260, 26, UI.danger + '4D');
     serif(uctx, 'Stage Survivors', 52, 125, Z.hot, 26, 'left', true);
 
     // Tape across the headline area
-    drawTape(uctx, 340, 50, 100, 18, 'rgba(255,213,84,0.45)', -5);
-    sans(uctx, 'NEW DROP', 356, 53, Z.dark, 9, 'left', 800);
+    drawTape(uctx, 340, 50, 100, 18, UI.motifCrown + '73', -5);
+    sans(uctx, 'NEW DROP', 356, 53, UI.textInverse, 9, 'left', 800);
 
     // Pull quote — overlapping the hero area
     drawPullQuote(uctx, 50, 170, '"pick your fave. fight the haters."', Z.coral, 18);
@@ -1864,10 +2148,10 @@ function drawUI_Title() {
         }
         // Name label — offset, some taped
         if (i === 0) {
-            drawTape(uctx, pos.x - 10, pos.y + 20*positions[i].s + 6, 90, 18, 'rgba(255,107,107,0.45)', -1);
+            drawTape(uctx, pos.x - 10, pos.y + 20*positions[i].s + 6, 90, 18, UI.danger + '73', -1);
             sansBold(uctx, charNames[i], pos.x, pos.y + 20*positions[i].s + 9, Z.white, 9);
         } else {
-            sans(uctx, charNames[i], pos.x + 5, pos.y + 20*positions[i].s + 8, 'rgba(255,255,255,0.5)', 9, 'left', 700);
+            sans(uctx, charNames[i], pos.x + 5, pos.y + 20*positions[i].s + 8, UI.textSecondary + '80', 9, 'left', 700);
         }
     });
 
@@ -1879,24 +2163,24 @@ function drawUI_Title() {
 
     // === FEED TILES — overlapping info cards below ===
     // Tile 1: "The Drop" — big feature tile
-    drawCutout(uctx, 30, 370, 290, 130, '#1a1a22', 0.5);
-    drawHighlight(uctx, 42, 378, 60, 16, 'rgba(255,213,84,0.35)');
+    drawCutout(uctx, 30, 370, 290, 130, UI.panel, 0.5);
+    drawHighlight(uctx, 42, 378, 60, 16, UI.motifCrown + '59');
     sansBold(uctx, 'THE DROP', 44, 378, Z.yellow, 11);
     serif(uctx, '4 idols.', 44, 402, Z.white, 22);
     serif(uctx, '1 stage.', 44, 428, Z.white, 22);
     sans(uctx, 'deep skill trees • auto-combat • endless waves', 44, 462, Z.gray, 9, 'left', 400);
 
     // Tile 2: "How to play" — small card, overlapping
-    drawCutout(uctx, 280, 390, 200, 110, '#1e1e26', -1.2);
-    drawTape(uctx, 290, 385, 70, 14, 'rgba(100,255,218,0.4)', 3);
-    sans(uctx, 'HOW 2 PLAY', 296, 386, Z.dark, 7, 'left', 800);
-    sans(uctx, 'WASD / arrows = move', 294, 412, 'rgba(255,255,255,0.6)', 10);
-    sans(uctx, 'auto-attack = just vibe', 294, 430, 'rgba(255,255,255,0.6)', 10);
-    sans(uctx, 'collect gems = level up', 294, 448, 'rgba(255,255,255,0.6)', 10);
-    sans(uctx, 'pick powers = slay', 294, 466, 'rgba(255,255,255,0.6)', 10);
+    drawCutout(uctx, 280, 390, 200, 110, UI.panelAlt, -1.2);
+    drawTape(uctx, 290, 385, 70, 14, UI.mint + '66', 3);
+    sans(uctx, 'HOW 2 PLAY', 296, 386, UI.textInverse, 7, 'left', 800);
+    sans(uctx, 'WASD / arrows = move', 294, 412, UI.textSecondary, 10);
+    sans(uctx, 'auto-attack = just vibe', 294, 430, UI.textSecondary, 10);
+    sans(uctx, 'collect gems = level up', 294, 448, UI.textSecondary, 10);
+    sans(uctx, 'pick powers = slay', 294, 466, UI.textSecondary, 10);
 
     // Tile 3: reaction/social tile
-    drawCutout(uctx, 500, 360, 440, 150, '#161620', 0.8);
+    drawCutout(uctx, 500, 360, 440, 150, UI.panel, 0.8);
     serif(uctx, 'Hot take:', 520, 375, Z.hot, 20);
     serif(uctx, 'this is the game of the year', 520, 400, Z.white, 18, 'left', true);
     drawReactionBar(uctx, 520, 440, [['🔥','4.2K'],['💀','982'],['👑','1.7K'],['💕','3.3K']]);
@@ -1934,7 +2218,7 @@ function drawUI_Select() {
     uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(30, 30, UW - 60, 1);
 
     // === LEFT SIDE: Selected character BIG — zine cover hero ===
-    drawCutout(uctx, 20, 40, 380, 420, '#141418', -0.5);
+    drawCutout(uctx, 20, 40, 380, 420, UI.panel, -0.5);
     const heroSprite = getScaledSprite(selChar.id, 10);
     if (heroSprite) {
         const bob = Math.sin(gameTime*0.05)*4;
@@ -1960,8 +2244,8 @@ function drawUI_Select() {
     drawPullQuote(uctx, 50, 418, selChar.desc, selCol, 13);
 
     // Tape sticker
-    drawTape(uctx, 250, 50, 80, 16, 'rgba(255,213,84,0.45)', -8);
-    sans(uctx, 'COVER STAR', 260, 52, Z.dark, 8, 'left', 800);
+    drawTape(uctx, 250, 50, 80, 16, UI.motifCrown + '73', -8);
+    sans(uctx, 'COVER STAR', 260, 52, UI.textInverse, 8, 'left', 800);
 
     // === RIGHT SIDE: Other characters as thumbnails — collage overlap ===
     const thumbPositions = [];
@@ -2007,7 +2291,7 @@ function drawUI_Select() {
         const sx2 = 28 + idx * 182;
         const sy2 = treeY + 28;
 
-        drawCutout(uctx, sx2, sy2, 174, 198, '#161620', (idx%2===0 ? 0.5 : -0.3));
+        drawCutout(uctx, sx2, sy2, 174, 198, UI.panel, (idx%2===0 ? 0.5 : -0.3));
 
         uctx.font = '20px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
         uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, sx2 + 87, sy2 + 6);
@@ -2021,8 +2305,8 @@ function drawUI_Select() {
         });
 
         if (idx === 0) {
-            drawTape(uctx, sx2 + 44, sy2 + 180, 80, 14, 'rgba(255,213,84,0.4)', -2);
-            sans(uctx, 'SIGNATURE', sx2 + 52, sy2 + 181, Z.dark, 7, 'left', 800);
+            drawTape(uctx, sx2 + 44, sy2 + 180, 80, 14, UI.motifCrown + '66', -2);
+            sans(uctx, 'SIGNATURE', sx2 + 52, sy2 + 181, UI.textInverse, 7, 'left', 800);
         }
     });
 
@@ -2032,7 +2316,7 @@ function drawUI_Select() {
 
 function drawUI_LevelUp() {
     // === POST VIEW — full-bleed dark overlay ===
-    uctx.fillStyle = 'rgba(10, 10, 14, 0.88)';
+    uctx.fillStyle = UI.panelScrim;
     uctx.fillRect(0, 0, UW, UH);
     drawGrain(uctx, UW, UH, 0.03);
 
@@ -2044,8 +2328,8 @@ function drawUI_LevelUp() {
 
     // === HEADER — editorial headline, overlapping tape ===
     const bounce = Math.sin(gameTime * 0.08) * 2;
-    drawTape(uctx, 50, 14, 100, 20, 'rgba(255,213,84,0.5)', -2);
-    sans(uctx, 'NEW POST', 60, 17, Z.dark, 9, 'left', 800);
+    drawTape(uctx, 50, 14, 100, 20, UI.motifCrown + '80', -2);
+    sans(uctx, 'NEW POST', 60, 17, UI.textInverse, 9, 'left', 800);
 
     serif(uctx, 'Level Up', UW/2, 20 + bounce, Z.white, 48, 'center');
     drawHighlight(uctx, UW/2 - 100, 72, 200, 18, accent + '30');
@@ -2063,7 +2347,7 @@ function drawUI_LevelUp() {
         const cardRot = i === 0 ? 0.3 : (i === 1 ? -0.4 : 0.6);
 
         // Cutout card — slight rotation, overlap
-        drawCutout(uctx, bx, by, cw, 115, hover ? '#222230' : '#181822', cardRot);
+        drawCutout(uctx, bx, by, cw, 115, hover ? UI.surfaceCard : UI.panel, cardRot);
 
         // Hover glow
         if (hover) {
@@ -2086,8 +2370,8 @@ function drawUI_LevelUp() {
 
         // Signature tag
         if (isCharSkill) {
-            drawTape(uctx, bx + 92 + choice.name.length * 11 + 10, by + 12, 70, 14, 'rgba(255,213,84,0.45)', -1.5);
-            sans(uctx, 'SIGNATURE', bx + 92 + choice.name.length * 11 + 16, by + 14, Z.dark, 7, 'left', 800);
+            drawTape(uctx, bx + 92 + choice.name.length * 11 + 10, by + 12, 70, 14, UI.motifCrown + '73', -1.5);
+            sans(uctx, 'SIGNATURE', bx + 92 + choice.name.length * 11 + 16, by + 14, UI.textInverse, 7, 'left', 800);
         }
 
         // Level — clean sans
@@ -2150,7 +2434,7 @@ function drawUI_GameOver() {
 
     // Big editorial headline
     serif(uctx, 'CURTAIN CALL', UW/2, 40, Z.white, 58, 'center');
-    drawHighlight(uctx, UW/2 - 90, 100, 180, 18, 'rgba(255,107,107,0.3)');
+    drawHighlight(uctx, UW/2 - 90, 100, 180, 18, UI.danger + '4D');
     sans(uctx, 'the run is over. here\'s the recap.', UW/2, 102, Z.hot, 12, 'center', 500);
 
     if (player) {
@@ -2159,7 +2443,7 @@ function drawUI_GameOver() {
         const accent = charColors[player.charIdx] || Z.hot;
 
         // === LEFT: Character portrait cutout ===
-        drawCutout(uctx, 30, 130, 260, 320, '#141418', -1);
+        drawCutout(uctx, 30, 130, 260, 320, UI.panel, -1);
         const goScaled = getScaledSprite(player.charId, 8);
         if (goScaled) {
             const bob = Math.sin(gameTime * 0.04) * 3;
@@ -2182,8 +2466,8 @@ function drawUI_GameOver() {
         drawReactionBar(uctx, 50, 410, [[cd.lightstick, formatNum(followers)], ['💬', killCount + ' KOs']]);
 
         // Tape label
-        drawTape(uctx, 180, 140, 80, 16, 'rgba(255,213,84,0.45)', -6);
-        sans(uctx, 'MVP', 192, 142, Z.dark, 8, 'left', 800);
+        drawTape(uctx, 180, 140, 80, 16, UI.motifCrown + '73', -6);
+        sans(uctx, 'MVP', 192, 142, UI.textInverse, 8, 'left', 800);
 
         // === RIGHT: Stats as article cards ===
         const secs = Math.floor(survivalTime / 60);
@@ -2200,7 +2484,7 @@ function drawUI_GameOver() {
         ];
 
         const statsX = 320;
-        drawCutout(uctx, statsX, 130, 610, 320, '#181822', 0.5);
+        drawCutout(uctx, statsX, 130, 610, 320, UI.panel, 0.5);
 
         // Stats header
         drawHighlight(uctx, statsX + 16, 140, 70, 16, accent + '30');
@@ -2253,7 +2537,7 @@ function drawUI_GameOver() {
 function drawUI_QuestModal() {
     const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
     const lore = lastLoreCard || (CONTENT.story?.loreCards || [])[0] || '';
-    uctx.fillStyle = 'rgba(8,8,16,0.78)';
+    uctx.fillStyle = UI.scrim;
     uctx.fillRect(0, 0, UW, UH);
     drawPixelPanel(uctx, UW/2 - 260, UH/2 - 150, 520, 300, { fill: UI.panel, border: UI.quest, ribbon: UI.quest, spikes: UI.danger });
     sansBold(uctx, 'QUEST / STORY PROMPT', UW/2 - 236, UH/2 - 140, UI.bg, 9);
@@ -2263,21 +2547,23 @@ function drawUI_QuestModal() {
     drawPixelPanel(uctx, UW/2 - 220, UH/2 - 16, 440, 88, { fill: UI.panelAlt, border: UI.pink });
     sansBold(uctx, 'LORE CARD', UW/2 - 200, UH/2 - 7, UI.pink, 9);
     sans(uctx, lore, UW/2 - 200, UH/2 + 20, UI.text, 12, 'left', 500);
-    sans(uctx, 'Press Q to close', UW/2, UH/2 + 96, UI.textMuted, 10, 'center', 500);
+    // Footer key prompt with styled chip
+    drawPixelPanel(uctx, UW/2 - 60, UH/2 + 90, 120, 22, { fill: UI.surfaceChip, border: UI.borderUI, noLace: true });
+    sans(uctx, '[Q] Close', UW/2, UH/2 + 94, UI.textSecondary, 10, 'center', 600);
 }
 
 function drawUI_Paused() {
     // === STORY OVERLAY — minimal, magazine interstitial ===
-    uctx.fillStyle = 'rgba(10, 10, 14, 0.8)';
+    uctx.fillStyle = UI.scrim;
     uctx.fillRect(0, 0, UW, UH);
     drawGrain(uctx, UW, UH, 0.03);
 
     // Centered cutout card
-    drawCutout(uctx, UW/2 - 220, UH/2 - 70, 440, 140, '#181822', -0.5);
+    drawCutout(uctx, UW/2 - 220, UH/2 - 70, 440, 140, UI.panel, -0.5);
 
     // Tape across the top
-    drawTape(uctx, UW/2 - 50, UH/2 - 78, 100, 16, 'rgba(255,213,84,0.45)', 2);
-    sans(uctx, 'PAUSED', UW/2 - 38, UH/2 - 76, Z.dark, 8, 'left', 800);
+    drawTape(uctx, UW/2 - 50, UH/2 - 78, 100, 16, UI.motifCrown + '73', 2);
+    sans(uctx, 'PAUSED', UW/2 - 38, UH/2 - 76, UI.textInverse, 8, 'left', 800);
 
     // Big editorial serif
     serif(uctx, 'Intermission', UW/2, UH/2 - 45, Z.white, 42, 'center');
