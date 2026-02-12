@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUPERNOVA: Stage Survivors</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Outfit:wght@300;400;500;600;700;800&family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(145deg, #1a0a1e 0%, #2d1028 25%, #1e0e2a 50%, #281530 75%, #1a0a1e 100%);
+            background: #0d0d0d;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Inter', sans-serif;
         }
         #wrap {
             position: relative;
@@ -26,22 +26,15 @@
             top: 0; left: 0;
             width: 960px;
             height: 720px;
-            border: 2px solid rgba(255, 200, 220, 0.35);
-            border-radius: 12px;
-            box-shadow:
-                0 0 40px rgba(255, 182, 203, 0.2),
-                0 0 80px rgba(200, 150, 200, 0.12),
-                0 0 120px rgba(255, 200, 220, 0.06),
-                inset 0 0 60px rgba(255, 182, 203, 0.04);
+            border: none;
+            border-radius: 0;
         }
         #gameCanvas {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
-            border-radius: 12px;
         }
         #uiCanvas {
             pointer-events: none;
-            border-radius: 12px;
         }
     </style>
 </head>

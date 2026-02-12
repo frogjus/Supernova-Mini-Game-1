@@ -19,197 +19,161 @@ gameCanvas.height = PH;
 uiCanvas.width = UW;
 uiCanvas.height = UH;
 
-// === TEXT HELPERS (Romance Sim Princess Style) ===
-function txt(ctx, text, x, y, fill, size, align, stroke, strokeW) {
-    ctx.font = `bold ${size}px 'Press Start 2P', monospace`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    if (stroke) {
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = strokeW || 3;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(text, x, y);
-    }
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
+// === ZINE UI TOOLKIT — Social Magazine Mashup ===
+// Typography: DM Serif Display (editorial headlines) + Inter (clean sans body)
+
+function serif(ctx, text, x, y, fill, size, align, italic) {
+    ctx.font = `${italic?'italic ':''} ${size}px 'DM Serif Display', serif`;
+    ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = fill; ctx.fillText(text, x, y);
 }
 
-function txtShadow(ctx, text, x, y, fill, size, align) {
-    ctx.font = `bold ${size}px 'Press Start 2P', monospace`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillText(text, x + 2, y + 2);
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
+function sans(ctx, text, x, y, fill, size, align, weight) {
+    ctx.font = `${weight||500} ${size}px 'Inter', sans-serif`;
+    ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = fill; ctx.fillText(text, x, y);
 }
 
-function txtGlow(ctx, text, x, y, fill, size, align, glowColor) {
+function sansBold(ctx, text, x, y, fill, size, align) { sans(ctx, text, x, y, fill, size, align, 800); }
+
+function pixel(ctx, text, x, y, fill, size, align) {
+    ctx.font = `${size}px 'Press Start 2P', monospace`;
+    ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
+    ctx.fillStyle = fill; ctx.fillText(text, x, y);
+}
+
+// Paper grain overlay (subtle texture feel)
+function drawGrain(ctx, w, h, alpha) {
     ctx.save();
-    ctx.font = `600 ${size}px 'Playfair Display', serif`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    ctx.shadowColor = glowColor || fill;
-    ctx.shadowBlur = 16;
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
-    ctx.shadowBlur = 0;
-    ctx.restore();
-}
-
-function txtTitle(ctx, text, x, y, fill, size, align, stroke, strokeW) {
-    ctx.font = `700 ${size}px 'Playfair Display', serif`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    if (stroke) {
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = strokeW || 4;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(text, x, y);
-    }
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
-}
-
-function txtItalic(ctx, text, x, y, fill, size, align) {
-    ctx.font = `italic 500 ${size}px 'Cormorant Garamond', serif`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
-}
-
-function txtBody(ctx, text, x, y, fill, size, align, weight, stroke, strokeW) {
-    ctx.font = `${weight||500} ${size}px 'Outfit', sans-serif`;
-    ctx.textAlign = align || 'left';
-    ctx.textBaseline = 'top';
-    if (stroke) {
-        ctx.strokeStyle = stroke;
-        ctx.lineWidth = strokeW || 3;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(text, x, y);
-    }
-    ctx.fillStyle = fill;
-    ctx.fillText(text, x, y);
-}
-
-// Romance sim: soft rounded panel with frosted glass + ornate top border
-function drawRomPanel(ctx, x, y, w, h, accentColor, alpha) {
-    const r = 10;
-    ctx.save();
-    // Soft dark fill
-    ctx.fillStyle = `rgba(30, 15, 35, ${alpha||0.78})`;
-    ctx.beginPath();
-    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-    ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-    ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-    ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
-    ctx.closePath();
-    ctx.fill();
-    // Frosted top shine
-    const shineGrad = ctx.createLinearGradient(x, y, x, y + h * 0.35);
-    shineGrad.addColorStop(0, 'rgba(255, 220, 235, 0.08)');
-    shineGrad.addColorStop(1, 'rgba(255, 220, 235, 0)');
-    ctx.fillStyle = shineGrad;
-    ctx.fill();
-    // Soft border
-    if (accentColor) {
-        ctx.strokeStyle = accentColor;
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.45;
-        ctx.stroke();
-        ctx.globalAlpha = 1;
+    ctx.globalAlpha = alpha || 0.035;
+    for (let i = 0; i < 120; i++) {
+        const gx = (i * 137 + gameTime * 0.1) % w;
+        const gy = (i * 89 + gameTime * 0.07) % h;
+        ctx.fillStyle = i % 2 === 0 ? '#fff' : '#000';
+        ctx.fillRect(gx, gy, 1, 1);
     }
     ctx.restore();
 }
 
-// Romance sim: ornate decorative divider line
-function drawOrnament(ctx, x, y, w, color) {
+// Tape strip — rotated rectangle with translucent color
+function drawTape(ctx, x, y, w, h, color, angle) {
     ctx.save();
-    ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = color || '#e8b4c8';
-    ctx.lineWidth = 1;
-    const mid = x + w/2;
-    // Left line
-    ctx.beginPath(); ctx.moveTo(x+20, y); ctx.lineTo(mid-30, y); ctx.stroke();
-    // Right line
-    ctx.beginPath(); ctx.moveTo(mid+30, y); ctx.lineTo(x+w-20, y); ctx.stroke();
-    // Center diamond
-    ctx.fillStyle = color || '#e8b4c8';
-    ctx.globalAlpha = 0.5;
+    ctx.translate(x + w/2, y + h/2);
+    ctx.rotate((angle || 0) * Math.PI / 180);
+    ctx.fillStyle = color || 'rgba(255, 230, 100, 0.45)';
+    ctx.fillRect(-w/2, -h/2, w, h);
+    // Tape shine stripe
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(-w/2, -h/2, w, h * 0.3);
+    ctx.restore();
+}
+
+// Highlighter underline
+function drawHighlight(ctx, x, y, w, h, color) {
+    ctx.save();
+    ctx.fillStyle = color || 'rgba(255, 200, 60, 0.35)';
+    ctx.fillRect(x - 2, y, w + 4, h);
+    ctx.restore();
+}
+
+// Sticker — rotated emoji/text blob
+function drawSticker(ctx, text, x, y, angle, size) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((angle || 0) * Math.PI / 180);
+    ctx.font = `${size || 24}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+}
+
+// Comment bubble — ragged social comment shape
+function drawCommentBubble(ctx, x, y, text, who, color) {
+    ctx.save();
+    const w = ctx.measureText ? 200 : 200;
+    const h = 32;
+    ctx.fillStyle = color || 'rgba(255,255,255,0.08)';
     ctx.beginPath();
-    ctx.moveTo(mid, y-4); ctx.lineTo(mid+4, y); ctx.lineTo(mid, y+4); ctx.lineTo(mid-4, y);
+    ctx.moveTo(x+6,y); ctx.lineTo(x+w-4,y); ctx.lineTo(x+w,y+4);
+    ctx.lineTo(x+w,y+h-4); ctx.lineTo(x+w-4,y+h);
+    ctx.lineTo(x+14,y+h); ctx.lineTo(x+8,y+h+8); ctx.lineTo(x+8,y+h);
+    ctx.lineTo(x+4,y+h); ctx.lineTo(x,y+h-4); ctx.lineTo(x,y+4);
     ctx.closePath(); ctx.fill();
-    // Small dots
-    ctx.beginPath(); ctx.arc(mid-14, y, 1.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(mid+14, y, 1.5, 0, Math.PI*2); ctx.fill();
+    // Name
+    sansBold(ctx, who || '', x+10, y+4, 'rgba(255,255,255,0.5)', 8);
+    sans(ctx, text, x+10, y+16, 'rgba(255,255,255,0.75)', 9);
     ctx.restore();
 }
 
-// Pastel gradient bar with rounded ends
-function drawPastelBar(ctx, x, y, w, h, ratio, color1, color2, bgColor) {
-    const r = h/2;
-    ctx.save();
-    // Background
-    ctx.fillStyle = bgColor || 'rgba(20, 8, 25, 0.6)';
-    ctx.beginPath();
-    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arc(x+w-r,y+r,r,-Math.PI/2,Math.PI/2);
-    ctx.lineTo(x+r,y+h); ctx.arc(x+r,y+r,r,Math.PI/2,3*Math.PI/2);
-    ctx.closePath(); ctx.fill();
-    // Fill
-    if (ratio > 0) {
-        const fw = Math.max(h, Math.ceil(w * ratio));
-        const grad = ctx.createLinearGradient(x, y, x + fw, y);
-        grad.addColorStop(0, color1);
-        grad.addColorStop(1, color2 || color1);
-        ctx.fillStyle = grad;
+// Reaction bar — row of emoji reactions with counts
+function drawReactionBar(ctx, x, y, reactions) {
+    let rx = x;
+    reactions.forEach(r => {
+        ctx.save();
+        // Pill bg
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        const pw = 50;
         ctx.beginPath();
-        ctx.moveTo(x+r,y); ctx.lineTo(x+fw-r,y); ctx.arc(Math.min(x+fw-r,x+w-r),y+r,r,-Math.PI/2,Math.PI/2);
-        ctx.lineTo(x+r,y+h); ctx.arc(x+r,y+r,r,Math.PI/2,3*Math.PI/2);
+        ctx.arc(rx+12, y+12, 12, Math.PI/2, 3*Math.PI/2);
+        ctx.arc(rx+pw-12, y+12, 12, -Math.PI/2, Math.PI/2);
         ctx.closePath(); ctx.fill();
-        // Glossy shine
-        ctx.fillStyle = 'rgba(255,255,255,0.12)';
-        ctx.fillRect(x+2, y+1, fw-4, Math.floor(h/2));
-    }
-    // Soft outline
-    ctx.strokeStyle = 'rgba(255, 210, 230, 0.15)';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arc(x+w-r,y+r,r,-Math.PI/2,Math.PI/2);
-    ctx.lineTo(x+r,y+h); ctx.arc(x+r,y+r,r,Math.PI/2,3*Math.PI/2);
-    ctx.closePath(); ctx.stroke();
-    ctx.restore();
+        // Emoji
+        ctx.font = '14px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillStyle='#fff'; ctx.fillText(r[0], rx+16, y+12);
+        // Count
+        sans(ctx, r[1], rx+32, y+5, 'rgba(255,255,255,0.6)', 10, 'left', 600);
+        ctx.restore();
+        rx += pw + 6;
+    });
 }
 
-// Floating sparkle/star helper for backgrounds
-function drawSparkle(ctx, x, y, size, color, alpha) {
+// Pull quote — big italic serif with decorative bar
+function drawPullQuote(ctx, x, y, text, color, size) {
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    // 4-point star shape
-    ctx.beginPath();
-    ctx.moveTo(x, y-size);
-    ctx.quadraticCurveTo(x+size*0.2, y-size*0.2, x+size, y);
-    ctx.quadraticCurveTo(x+size*0.2, y+size*0.2, x, y+size);
-    ctx.quadraticCurveTo(x-size*0.2, y+size*0.2, x-size, y);
-    ctx.quadraticCurveTo(x-size*0.2, y-size*0.2, x, y-size);
-    ctx.closePath();
-    ctx.fill();
+    // Decorative left bar
+    ctx.fillStyle = color || '#ff6b6b';
+    ctx.fillRect(x, y, 3, (size||28) + 6);
+    // Quote text
+    serif(ctx, text, x + 14, y, color || '#ff6b6b', size || 28, 'left', true);
     ctx.restore();
 }
 
-// Pastel palette for the romance theme
-const P = {
-    rose: '#e8889e', roseLight: '#f4b8c8', rosePale: '#fce4ec',
-    lavender: '#c4a0d0', lavLight: '#dcc8e8', lavPale: '#f0e6f6',
-    cream: '#fff5e8', peach: '#f8c8a8', peachLight: '#fde4d0',
-    gold: '#e8c878', goldLight: '#f4e4b0',
-    blush: '#d4788c', mauve: '#9c7ca8', plum: '#6b4878',
-    sky: '#a8c8e8', skyLight: '#d0e4f4',
-    mint: '#a8d8c0', mintLight: '#d0f0e0',
-    bg: '#1a0e22', bgLight: '#2a1832', bgCard: '#241430',
-    textMain: '#f0e0ea', textSoft: '#c0a8b8', textMuted: '#8878a0',
-    border: 'rgba(228, 180, 200, 0.25)',
+// Cutout shape — irregular clipped rectangle
+function drawCutout(ctx, x, y, w, h, fill, rotation) {
+    ctx.save();
+    ctx.translate(x + w/2, y + h/2);
+    ctx.rotate((rotation || 0) * Math.PI / 180);
+    ctx.fillStyle = fill || '#1a1a2e';
+    ctx.beginPath();
+    ctx.moveTo(-w/2+2, -h/2);
+    ctx.lineTo(w/2, -h/2+1);
+    ctx.lineTo(w/2-1, h/2);
+    ctx.lineTo(-w/2, h/2-2);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+}
+
+// Social share/save row
+function drawShareRow(ctx, x, y) {
+    const items = ['SAVE', 'SHARE', 'REMIX'];
+    items.forEach((label, i) => {
+        const bx = x + i * 78;
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(bx, y, 68, 22);
+        sans(ctx, label, bx + 34, y + 5, 'rgba(255,255,255,0.5)', 9, 'center', 700);
+    });
+}
+
+// Zine color palette — high contrast, magazine editorial
+const Z = {
+    hot: '#ff6b6b', coral: '#ff8a65', peach: '#ffab91',
+    yellow: '#ffd54f', lime: '#c6ff00', mint: '#64ffda',
+    sky: '#40c4ff', blue: '#448aff', indigo: '#7c4dff',
+    purple: '#b388ff', pink: '#ff80ab', magenta: '#ff4081',
+    white: '#ffffff', cream: '#faf3e0', offwhite: '#e8e0d0',
+    dark: '#0d0d0d', darkCard: '#1a1a1a', darkGray: '#2a2a2a',
+    gray: '#888', lightGray: '#bbb', faint: 'rgba(255,255,255,0.06)',
 };
 
 // === PALETTES (unified idol style — same face/body, unique colors) ===
@@ -489,18 +453,18 @@ let fanChants = [];
 let trendingTimer = 0, trendingText = '';
 let score = 0;
 
-// === ACCLAIM MESSAGES ===
+// === SOCIAL CAPTIONS ===
 const KILL_CHANTS = [
-    'Magnificent!', 'Splendid~', 'Flawless', 'Graceful!', 'Beautiful!',
-    'How elegant!', 'Dazzling~', 'Enchanting!', 'Wonderful~', 'Radiant!',
-    'Breathtaking!', 'Exquisite~', 'Stunning!', 'Brilliant!', 'Divine~',
-    'Gorgeous!', 'Sublime~', 'Marvelous!', 'Charming!', 'Captivating~',
+    'slay literally', 'not them 💀', 'ATE that', 'main character fr', 'the audacity',
+    'obsessed rn', 'she said nope', 'zero chill', 'bestie snapped', 'period.',
+    'iconic tbh', 'rent free', 'understood the assignment', 'say less', 'its giving',
+    'no bc why', 'unhinged queen', 'pop OFF', 'we stan', 'this era >>>',
 ];
 
 const TRENDING_TAGS = [
-    '#EternalSupernova', '#StarlightBlessings', '#DreamingOfYou',
-    '#OurShiningStars', '#HeartfeltDevotion', '#ForeverRadiant',
-    '#CelestialBeauty', '#EnchantedStage', '#BlossomingStar', '#MoonlitPromise',
+    'Hot take: this run is unreal', 'POV: you chose violence', 'the way im screaming rn',
+    'core memory unlocked', 'no thoughts just vibes', 'this is cinema',
+    'spill: new high score era', 'not me getting emotional', 'the glow up is real', 'main character energy',
 ];
 
 // === INPUT ===
@@ -613,8 +577,8 @@ function startGame() {
     projectiles = []; enemies = []; xpGems = []; particles = []; floatingTexts = [];
     enemySet.clear();
 
-    addNotification(cd.name + ' steps into the light...', P.roseLight);
-    addNotification('The ' + cd.fandom + ' hold their breath~', P.lavLight);
+    addNotification(cd.name + ' just entered the chat 🔥', Z.hot);
+    addNotification(cd.fandom + ' are SCREAMING rn', Z.purple);
 }
 
 // ================================================================
@@ -690,8 +654,8 @@ function choosePowerUp(index) {
     else if (choice.id === 'selfLove') player.regenTimer = 0;
 
     const n = choice.name + ' ~ Level ' + lv;
-    addNotification(n, P.roseLight);
-    spawnFloatingText(player.x, player.y - 20, choice.emoji + ' ' + choice.name, P.rosePale);
+    addNotification(n, Z.hot);
+    spawnFloatingText(player.x, player.y - 20, choice.emoji + ' ' + choice.name, Z.coral);
     screenFlash = 8; screenFlashColor = choice.color;
     state = State.PLAYING;
 }
@@ -750,7 +714,7 @@ function spawnBoss() {
 
     SFX.bossSpawn();
     screenFlash = 12; screenFlashColor = '#ff2d78';
-    addNotification('A dark presence stirs... ' + type.name + ' ' + type.emoji, P.blush);
+    addNotification('BOSS INCOMING: ' + type.name + ' ' + type.emoji + ' 💀', Z.magenta);
 }
 
 function spawnEnemy() {
@@ -956,7 +920,7 @@ function updatePlayer() {
             const lv = player.powers.overclock;
             player.overclockTimer = (lv + 1) * 60;
             player.overclockCD = Math.max(480, 900 - lv * 120);
-            addNotification('Overclock ~ time quickens!', P.peach);
+            addNotification('Overclock activated ⚡ speed UP', Z.yellow);
         }
     }
 
@@ -1049,7 +1013,7 @@ function updatePlayer() {
         else if (idx === 1) player.speed *= 1.05;
         else if (idx === 2) player.hp = Math.min(player.maxHp, player.hp + 1);
         else player.invTimer += 60;
-        addNotification('Mood shifts ~ ' + buffs[idx], P.lavLight);
+        addNotification('Mood Ring proc → ' + buffs[idx], Z.purple);
     }
 }
 
@@ -1120,9 +1084,9 @@ function killEnemy(e) {
     }
 
     // Combo notification
-    if (comboCount === 10) addNotification('10x ~ The crowd is enchanted!', P.peach);
-    if (comboCount === 25) addNotification('25x ~ A breathtaking crescendo!', P.roseLight);
-    if (comboCount === 50) addNotification('50x ~ A legendary performance!', P.goldLight);
+    if (comboCount === 10) addNotification('10x combo 🔥 the crowd is HYPED', Z.coral);
+    if (comboCount === 25) addNotification('25x combo 💀 this is UNREAL', Z.hot);
+    if (comboCount === 50) addNotification('50x combo 👑 LEGENDARY RUN', Z.yellow);
 
     // Gumiho's Feast heal
     if (player.healPerKill > 0) {
@@ -1187,7 +1151,7 @@ function killEnemy(e) {
     // Boss kill rewards
     if (e.boss) {
         bossesKilled++;
-        addNotification('The darkness fades ~ ' + e.bossType.name + ' falls!', P.goldLight);
+        addNotification(e.bossType.name + ' DOWN 👑 absolutely bodied', Z.yellow);
         screenFlash = 15; screenFlashColor = '#ffdd44';
         SFX.bossKill();
         followers += e.xp * 50;
@@ -1279,7 +1243,7 @@ function playerTakeDamage(dmg) {
     // Spirit Form (Miho)
     if (player.powers.spiritForm > 0) {
         player.spiritTimer = 30 + player.powers.spiritForm * 15;
-        addNotification('Spirit form ~ ethereal grace!', P.lavLight);
+        addNotification('Spirit Form ✨ can\'t touch this', Z.mint);
     }
 
     if (player.hp<=0) gameOver();
@@ -1398,39 +1362,36 @@ function updateCamera() {
 // ================================================================
 
 function drawPixelWorld() {
-    gctx.fillStyle = '#160a1e';
+    gctx.fillStyle = '#0e0e12';
     gctx.fillRect(0, 0, PW, PH);
 
-    // Enchanted garden floor — soft pastel checkerboard
+    // Zine-textured floor — subtle dot grid like graph paper
     const ts = 32;
     const sx = -(camX%ts), sy = -(camY%ts);
     for (let gx=sx;gx<PW+ts;gx+=ts) for (let gy=sy;gy<PH+ts;gy+=ts) {
         const wx=Math.floor((gx+camX)/ts), wy=Math.floor((gy+camY)/ts);
-        gctx.fillStyle = (wx+wy)%2===0 ? '#1c0e28' : '#180c22';
+        gctx.fillStyle = (wx+wy)%2===0 ? '#111118' : '#0e0e14';
         gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
-        // Soft rose tile edge
-        gctx.fillStyle='rgba(228,180,200,0.02)';
-        gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,1);
-        gctx.fillRect(Math.floor(gx),Math.floor(gy),1,ts);
-        // Scattered flower/sparkle glow on some tiles
-        if ((wx*7+wy*13)%17===0) {
-            const pulse=Math.sin(gameTime*0.025+wx+wy)*0.25+0.25;
-            const colors=['#e8889e','#c4a0d0','#a8c8e8','#f8c8a8'];
-            gctx.globalAlpha=pulse*0.06;
+        // Dot grid intersection
+        gctx.fillStyle='rgba(255,255,255,0.04)';
+        gctx.fillRect(Math.floor(gx),Math.floor(gy),1,1);
+        // Occasional color splash
+        if ((wx*7+wy*13)%19===0) {
+            const pulse=Math.sin(gameTime*0.02+wx+wy)*0.2+0.2;
+            const colors=['#ff6b6b','#ffd54f','#40c4ff','#ff80ab'];
+            gctx.globalAlpha=pulse*0.04;
             gctx.fillStyle=colors[(wx+wy)%colors.length];
             gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
             gctx.globalAlpha=1;
         }
     }
 
-    // Soft dreamy light columns (pastel)
-    for (let i = 0; i < 3; i++) {
-        const beamX = ((gameTime * 0.4 + i * 130) % (PW + 120)) - 60;
-        gctx.globalAlpha = 0.025;
-        gctx.fillStyle = ['#e8889e','#c4a0d0','#a8c8e8'][i];
-        gctx.fillRect(Math.floor(beamX) - 8, 0, 16, PH);
-        gctx.globalAlpha = 0.04;
-        gctx.fillRect(Math.floor(beamX) - 3, 0, 6, PH);
+    // Moving scanlines / light leaks
+    for (let i = 0; i < 2; i++) {
+        const beamX = ((gameTime * 0.5 + i * 180) % (PW + 100)) - 50;
+        gctx.globalAlpha = 0.02;
+        gctx.fillStyle = ['#ff6b6b','#40c4ff'][i];
+        gctx.fillRect(Math.floor(beamX) - 10, 0, 20, PH);
         gctx.globalAlpha = 1;
     }
 
@@ -1627,145 +1588,128 @@ function drawPixelWorld() {
 function drawUI_HUD() {
     uctx.clearRect(0, 0, UW, UH);
     if (!player) return;
-
     const cd = player.charDef;
 
-    // === TOP BAR — frosted romantic header ===
-    drawRomPanel(uctx, -2, -2, UW+4, 62, P.border, 0.82);
-    // Soft ornate bottom accent
-    drawOrnament(uctx, 0, 59, UW, P.roseLight);
+    // === IG STORY-STYLE TOP — no bar, floating elements ===
+    // Character tag — tape label, slightly rotated
+    drawTape(uctx, 8, 6, 130, 24, 'rgba(255,107,107,0.5)', -1.5);
+    sansBold(uctx, cd.emoji + ' ' + cd.name, 16, 10, '#fff', 12);
+    sans(uctx, cd.hashtag, 16, 34, 'rgba(255,255,255,0.4)', 9);
 
-    // Character name with elegant serif
-    txtTitle(uctx, cd.emoji + ' ' + cd.name, 16, 8, P.roseLight, 18, 'left', 'rgba(0,0,0,0.4)', 3);
-    txtItalic(uctx, cd.title, 16, 32, P.textSoft, 11, 'left');
-
-    // HP bar — rose gradient, rounded
-    const hpX=170, hpY=8, hpW=155, hpH=14;
+    // HP — raw text, no bar frame, just highlighter
     const hpR = player.hp/player.maxHp;
-    const hpC1 = hpR>0.5 ? P.rose : (hpR>0.25 ? '#d4a060' : '#c85060');
-    const hpC2 = hpR>0.5 ? P.roseLight : (hpR>0.25 ? '#e8c080' : '#e07080');
-    drawPastelBar(uctx, hpX, hpY, hpW, hpH, hpR, hpC1, hpC2);
-    txtBody(uctx, Math.ceil(player.hp) + '/' + player.maxHp, hpX+8, hpY+1, '#fff', 10, 'left', 600, 'rgba(0,0,0,0.3)', 2);
+    const hpCol = hpR>0.5 ? Z.hot : (hpR>0.25 ? Z.yellow : '#ff2244');
+    drawHighlight(uctx, 158, 10, 110 * hpR, 14, hpR>0.5 ? 'rgba(255,107,107,0.25)' : 'rgba(255,34,68,0.3)');
+    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp + ' HP', 162, 10, hpCol, 11);
 
-    // XP bar — lavender, smaller
-    const xpX=170, xpY=27, xpW=155, xpH=9;
+    // XP — minimal line
     const xpR = player.xp/player.xpToNext;
-    drawPastelBar(uctx, xpX, xpY, xpW, xpH, xpR, P.lavender, P.lavLight);
-    txtBody(uctx, 'Lv.' + player.level, hpX, xpY+xpH+4, P.lavLight, 10, 'left', 600);
+    uctx.fillStyle = 'rgba(255,255,255,0.08)'; uctx.fillRect(158, 30, 110, 3);
+    uctx.fillStyle = Z.purple; uctx.fillRect(158, 30, 110 * xpR, 3);
+    sans(uctx, 'LV ' + player.level, 158, 36, 'rgba(255,255,255,0.45)', 9, 'left', 600);
 
-    // Timer (center) — elegant serif
+    // Timer — big editorial serif, right-aligned high
     const secs = Math.floor(survivalTime/60);
     const mins = Math.floor(secs/60);
     const secStr = (secs%60).toString().padStart(2,'0');
-    txtTitle(uctx, mins + ':' + secStr, UW/2, 5, P.cream, 22, 'center', 'rgba(0,0,0,0.35)', 2);
-    txtItalic(uctx, 'Chapter ' + difficulty, UW/2, 32, P.goldLight, 12, 'center');
+    serif(uctx, mins + ':' + secStr, UW - 20, 4, Z.white, 28, 'right');
+    // Wave sticker
+    drawSticker(uctx, 'EP.' + difficulty, UW - 80, 40, 3, 11);
+    sans(uctx, 'EP.' + difficulty, UW - 95, 36, 'rgba(255,255,255,0.35)', 10, 'left', 700);
 
-    // Followers (right side)
-    txtBody(uctx, formatNum(followers), UW-16, 6, P.roseLight, 16, 'right', 700, 'rgba(0,0,0,0.3)', 2);
-    txtItalic(uctx, 'Admirers', UW-16, 26, P.textSoft, 10, 'right');
+    // Followers — social metric, tape-style
+    drawTape(uctx, UW - 160, 6, 80, 20, 'rgba(255,213,84,0.4)', 1.2);
+    sansBold(uctx, formatNum(followers), UW - 152, 9, Z.white, 10);
+    sans(uctx, 'follows', UW - 105, 9, 'rgba(255,255,255,0.5)', 9);
 
-    // KO count
-    txtBody(uctx, killCount + ' Vanquished', UW-16, 42, P.textMuted, 9, 'right', 500);
+    // KO — bottom of top cluster
+    sans(uctx, killCount + ' KOs', UW - 152, 30, 'rgba(255,255,255,0.35)', 9, 'left', 600);
 
-    // Combo indicator — ornate style
+    // Combo — pull quote style when active
     if (comboCount >= 3) {
-        const comboX = UW/2, comboY = 66;
-        const pulse = 1 + Math.sin(gameTime*0.12)*0.1;
-        uctx.save();
-        uctx.translate(comboX, comboY);
-        uctx.scale(pulse, pulse);
-        const comboCol = comboCount>=25 ? P.gold : (comboCount>=10 ? P.peach : P.roseLight);
-        txtTitle(uctx, comboCount + 'x Crescendo', 0, -6, comboCol, 22, 'center', 'rgba(0,0,0,0.3)', 3);
-        uctx.restore();
+        const comboCol = comboCount>=25 ? Z.yellow : (comboCount>=10 ? Z.coral : Z.pink);
+        drawHighlight(uctx, UW/2 - 80, 60, 160, 28, comboCol + '30');
+        serif(uctx, comboCount + 'x', UW/2, 58, comboCol, 28, 'center');
+        sans(uctx, comboCount >= 25 ? 'UNREAL' : (comboCount >= 10 ? 'ON FIRE' : 'streak'), UW/2, 88, 'rgba(255,255,255,0.4)', 9, 'center', 700);
     }
 
-    // === BOSS HP BAR ===
+    // === BOSS — editorial callout ===
     const activeBoss = enemies.find(e => e.boss);
     if (activeBoss) {
-        const bossY = comboCount >= 3 ? 94 : 70;
-        drawRomPanel(uctx, UW/2 - 215, bossY - 6, 430, 42, P.blush, 0.82);
-        const bpulse = Math.sin(gameTime * 0.06) * 0.12 + 0.88;
-        uctx.globalAlpha = bpulse;
-        txtTitle(uctx, activeBoss.bossType.name + ' ' + activeBoss.bossType.emoji, UW/2, bossY - 1, P.blush, 11, 'center', 'rgba(0,0,0,0.3)', 2);
-        uctx.globalAlpha = 1;
+        const bossY = comboCount >= 3 ? 106 : 68;
+        drawCutout(uctx, UW/2 - 200, bossY, 400, 40, 'rgba(255,60,80,0.12)', -0.5);
+        serif(uctx, activeBoss.bossType.name, UW/2, bossY + 2, Z.hot, 14, 'center');
+        // HP raw bar
         const bhr = activeBoss.hp / activeBoss.maxHp;
-        drawPastelBar(uctx, UW/2 - 190, bossY + 17, 380, 12, bhr, P.blush, P.rose);
-        txtBody(uctx, Math.ceil(activeBoss.hp) + ' / ' + activeBoss.maxHp, UW/2, bossY + 17, 'rgba(255,255,255,0.7)', 8, 'center', 500);
+        uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(UW/2 - 180, bossY + 24, 360, 5);
+        uctx.fillStyle = Z.hot; uctx.fillRect(UW/2 - 180, bossY + 24, 360 * bhr, 5);
+        sans(uctx, Math.ceil(activeBoss.hp) + '/' + activeBoss.maxHp, UW/2, bossY + 31, 'rgba(255,255,255,0.4)', 8, 'center', 500);
     }
 
-    // === BOTTOM: Active skill icons — ornate frame ===
+    // === BOTTOM: Skill icons — raw emoji row, no frame ===
     const cd2 = CHARACTERS[player.charIdx];
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
     if (activeSkills.length > 0) {
-        const iconY = UH - 46;
-        const totalW = activeSkills.length * 40;
+        const iconY = UH - 40;
+        const totalW = activeSkills.length * 36;
         const startX = (UW - totalW) / 2;
 
-        drawRomPanel(uctx, startX - 14, iconY - 8, totalW + 28, 48, P.border, 0.65);
-
         activeSkills.forEach((sk, idx) => {
-            const ix = startX + idx * 40;
+            const ix = startX + idx * 36;
             const lv = player.powers[sk.id];
-            // Icon bg
-            uctx.fillStyle = 'rgba(30, 15, 40, 0.5)';
-            uctx.fillRect(ix, iconY, 34, 30);
-            uctx.strokeStyle = P.border;
-            uctx.lineWidth = 0.5;
-            uctx.strokeRect(ix, iconY, 34, 30);
-
-            uctx.font = '16px serif';
-            uctx.textAlign = 'center';
-            uctx.textBaseline = 'top';
-            uctx.fillStyle = '#fff';
-            uctx.fillText(sk.emoji, ix + 17, iconY + 3);
-
-            // Level pips (small hearts/dots)
-            for (let d = 0; d < 5; d++) {
-                uctx.fillStyle = d < lv ? P.roseLight : 'rgba(40,20,50,0.6)';
-                uctx.beginPath();
-                uctx.arc(ix + 5 + d * 5.5, iconY + 26, 2, 0, Math.PI*2);
-                uctx.fill();
+            uctx.font = '18px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+            uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, ix + 16, iconY);
+            // Level pips — tiny dots
+            for (let d = 0; d < lv; d++) {
+                uctx.fillStyle = Z.yellow;
+                uctx.fillRect(ix + 6 + d * 6, iconY + 24, 4, 2);
             }
         });
     }
 
-    // === RIGHT SIDE: Notifications — soft card style ===
+    // === BOTTOM-LEFT: Reaction bar (persistent social feel) ===
+    drawReactionBar(uctx, 12, UH - 36, [
+        [cd.lightstick, formatNum(Math.floor(followers/10))],
+        ['💬', '' + Math.min(killCount, 999)],
+    ]);
+
+    // === RIGHT: Notifications as comment stream ===
     let ny = 70;
-    notifications.slice(-5).forEach(n => {
+    notifications.slice(-4).forEach(n => {
         const alpha = Math.min(1, n.life / 30);
         uctx.globalAlpha = alpha;
-        drawRomPanel(uctx, UW - 320, ny - 4, 316, 26, null, 0.6);
-        txtBody(uctx, n.text, UW - 16, ny, P.roseLight, 9, 'right', 500);
-        ny += 30;
+        drawCommentBubble(uctx, UW - 230, ny, n.text, 'fan', 'rgba(255,255,255,0.05)');
+        ny += 40;
     });
     uctx.globalAlpha = 1;
 
-    // === Trending hashtag (bottom-left) — whispered italic ===
+    // === BOTTOM-LEFT: Trending caption ===
     if (trendingText) {
-        const tpulse = Math.sin(gameTime * 0.04) * 0.15 + 0.85;
+        const tpulse = Math.sin(gameTime * 0.04) * 0.12 + 0.88;
         uctx.globalAlpha = tpulse;
-        txtItalic(uctx, 'Whispers: ' + trendingText, 16, UH - 58, P.lavender, 10, 'left');
+        sans(uctx, trendingText, 16, UH - 58, 'rgba(255,255,255,0.3)', 9, 'left', 400);
         uctx.globalAlpha = 1;
     }
 
-    // Fan chants (world-space)
+    // Fan chants (world-space) — raw text, no glow
     fanChants.forEach(f => {
-        const fx = (f.x - camX) * S;
-        const fy = (f.y - camY) * S;
+        const fx = (f.x - camX) * S, fy = (f.y - camY) * S;
         uctx.globalAlpha = Math.min(1, f.life / 15);
-        txtGlow(uctx, f.text, fx, fy, P.rosePale, 10, 'center', P.rose);
+        sans(uctx, f.text, fx, fy, 'rgba(255,255,255,0.7)', 10, 'center', 600);
     });
     uctx.globalAlpha = 1;
 
     // Floating texts (world-space)
     floatingTexts.forEach(t => {
-        const tx = (t.x - camX) * S;
-        const ty = (t.y - camY) * S;
+        const tx = (t.x - camX) * S, ty = (t.y - camY) * S;
         uctx.globalAlpha = Math.min(1, t.life / 15);
-        txtBody(uctx, t.text, tx, ty, t.color, 10, 'center', 600, 'rgba(0,0,0,0.4)', 2);
+        sansBold(uctx, t.text, tx, ty, t.color, 10, 'center');
     });
     uctx.globalAlpha = 1;
+
+    // Paper grain
+    drawGrain(uctx, UW, UH, 0.02);
 }
 
 function formatNum(n) {
@@ -1781,412 +1725,462 @@ function formatNum(n) {
 function drawUI_Title() {
     uctx.clearRect(0, 0, UW, UH);
 
-    // Deep romantic gradient background
-    const bgGrad = uctx.createRadialGradient(UW/2, UH*0.35, 50, UW/2, UH*0.35, UH);
-    bgGrad.addColorStop(0, '#2a1430');
-    bgGrad.addColorStop(0.4, '#1c0e24');
-    bgGrad.addColorStop(1, '#0e0616');
-    uctx.fillStyle = bgGrad;
-    uctx.fillRect(0, 0, UW, UH);
+    // === HOME FEED — collage layout ===
+    uctx.fillStyle = Z.dark; uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.04);
 
-    // Floating sparkles — soft pastels
-    for (let i = 0; i < 60; i++) {
-        const sx = ((i*73+gameTime*0.18)%UW);
-        const sy = ((i*47+gameTime*0.08)%UH);
-        const pulse = Math.sin(gameTime*0.03+i*0.7)*0.35+0.45;
-        const sz = (i%5===0) ? 4 : ((i%3===0) ? 2.5 : 1.5);
-        const colors = [P.roseLight, P.lavLight, P.skyLight, P.peachLight, P.goldLight];
-        drawSparkle(uctx, Math.floor(sx), Math.floor(sy), sz, colors[i%5], pulse*0.4);
-    }
-    uctx.globalAlpha=1;
+    // Big hero cutout — overlapping, rotated slightly
+    drawCutout(uctx, 30, 20, 500, 340, '#141418', -0.8);
+    drawCutout(uctx, 460, 50, 480, 280, '#18181e', 1.2);
 
-    // Soft diagonal veil
-    for (let i = 0; i < 3; i++) {
-        const streakX = ((gameTime * 0.3 + i * 350) % (UW + 500)) - 250;
-        uctx.save();
-        uctx.globalAlpha = 0.02;
-        uctx.fillStyle = [P.rose, P.lavender, P.sky][i];
-        uctx.translate(streakX, 0);
-        uctx.transform(1, 0, -0.3, 1, 0, 0);
-        uctx.fillRect(0, 0, 80, UH);
-        uctx.restore();
-    }
-    uctx.globalAlpha = 1;
+    // === MAIN HEADLINE — editorial serif, massive ===
+    serif(uctx, 'SUPERNOVA', 50, 35, Z.white, 82, 'left');
+    // Highlighter accent on subtitle
+    drawHighlight(uctx, 50, 128, 260, 26, 'rgba(255,107,107,0.3)');
+    serif(uctx, 'Stage Survivors', 52, 125, Z.hot, 26, 'left', true);
 
-    // Title glow — soft rose/lavender aura
-    const pulse = Math.sin(gameTime*0.03)*0.12+0.88;
-    uctx.globalAlpha=pulse*0.08;
-    const titleGrad = uctx.createRadialGradient(UW/2, 115, 10, UW/2, 115, 280);
-    titleGrad.addColorStop(0, P.roseLight); titleGrad.addColorStop(1, 'transparent');
-    uctx.fillStyle=titleGrad;
-    uctx.fillRect(0, 0, UW, 250);
-    uctx.globalAlpha=1;
+    // Tape across the headline area
+    drawTape(uctx, 340, 50, 100, 18, 'rgba(255,213,84,0.45)', -5);
+    sans(uctx, 'NEW DROP', 356, 53, Z.dark, 9, 'left', 800);
 
-    // Ornate top decoration
-    drawOrnament(uctx, UW/2 - 200, 50, 400, P.roseLight);
+    // Pull quote — overlapping the hero area
+    drawPullQuote(uctx, 50, 170, '"pick your fave. fight the haters."', Z.coral, 18);
 
-    // Title — elegant serif
-    txtTitle(uctx, 'SUPERNOVA', UW/2, 64, P.rosePale, 68, 'center', 'rgba(0,0,0,0.4)', 5);
-    // Subtitle — italic serif
-    txtItalic(uctx, 'Stage Survivors', UW/2, 142, P.lavLight, 26, 'center');
-
-    // Ornate divider under title
-    drawOrnament(uctx, UW/2 - 180, 178, 360, P.lavender);
-
-    // Characters in a line with soft glow
-    const names = ['Miho','Hyunju','Sujin','Sohee'];
-    const titles = ['The Gumiho','The Dreamer','The Genius','The Quiet Storm'];
-    const colors = [P.gold, P.peach, P.blush, P.sky];
+    // === CHARACTER COLLAGE — overlapping, different sizes, rotated ===
     const charIDs = ['miho','hyunju','sujin','sohee'];
-    const startX = UW/2 - 210;
+    const charNames = ['MIHO', 'HYUNJU', 'SUJIN', 'SOHEE'];
+    const charTags = ['#FoxQueen', '#DreamWeaver', '#BigBrainStar', '#SilentPower'];
+    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+    const positions = [
+        {x: 490, y: 70, s: 6, rot: 2},
+        {x: 610, y: 100, s: 5, rot: -3},
+        {x: 730, y: 65, s: 5, rot: 1.5},
+        {x: 850, y: 95, s: 4, rot: -2},
+    ];
 
     gctx.clearRect(0, 0, PW, PH);
-    charIDs.forEach((c, i) => {
-        const scaled = getScaledSprite(c, 5);
+    positions.forEach((pos, i) => {
+        const scaled = getScaledSprite(charIDs[i], pos.s);
         if (scaled) {
-            const bob = Math.sin(gameTime*0.04 + i*1.3)*4;
-            const cx = startX + i*110;
-            const cy = 210 + bob;
-            // Soft circular glow
+            const bob = Math.sin(gameTime*0.04 + i*1.5)*3;
             uctx.save();
-            uctx.globalAlpha = 0.1 + Math.sin(gameTime*0.05+i)*0.04;
-            uctx.fillStyle = colors[i];
-            uctx.beginPath();
-            uctx.arc(cx + 40, cy + 50, 48, 0, Math.PI*2);
-            uctx.fill();
+            uctx.translate(pos.x, pos.y + bob);
+            uctx.rotate(pos.rot * Math.PI / 180);
+            // Shadow cutout behind
+            uctx.fillStyle = 'rgba(0,0,0,0.3)';
+            uctx.fillRect(-4, -4, 16*pos.s+8, 20*pos.s+8);
+            uctx.drawImage(scaled, 0, 0);
             uctx.restore();
-            uctx.drawImage(scaled, cx, cy);
         }
-        txtTitle(uctx, names[i], startX + i*110 + 40, 322, colors[i], 14, 'center', 'rgba(0,0,0,0.3)', 2);
-        txtItalic(uctx, titles[i], startX + i*110 + 40, 342, P.textSoft, 9, 'center');
+        // Name label — offset, some taped
+        if (i === 0) {
+            drawTape(uctx, pos.x - 10, pos.y + 20*positions[i].s + 6, 90, 18, 'rgba(255,107,107,0.45)', -1);
+            sansBold(uctx, charNames[i], pos.x, pos.y + 20*positions[i].s + 9, Z.white, 9);
+        } else {
+            sans(uctx, charNames[i], pos.x + 5, pos.y + 20*positions[i].s + 8, 'rgba(255,255,255,0.5)', 9, 'left', 700);
+        }
     });
 
-    // Tagline — romantic italic
-    txtItalic(uctx, 'Choose your heart. Face the darkness. Shine eternal.', UW/2, 380, P.lavLight, 16, 'center');
+    // === STICKERS — scattered, rotated ===
+    drawSticker(uctx, '🔥', 430, 140, 12, 28);
+    drawSticker(uctx, '✨', 540, 300, -8, 22);
+    drawSticker(uctx, '💕', 880, 55, 15, 20);
+    drawSticker(uctx, '⚡', 46, 290, -10, 24);
 
-    // Features — delicate
-    drawOrnament(uctx, UW/2 - 220, 412, 440, P.textMuted);
-    txtBody(uctx, 'Deep skill trees  |  Unique abilities  |  Enchanted stage', UW/2, 428, P.textMuted, 11, 'center', 400);
+    // === FEED TILES — overlapping info cards below ===
+    // Tile 1: "The Drop" — big feature tile
+    drawCutout(uctx, 30, 370, 290, 130, '#1a1a22', 0.5);
+    drawHighlight(uctx, 42, 378, 60, 16, 'rgba(255,213,84,0.35)');
+    sansBold(uctx, 'THE DROP', 44, 378, Z.yellow, 11);
+    serif(uctx, '4 idols.', 44, 402, Z.white, 22);
+    serif(uctx, '1 stage.', 44, 428, Z.white, 22);
+    sans(uctx, 'deep skill trees • auto-combat • endless waves', 44, 462, Z.gray, 9, 'left', 400);
 
-    // Controls
-    txtBody(uctx, 'WASD / Arrows to move  ~  Auto-attack nearby foes', UW/2, 460, P.textMuted, 10, 'center', 400);
-    txtBody(uctx, 'Collect gems  ~  Level up & choose your path', UW/2, 480, P.textMuted, 10, 'center', 400);
+    // Tile 2: "How to play" — small card, overlapping
+    drawCutout(uctx, 280, 390, 200, 110, '#1e1e26', -1.2);
+    drawTape(uctx, 290, 385, 70, 14, 'rgba(100,255,218,0.4)', 3);
+    sans(uctx, 'HOW 2 PLAY', 296, 386, Z.dark, 7, 'left', 800);
+    sans(uctx, 'WASD / arrows = move', 294, 412, 'rgba(255,255,255,0.6)', 10);
+    sans(uctx, 'auto-attack = just vibe', 294, 430, 'rgba(255,255,255,0.6)', 10);
+    sans(uctx, 'collect gems = level up', 294, 448, 'rgba(255,255,255,0.6)', 10);
+    sans(uctx, 'pick powers = slay', 294, 466, 'rgba(255,255,255,0.6)', 10);
 
-    // Start prompt — gentle glow
-    const blinkAlpha = Math.sin(gameTime*0.06)*0.25+0.75;
-    uctx.globalAlpha = blinkAlpha;
-    txtGlow(uctx, 'Touch to Begin Your Story', UW/2, 535, P.rosePale, 18, 'center', P.rose);
+    // Tile 3: reaction/social tile
+    drawCutout(uctx, 500, 360, 440, 150, '#161620', 0.8);
+    serif(uctx, 'Hot take:', 520, 375, Z.hot, 20);
+    serif(uctx, 'this is the game of the year', 520, 400, Z.white, 18, 'left', true);
+    drawReactionBar(uctx, 520, 440, [['🔥','4.2K'],['💀','982'],['👑','1.7K'],['💕','3.3K']]);
+    // Comment bubble overlapping
+    drawCommentBubble(uctx, 700, 370, 'ok but miho tho', 'user_02', 'rgba(255,255,255,0.06)');
+
+    // === BOTTOM: CTA + share ===
+    const blink = Math.sin(gameTime*0.06)*0.2+0.8;
+    uctx.globalAlpha = blink;
+    serif(uctx, 'TAP TO START', UW/2, UH - 80, Z.white, 24, 'center');
     uctx.globalAlpha = 1;
+    sans(uctx, 'or press SPACE', UW/2, UH - 52, 'rgba(255,255,255,0.3)', 10, 'center', 400);
 
-    // Bottom flourish
-    drawOrnament(uctx, UW/2 - 150, UH-44, 300, P.textMuted);
-    txtItalic(uctx, 'a tale of starlight & devotion', UW/2, UH-32, P.plum, 10, 'center');
+    drawShareRow(uctx, UW/2 - 120, UH - 30);
+
+    // Subtle magazine page number
+    sans(uctx, '001', UW - 40, UH - 24, 'rgba(255,255,255,0.15)', 9, 'right', 300);
 }
 
 function drawUI_Select() {
     uctx.clearRect(0, 0, UW, UH);
 
-    // Deep gradient background
-    const bgGrad = uctx.createRadialGradient(UW/2, 300, 50, UW/2, 300, UH);
-    bgGrad.addColorStop(0, '#221228');
-    bgGrad.addColorStop(0.5, '#160a20');
-    bgGrad.addColorStop(1, '#0c0614');
-    uctx.fillStyle = bgGrad;
-    uctx.fillRect(0, 0, UW, UH);
+    // === PROFILE / ZINE COVER ===
+    uctx.fillStyle = Z.dark; uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.035);
 
-    // Floating sparkles
-    for (let i = 0; i < 30; i++) {
-        const sx = ((i*97+gameTime*0.15)%UW);
-        const sy = ((i*53+gameTime*0.08)%UH);
-        const colors = [P.roseLight, P.lavLight, P.skyLight, P.peachLight];
-        drawSparkle(uctx, Math.floor(sx), Math.floor(sy), 2, colors[i%4], Math.sin(gameTime*0.03+i)*0.2+0.2);
-    }
-    uctx.globalAlpha=1;
-
-    txtTitle(uctx, 'Choose Your Heart', UW/2, 10, P.rosePale, 38, 'center', 'rgba(0,0,0,0.35)', 4);
-    drawOrnament(uctx, UW/2 - 200, 55, 400, P.roseLight);
-    txtItalic(uctx, 'A/D or arrows to browse  ~  Space to confirm  ~  Click to select', UW/2, 66, P.textMuted, 10, 'center');
-
-    // 4 character cards — elegant portrait style
-    const cardColors = [P.gold, P.peach, P.blush, P.sky];
-    for (let i = 0; i < 4; i++) {
-        const c = CHARACTERS[i];
-        const bx = 55 + i * 218, by = 96;
-        const sel = i === selectedChar;
-
-        if (sel) {
-            // Selected glow aura
-            uctx.save();
-            uctx.globalAlpha = Math.sin(gameTime*0.06)*0.06+0.1;
-            uctx.fillStyle = cardColors[i];
-            uctx.beginPath();
-            uctx.arc(bx+97, by+170, 120, 0, Math.PI*2);
-            uctx.fill();
-            uctx.restore();
-            drawRomPanel(uctx, bx-4, by-4, 203, 345, cardColors[i], 0.85);
-        } else {
-            drawRomPanel(uctx, bx, by, 195, 337, P.border, 0.55);
-        }
-
-        // Sprite
-        const sc = sel ? 5 : 4;
-        const scaled = getScaledSprite(c.id, sc);
-        if (scaled) {
-            const bob = sel ? Math.sin(gameTime*0.06)*4 : 0;
-            const sprX = bx + 97 - (16*sc)/2;
-            const sprY = by + 14 + bob;
-            if (sel) {
-                uctx.save();
-                uctx.globalAlpha = 0.12;
-                uctx.fillStyle = cardColors[i];
-                uctx.beginPath(); uctx.arc(sprX+16*sc/2, sprY+20*sc/2, 42, 0, Math.PI*2); uctx.fill();
-                uctx.restore();
-            }
-            uctx.drawImage(scaled, sprX, sprY);
-        }
-
-        const nameCol = sel ? cardColors[i] : P.textMuted;
-        txtTitle(uctx, c.emoji + ' ' + c.name, bx + 97, by + 118, nameCol, sel ? 15 : 12, 'center', 'rgba(0,0,0,0.3)', 2);
-        txtItalic(uctx, c.title, bx + 97, by + 140, sel ? P.lavLight : '#3a3a4a', sel ? 11 : 9, 'center');
-
-        if (sel) {
-            drawOrnament(uctx, bx+10, by+158, 175, cardColors[i]);
-            txtItalic(uctx, c.desc, bx + 97, by + 170, P.textSoft, 8, 'center');
-            txtBody(uctx, c.lightstick + ' ' + c.skills[0].name, bx + 97, by + 194, P.roseLight, 10, 'center', 600, 'rgba(0,0,0,0.3)', 2);
-            txtItalic(uctx, c.skills[0].desc, bx + 97, by + 212, P.textMuted, 8, 'center');
-
-            // Stats bars — pastel rounded
-            const stats = c.stats;
-            const statNames = ['Grace','Heart','Power','Reach'];
-            const statVals = [stats.speed/4, stats.hp/7, stats.atk/2, stats.range/100];
-            statNames.forEach((name, idx) => {
-                const sy2 = by + 236 + idx * 21;
-                txtBody(uctx, name, bx + 10, sy2, P.textSoft, 8, 'left', 500);
-                drawPastelBar(uctx, bx+66, sy2+2, 110, 9, statVals[idx], cardColors[i], P.lavLight);
-            });
-
-            txtItalic(uctx, 'Devotees: ' + c.fandom, bx + 97, by + 326, P.roseLight, 8, 'center');
-        }
-    }
-
-    // Skill tree preview — ornate panel
     const selChar = CHARACTERS[selectedChar];
-    const selColor = cardColors[selectedChar];
-    const treeY = 454;
-    drawRomPanel(uctx, 28, treeY, UW - 56, 238, selColor, 0.82);
-    drawOrnament(uctx, 100, treeY + 2, UW - 200, selColor);
+    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+    const selCol = charColors[selectedChar];
 
-    txtTitle(uctx, 'Abilities ~ ' + selChar.name + ' ' + selChar.emoji, UW/2, treeY + 10, selColor, 13, 'center', 'rgba(0,0,0,0.3)', 2);
+    // === TOP: Magazine header ===
+    sans(uctx, 'SUPERNOVA ZINE', 30, 14, 'rgba(255,255,255,0.25)', 10, 'left', 800);
+    sans(uctx, 'ISSUE #' + (selectedChar + 1) + ' of 4', UW - 30, 14, 'rgba(255,255,255,0.2)', 9, 'right', 400);
+    // Divider line
+    uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(30, 30, UW - 60, 1);
+
+    // === LEFT SIDE: Selected character BIG — zine cover hero ===
+    drawCutout(uctx, 20, 40, 380, 420, '#141418', -0.5);
+    const heroSprite = getScaledSprite(selChar.id, 10);
+    if (heroSprite) {
+        const bob = Math.sin(gameTime*0.05)*4;
+        uctx.save();
+        uctx.translate(60, 55 + bob);
+        uctx.rotate(-1 * Math.PI/180);
+        // Photo shadow
+        uctx.fillStyle = 'rgba(0,0,0,0.35)'; uctx.fillRect(-6, -6, 160+12, 200+12);
+        uctx.drawImage(heroSprite, 0, 0);
+        uctx.restore();
+    }
+
+    // Character name — huge, overlapping the image
+    serif(uctx, selChar.name, 50, 260, Z.white, 56, 'left');
+    drawHighlight(uctx, 48, 320, 180, 20, selCol + '40');
+    serif(uctx, selChar.title, 50, 318, selCol, 18, 'left', true);
+
+    // Social metrics on the hero
+    sans(uctx, selChar.hashtag, 50, 350, 'rgba(255,255,255,0.4)', 11, 'left', 500);
+    drawReactionBar(uctx, 50, 378, [['💕','12K'],[selChar.lightstick,'8K'],['💬','2K']]);
+
+    // Quote — pull quote overlapping
+    drawPullQuote(uctx, 50, 418, selChar.desc, selCol, 13);
+
+    // Tape sticker
+    drawTape(uctx, 250, 50, 80, 16, 'rgba(255,213,84,0.45)', -8);
+    sans(uctx, 'COVER STAR', 260, 52, Z.dark, 8, 'left', 800);
+
+    // === RIGHT SIDE: Other characters as thumbnails — collage overlap ===
+    const thumbPositions = [];
+    let thumbIdx = 0;
+    const basePositions = [{x:430, y:46, rot:2}, {x:580, y:52, rot:-1.5}, {x:730, y:42, rot:3}];
+    for (let i = 0; i < 4; i++) {
+        if (i === selectedChar) continue;
+        const pos = basePositions[thumbIdx];
+        const sc = 5;
+        const scaled = getScaledSprite(CHARACTERS[i].id, sc);
+        if (scaled && pos) {
+            uctx.save();
+            uctx.translate(pos.x, pos.y);
+            uctx.rotate(pos.rot * Math.PI / 180);
+            uctx.fillStyle = 'rgba(0,0,0,0.25)'; uctx.fillRect(-3,-3, 16*sc+6, 20*sc+6);
+            uctx.globalAlpha = i === selectedChar ? 1 : 0.65;
+            uctx.drawImage(scaled, 0, 0);
+            uctx.globalAlpha = 1;
+            uctx.restore();
+            sans(uctx, CHARACTERS[i].name, pos.x + 10, pos.y + 20*sc + 8, 'rgba(255,255,255,0.4)', 9, 'left', 600);
+        }
+        thumbIdx++;
+    }
+
+    // Stickers scattered
+    drawSticker(uctx, '✨', 430, 200, 10, 22);
+    drawSticker(uctx, '🔥', 860, 60, -12, 18);
+
+    // === BROWSE HINT — tape label ===
+    drawTape(uctx, 420, 225, 200, 22, 'rgba(255,255,255,0.07)', 0);
+    sans(uctx, '← A/D to browse  •  SPACE or click →', 432, 228, 'rgba(255,255,255,0.45)', 10, 'left', 500);
+
+    // === BOTTOM: Skill tree as "article preview" cards ===
+    const treeY = 468;
+    uctx.fillStyle = 'rgba(255,255,255,0.03)'; uctx.fillRect(0, treeY - 6, UW, UH - treeY + 6);
+    uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(0, treeY - 6, UW, 1);
+
+    drawHighlight(uctx, 30, treeY + 2, 80, 16, selCol + '35');
+    sansBold(uctx, 'SKILL TREE', 34, treeY + 3, Z.white, 11);
+    sans(uctx, selChar.name + ' ' + selChar.emoji, 130, treeY + 5, 'rgba(255,255,255,0.4)', 10, 'left', 500);
 
     selChar.skills.forEach((sk, idx) => {
-        const sx2 = 52 + idx * 176;
-        const sy2 = treeY + 36;
+        const sx2 = 28 + idx * 182;
+        const sy2 = treeY + 28;
 
-        drawRomPanel(uctx, sx2, sy2, 168, 182, P.border, 0.5);
+        drawCutout(uctx, sx2, sy2, 174, 198, '#161620', (idx%2===0 ? 0.5 : -0.3));
 
-        uctx.font = '18px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-        uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, sx2 + 84, sy2 + 6);
-        txtBody(uctx, sk.name, sx2 + 84, sy2 + 30, selColor, 10, 'center', 600, 'rgba(0,0,0,0.3)', 2);
-        txtItalic(uctx, sk.desc, sx2 + 84, sy2 + 48, P.textMuted, 8, 'center');
+        uctx.font = '20px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+        uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, sx2 + 87, sy2 + 6);
+        sansBold(uctx, sk.name, sx2 + 87, sy2 + 32, selCol, 10, 'center');
+        sans(uctx, sk.desc, sx2 + 87, sy2 + 48, Z.gray, 7, 'center', 400);
 
         sk.levels.forEach((lv, li) => {
-            const ly = sy2 + 68 + li * 20;
+            const ly = sy2 + 68 + li * 22;
             const isFirst = li === 0 && idx === 0;
-            txtBody(uctx, (li+1)+'.', sx2 + 8, ly, isFirst ? P.gold : '#444', 7, 'left', 600);
-            txtBody(uctx, lv, sx2 + 24, ly, isFirst ? P.goldLight : '#666', 7, 'left', 400);
+            sans(uctx, (li+1) + '. ' + lv, sx2 + 12, ly, isFirst ? Z.yellow : '#555', 7, 'left', isFirst ? 600 : 400);
         });
 
         if (idx === 0) {
-            txtItalic(uctx, 'Signature', sx2 + 84, sy2 + 168, P.gold, 8, 'center');
+            drawTape(uctx, sx2 + 44, sy2 + 180, 80, 14, 'rgba(255,213,84,0.4)', -2);
+            sans(uctx, 'SIGNATURE', sx2 + 52, sy2 + 181, Z.dark, 7, 'left', 800);
         }
     });
+
+    // Page number
+    sans(uctx, '002', UW - 40, UH - 20, 'rgba(255,255,255,0.12)', 9, 'right', 300);
 }
 
 function drawUI_LevelUp() {
-    // Dreamy overlay
-    uctx.fillStyle = 'rgba(14, 6, 22, 0.82)';
+    // === POST VIEW — full-bleed dark overlay ===
+    uctx.fillStyle = 'rgba(10, 10, 14, 0.88)';
     uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.03);
 
-    // Soft radiating sparkle aura
-    uctx.save();
-    uctx.translate(UW/2, UH/2 - 20);
-    uctx.rotate(gameTime * 0.003);
-    for (let i = 0; i < 12; i++) {
-        const a = (i/12) * Math.PI * 2;
-        uctx.globalAlpha = 0.015;
-        uctx.fillStyle = i%2===0 ? P.goldLight : P.roseLight;
-        uctx.beginPath();
-        uctx.moveTo(0, 0);
-        uctx.lineTo(Math.cos(a-0.06)*600, Math.sin(a-0.06)*600);
-        uctx.lineTo(Math.cos(a+0.06)*600, Math.sin(a+0.06)*600);
-        uctx.fill();
-    }
-    uctx.restore();
-    uctx.globalAlpha = 1;
+    // Subtle color wash — shifted, rotated cutout
+    const cd = CHARACTERS[player.charIdx];
+    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+    const accent = charColors[player.charIdx] || Z.hot;
+    drawCutout(uctx, -30, -10, UW + 60, 120, accent + '08', -0.3);
 
-    // Title — elegant
-    const bounce = Math.sin(gameTime*0.08)*2;
-    drawOrnament(uctx, UW/2 - 160, 22, 320, P.goldLight);
-    txtTitle(uctx, 'A New Power Blooms', UW/2, 32 + bounce, P.goldLight, 36, 'center', 'rgba(0,0,0,0.35)', 4);
-    txtItalic(uctx, 'Level ' + player.level + ' ~ Choose your blessing', UW/2, 78, P.lavLight, 14, 'center');
-    txtBody(uctx, player.charDef.emoji + ' ' + player.charDef.name, UW/2, 100, P.roseLight, 11, 'center', 600);
-    drawOrnament(uctx, UW/2 - 140, 120, 280, P.roseLight);
+    // === HEADER — editorial headline, overlapping tape ===
+    const bounce = Math.sin(gameTime * 0.08) * 2;
+    drawTape(uctx, 50, 14, 100, 20, 'rgba(255,213,84,0.5)', -2);
+    sans(uctx, 'NEW POST', 60, 17, Z.dark, 9, 'left', 800);
 
-    // Cards — ornate choice panels
+    serif(uctx, 'Level Up', UW/2, 20 + bounce, Z.white, 48, 'center');
+    drawHighlight(uctx, UW/2 - 100, 72, 200, 18, accent + '30');
+    sans(uctx, cd.emoji + ' ' + cd.name + ' reached LV ' + player.level, UW/2, 74, accent, 13, 'center', 600);
+
+    // Pull quote
+    drawPullQuote(uctx, UW/2 - 180, 100, '"pick your power-up. choose wisely."', Z.coral, 14);
+
+    // === CHOICE CARDS — cutout collage, not a grid ===
     levelUpChoices.forEach((choice, i) => {
-        const bx = 170, by = 145 + i * 125;
-        const hover = mouseX >= bx && mouseX <= bx + 620 && mouseY >= by && mouseY <= by + 110;
-        const cd = CHARACTERS[player.charIdx];
+        const bx = 80 + i * 4, by = 140 + i * 130;
+        const cw = 800 - i * 8;
+        const hover = mouseX >= bx && mouseX <= bx + cw && mouseY >= by && mouseY <= by + 115;
         const isCharSkill = cd.skills.some(s => s.id === choice.id);
+        const cardRot = i === 0 ? 0.3 : (i === 1 ? -0.4 : 0.6);
 
-        drawRomPanel(uctx, bx, by, 620, 110, hover ? P.roseLight : P.border, hover ? 0.88 : 0.72);
+        // Cutout card — slight rotation, overlap
+        drawCutout(uctx, bx, by, cw, 115, hover ? '#222230' : '#181822', cardRot);
 
+        // Hover glow
         if (hover) {
             uctx.save();
-            uctx.globalAlpha = 0.04;
-            uctx.fillStyle = P.roseLight;
-            uctx.fillRect(bx+10, by+10, 600, 90);
+            uctx.globalAlpha = 0.06;
+            uctx.fillStyle = accent;
+            uctx.fillRect(bx + 4, by + 4, cw - 8, 107);
             uctx.restore();
         }
 
-        // Number
-        txtTitle(uctx, (i+1) + '', bx + 24, by + 12, P.roseLight, 18, 'left', 'rgba(0,0,0,0.3)', 2);
+        // Number — big serif overlapping the edge
+        serif(uctx, (i + 1) + '', bx + 18, by + 8, accent + '60', 36, 'left');
 
         // Emoji
-        uctx.font = '28px serif'; uctx.textAlign='left'; uctx.textBaseline='top';
-        uctx.fillStyle='#fff'; uctx.fillText(choice.emoji, bx + 60, by + 12);
+        uctx.font = '26px serif'; uctx.textAlign = 'left'; uctx.textBaseline = 'top';
+        uctx.fillStyle = '#fff'; uctx.fillText(choice.emoji, bx + 56, by + 14);
 
-        // Name
-        txtTitle(uctx, choice.name, bx + 100, by + 10, P.rosePale, 16, 'left', 'rgba(0,0,0,0.3)', 2);
+        // Name — editorial weight
+        serif(uctx, choice.name, bx + 92, by + 10, Z.white, 20, 'left');
 
+        // Signature tag
         if (isCharSkill) {
-            txtItalic(uctx, 'Signature', bx + 100 + choice.name.length * 9.5 + 14, by + 14, P.gold, 10, 'left');
+            drawTape(uctx, bx + 92 + choice.name.length * 11 + 10, by + 12, 70, 14, 'rgba(255,213,84,0.45)', -1.5);
+            sans(uctx, 'SIGNATURE', bx + 92 + choice.name.length * 11 + 16, by + 14, Z.dark, 7, 'left', 800);
         }
 
-        // Level indicator
+        // Level — clean sans
         const curLv = player.powers[choice.id];
-        txtBody(uctx, 'Lv.' + curLv + ' -> Lv.' + (curLv + 1), bx + 100, by + 34, P.textSoft, 10, 'left', 500);
+        sans(uctx, 'LV ' + curLv + ' → ' + (curLv + 1), bx + 92, by + 38, Z.gray, 10, 'left', 600);
 
-        // Level pips (hearts)
+        // Level pips — highlighter dots
         for (let d = 0; d < 5; d++) {
-            const dotX = bx + 250 + d * 18;
-            uctx.fillStyle = d < curLv ? P.rose : (d === curLv ? P.roseLight : 'rgba(40,20,50,0.5)');
+            const dotX = bx + 210 + d * 20;
+            const dotCol = d < curLv ? accent : (d === curLv ? Z.yellow : 'rgba(255,255,255,0.08)');
+            uctx.fillStyle = dotCol;
             uctx.beginPath();
-            uctx.arc(dotX + 5, by + 39, d === curLv ? 5 : 4, 0, Math.PI*2);
+            uctx.arc(dotX, by + 44, d === curLv ? 5 : 3.5, 0, Math.PI * 2);
             uctx.fill();
-            if (d === curLv) {
-                uctx.strokeStyle = P.rosePale;
-                uctx.lineWidth = 1;
-                uctx.stroke();
-            }
         }
 
         // Description
-        txtItalic(uctx, choice.desc, bx + 100, by + 56, P.textSoft, 11, 'left');
+        sans(uctx, choice.desc, bx + 92, by + 60, 'rgba(255,255,255,0.55)', 11, 'left', 400);
 
-        // Level-specific text
+        // Level-specific detail
         const charSkill = cd.skills.find(s => s.id === choice.id);
         if (charSkill && charSkill.levels && charSkill.levels[curLv]) {
-            txtBody(uctx, '~ ' + charSkill.levels[curLv], bx + 100, by + 80, P.lavLight, 9, 'left', 500);
+            drawHighlight(uctx, bx + 90, by + 82, 300, 14, accent + '15');
+            sans(uctx, '→ ' + charSkill.levels[curLv], bx + 92, by + 83, accent, 9, 'left', 500);
+        }
+
+        // Mini reaction on hover
+        if (hover) {
+            drawReactionBar(uctx, bx + cw - 200, by + 88, [['🔥', 'pick'], ['✨', 'slay']]);
         }
     });
 
-    // Hint
-    drawOrnament(uctx, UW/2 - 160, UH - 62, 320, P.textMuted);
-    txtItalic(uctx, 'Press 1, 2, or 3  ~  or click to choose your path', UW/2, UH - 50, P.textMuted, 10, 'center');
+    // === BOTTOM: hint + social ===
+    sans(uctx, 'press 1, 2, or 3  •  or click to choose', UW/2, UH - 52, 'rgba(255,255,255,0.3)', 10, 'center', 400);
+    drawShareRow(uctx, UW/2 - 100, UH - 28);
+
+    // Page number
+    sans(uctx, '003', UW - 40, UH - 24, 'rgba(255,255,255,0.12)', 9, 'right', 300);
 }
 
 function drawUI_GameOver() {
-    // Misty overlay
-    const goGrad = uctx.createRadialGradient(UW/2, UH*0.4, 50, UW/2, UH*0.4, UH);
-    goGrad.addColorStop(0, 'rgba(24, 10, 30, 0.9)');
-    goGrad.addColorStop(0.5, 'rgba(14, 6, 22, 0.88)');
-    goGrad.addColorStop(1, 'rgba(8, 3, 14, 0.94)');
-    uctx.fillStyle = goGrad;
+    // === PROFILE RECAP — zine cover stats ===
+    uctx.fillStyle = Z.dark;
     uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.04);
 
-    // Softly falling sparkles
-    for (let i = 0; i < 25; i++) {
-        const px = ((i*83+gameTime*0.1)%UW);
-        const py = ((i*59+gameTime*0.06)%UH);
-        drawSparkle(uctx, Math.floor(px), Math.floor(py), 2, P.roseLight, Math.sin(gameTime*0.025+i)*0.12+0.12);
+    // Slow-drifting stickers in background
+    for (let i = 0; i < 8; i++) {
+        const sx = ((i * 137 + gameTime * 0.05) % (UW + 40)) - 20;
+        const sy = ((i * 89 + gameTime * 0.03) % (UH + 40)) - 20;
+        uctx.globalAlpha = 0.04;
+        drawSticker(uctx, ['✨','💫','🌟','⚡','🔥','💀','👑','💕'][i], sx, sy, gameTime * 0.02 + i * 45, 28);
     }
     uctx.globalAlpha = 1;
 
-    drawOrnament(uctx, UW/2 - 180, 38, 360, P.roseLight);
-    txtTitle(uctx, 'The Curtain Falls', UW/2, 48, P.rosePale, 44, 'center', 'rgba(0,0,0,0.35)', 4);
-    drawOrnament(uctx, UW/2 - 140, 100, 280, P.lavender);
+    // Top magazine header
+    sans(uctx, 'SUPERNOVA ZINE', 30, 14, 'rgba(255,255,255,0.2)', 10, 'left', 800);
+    sans(uctx, 'FINAL ISSUE', UW - 30, 14, 'rgba(255,255,255,0.15)', 9, 'right', 400);
+    uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(30, 30, UW - 60, 1);
+
+    // Big editorial headline
+    serif(uctx, 'CURTAIN CALL', UW/2, 40, Z.white, 58, 'center');
+    drawHighlight(uctx, UW/2 - 90, 100, 180, 18, 'rgba(255,107,107,0.3)');
+    sans(uctx, 'the run is over. here\'s the recap.', UW/2, 102, Z.hot, 12, 'center', 500);
 
     if (player) {
         const cd = player.charDef;
+        const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+        const accent = charColors[player.charIdx] || Z.hot;
 
-        // Character portrait with soft glow
-        const goScaled = getScaledSprite(player.charId, 6);
+        // === LEFT: Character portrait cutout ===
+        drawCutout(uctx, 30, 130, 260, 320, '#141418', -1);
+        const goScaled = getScaledSprite(player.charId, 8);
         if (goScaled) {
+            const bob = Math.sin(gameTime * 0.04) * 3;
             uctx.save();
-            uctx.globalAlpha = 0.1;
-            uctx.fillStyle = P.roseLight;
-            uctx.beginPath(); uctx.arc(UW/2, 195, 55, 0, Math.PI*2); uctx.fill();
+            uctx.translate(65, 145 + bob);
+            uctx.rotate(-0.5 * Math.PI / 180);
+            uctx.fillStyle = 'rgba(0,0,0,0.3)'; uctx.fillRect(-5, -5, 128 + 10, 160 + 10);
+            uctx.globalAlpha = 0.85;
+            uctx.drawImage(goScaled, 0, 0);
             uctx.restore();
-            uctx.globalAlpha = 0.8;
-            uctx.drawImage(goScaled, UW/2 - 48, 130);
-            uctx.globalAlpha = 1;
         }
 
-        txtTitle(uctx, cd.emoji + ' ' + cd.name, UW/2, 258, P.roseLight, 16, 'center', 'rgba(0,0,0,0.3)', 2);
-        txtItalic(uctx, cd.title, UW/2, 280, P.lavLight, 12, 'center');
+        // Name + title overlapping portrait
+        serif(uctx, cd.name, 50, 320, Z.white, 36, 'left');
+        drawHighlight(uctx, 48, 360, 140, 16, accent + '35');
+        serif(uctx, cd.title, 50, 358, accent, 14, 'left', true);
+        sans(uctx, cd.hashtag, 50, 384, 'rgba(255,255,255,0.35)', 10, 'left', 500);
 
-        // Stats panel — ornate
-        drawRomPanel(uctx, UW/2-215, 305, 430, 240, P.roseLight, 0.82);
-        drawOrnament(uctx, UW/2-180, 308, 360, P.roseLight);
+        // Reaction bar on portrait
+        drawReactionBar(uctx, 50, 410, [[cd.lightstick, formatNum(followers)], ['💬', killCount + ' KOs']]);
 
-        txtTitle(uctx, 'Your Story', UW/2, 316, P.rosePale, 14, 'center');
+        // Tape label
+        drawTape(uctx, 180, 140, 80, 16, 'rgba(255,213,84,0.45)', -6);
+        sans(uctx, 'MVP', 192, 142, Z.dark, 8, 'left', 800);
 
-        const secs = Math.floor(survivalTime/60);
-        const mins = Math.floor(secs/60);
-        const secStr = (secs%60).toString().padStart(2,'0');
+        // === RIGHT: Stats as article cards ===
+        const secs = Math.floor(survivalTime / 60);
+        const mins = Math.floor(secs / 60);
+        const secStr = (secs % 60).toString().padStart(2, '0');
 
         const stats = [
-            ['Time Survived', mins + ':' + secStr],
-            ['Foes Vanquished', killCount.toString()],
-            ['Level Reached', player.level.toString()],
-            ['Admirers Won', formatNum(followers)],
-            ['Highest Crescendo', bestCombo.toString() + 'x'],
-            ['Bosses Felled', bossesKilled.toString()],
+            ['⏱️', 'Time', mins + ':' + secStr],
+            ['💀', 'KOs', killCount.toString()],
+            ['📈', 'Level', player.level.toString()],
+            ['💕', 'Follows', formatNum(followers)],
+            ['🔥', 'Best Combo', bestCombo + 'x'],
+            ['👑', 'Bosses', bossesKilled.toString()],
         ];
 
+        const statsX = 320;
+        drawCutout(uctx, statsX, 130, 610, 320, '#181822', 0.5);
+
+        // Stats header
+        drawHighlight(uctx, statsX + 16, 140, 70, 16, accent + '30');
+        sansBold(uctx, 'THE STATS', statsX + 20, 141, Z.white, 10);
+
         stats.forEach((s, idx) => {
-            const sy = 345 + idx * 28;
-            txtItalic(uctx, s[0], UW/2 - 190, sy, P.textSoft, 12, 'left');
-            txtTitle(uctx, s[1], UW/2 + 190, sy, P.cream, 13, 'right', 'rgba(0,0,0,0.3)', 2);
+            const row = Math.floor(idx / 2);
+            const col = idx % 2;
+            const sx = statsX + 24 + col * 290;
+            const sy = 172 + row * 68;
+
+            // Mini cutout per stat
+            drawCutout(uctx, sx, sy, 270, 56, 'rgba(255,255,255,0.03)', col === 0 ? 0.3 : -0.2);
+
+            // Emoji + label
+            uctx.font = '18px serif'; uctx.textAlign = 'left'; uctx.textBaseline = 'top';
+            uctx.fillStyle = '#fff'; uctx.fillText(s[0], sx + 10, sy + 6);
+            sans(uctx, s[1], sx + 36, sy + 10, Z.gray, 10, 'left', 500);
+
+            // Value — big serif
+            serif(uctx, s[2], sx + 36, sy + 26, Z.white, 20, 'left');
         });
 
-        // Verdict — romantic
-        drawOrnament(uctx, UW/2 - 160, 510, 320, P.goldLight);
-        const verdict = killCount >= 100 ? 'Eternal Radiance' :
-                        killCount >= 50 ? 'Rising Constellation' :
-                        killCount >= 25 ? 'Budding Bloom' :
-                        'A Gentle Beginning';
-        txtTitle(uctx, verdict, UW/2, 522, P.goldLight, 22, 'center', 'rgba(0,0,0,0.3)', 3);
+        // === VERDICT — pull quote style ===
+        const verdict = killCount >= 100 ? 'Legendary Run 👑' :
+                        killCount >= 50 ? 'Main Character Energy 🔥' :
+                        killCount >= 25 ? 'Rising Star ✨' :
+                        'First Chapter 📖';
+        drawPullQuote(uctx, statsX + 20, 390, '"' + verdict + '"', Z.yellow, 18);
 
-        txtItalic(uctx, cd.hashtag + '  ~  forever in our hearts', UW/2, 556, P.plum, 10, 'center');
+        // Comment bubble
+        const quips = ['no bc this was actually insane', 'the way they ATE', 'ok legend behavior', 'not bad for a first run'];
+        const quip = quips[killCount % quips.length];
+        drawCommentBubble(uctx, statsX + 20, 430, quip, 'fan_' + (killCount % 99), 'rgba(255,255,255,0.05)');
     }
 
-    // Continue prompt
-    const blinkAlpha = Math.sin(gameTime*0.06)*0.25+0.75;
-    uctx.globalAlpha = blinkAlpha;
-    txtGlow(uctx, 'Press Space to Begin Anew', UW/2, UH - 70, P.rosePale, 16, 'center', P.rose);
+    // === BOTTOM: CTA + social ===
+    const blink = Math.sin(gameTime * 0.06) * 0.2 + 0.8;
+    uctx.globalAlpha = blink;
+    serif(uctx, 'TAP TO RESTART', UW/2, UH - 80, Z.white, 22, 'center');
     uctx.globalAlpha = 1;
+    sans(uctx, 'or press SPACE', UW/2, UH - 54, 'rgba(255,255,255,0.3)', 10, 'center', 400);
+    drawShareRow(uctx, UW/2 - 120, UH - 30);
+
+    // Page number
+    sans(uctx, '004', UW - 40, UH - 24, 'rgba(255,255,255,0.12)', 9, 'right', 300);
 }
 
 function drawUI_Paused() {
-    uctx.fillStyle = 'rgba(14, 6, 22, 0.75)';
+    // === STORY OVERLAY — minimal, magazine interstitial ===
+    uctx.fillStyle = 'rgba(10, 10, 14, 0.8)';
     uctx.fillRect(0, 0, UW, UH);
-    drawRomPanel(uctx, UW/2 - 210, UH/2 - 65, 420, 130, P.lavender, 0.85);
-    drawOrnament(uctx, UW/2 - 160, UH/2 - 60, 320, P.lavender);
-    txtTitle(uctx, 'Intermission', UW/2, UH/2 - 38, P.lavPale, 38, 'center', 'rgba(0,0,0,0.3)', 3);
-    drawOrnament(uctx, UW/2 - 120, UH/2 + 12, 240, P.roseLight);
-    txtItalic(uctx, 'Press Escape to continue your story', UW/2, UH/2 + 28, P.textSoft, 13, 'center');
+    drawGrain(uctx, UW, UH, 0.03);
+
+    // Centered cutout card
+    drawCutout(uctx, UW/2 - 220, UH/2 - 70, 440, 140, '#181822', -0.5);
+
+    // Tape across the top
+    drawTape(uctx, UW/2 - 50, UH/2 - 78, 100, 16, 'rgba(255,213,84,0.45)', 2);
+    sans(uctx, 'PAUSED', UW/2 - 38, UH/2 - 76, Z.dark, 8, 'left', 800);
+
+    // Big editorial serif
+    serif(uctx, 'Intermission', UW/2, UH/2 - 45, Z.white, 42, 'center');
+
+    // Hint
+    drawHighlight(uctx, UW/2 - 110, UH/2 + 12, 220, 16, 'rgba(255,255,255,0.05)');
+    sans(uctx, 'press ESC to continue', UW/2, UH/2 + 14, 'rgba(255,255,255,0.4)', 11, 'center', 500);
+
+    // Sticker
+    drawSticker(uctx, '⏸️', UW/2 + 200, UH/2 - 50, 8, 28);
 }
 
 // ================================================================
