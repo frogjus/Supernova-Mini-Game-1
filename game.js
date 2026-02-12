@@ -373,30 +373,53 @@ const PALETTES = {
 function drawPixelPanel(ctx, x, y, w, h, opts = {}) {
     const fill = opts.fill || UI.panel;
     const border = opts.border || UI.textMuted;
+    // Outer glow (subtle colored shadow behind panel)
+    if (opts.glow || opts.ribbon) {
+        const glowCol = opts.glow || opts.ribbon || border;
+        ctx.save();
+        ctx.globalAlpha = 0.15;
+        ctx.fillStyle = glowCol;
+        ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
+        ctx.globalAlpha = 0.08;
+        ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+        ctx.restore();
+    }
     ctx.fillStyle = fill;
     ctx.fillRect(x, y, w, h);
     ctx.strokeStyle = border;
     ctx.lineWidth = 1;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    // Double border for depth (inner highlight line)
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
     // Lace corner decorations — princessy pixel notches
-    if (!opts.noLace && w > 16 && h > 16) {
+    if (!opts.noLace && w > 20 && h > 20) {
         ctx.fillStyle = border;
+        const cs = Math.min(5, Math.floor(w / 8)); // corner size scales with panel
         // Top-left lace
-        ctx.fillRect(x+1, y+1, 3, 1); ctx.fillRect(x+1, y+2, 1, 2);
+        ctx.fillRect(x, y, cs, 1); ctx.fillRect(x, y, 1, cs);
+        ctx.fillRect(x + 2, y + 2, 2, 1); ctx.fillRect(x + 2, y + 2, 1, 2);
         // Top-right lace
-        ctx.fillRect(x+w-4, y+1, 3, 1); ctx.fillRect(x+w-2, y+2, 1, 2);
+        ctx.fillRect(x + w - cs, y, cs, 1); ctx.fillRect(x + w - 1, y, 1, cs);
+        ctx.fillRect(x + w - 4, y + 2, 2, 1); ctx.fillRect(x + w - 3, y + 2, 1, 2);
         // Bottom-left lace
-        ctx.fillRect(x+1, y+h-2, 3, 1); ctx.fillRect(x+1, y+h-4, 1, 2);
+        ctx.fillRect(x, y + h - 1, cs, 1); ctx.fillRect(x, y + h - cs, 1, cs);
+        ctx.fillRect(x + 2, y + h - 3, 2, 1); ctx.fillRect(x + 2, y + h - 4, 1, 2);
         // Bottom-right lace
-        ctx.fillRect(x+w-4, y+h-2, 3, 1); ctx.fillRect(x+w-2, y+h-4, 1, 2);
+        ctx.fillRect(x + w - cs, y + h - 1, cs, 1); ctx.fillRect(x + w - 1, y + h - cs, 1, cs);
+        ctx.fillRect(x + w - 4, y + h - 3, 2, 1); ctx.fillRect(x + w - 3, y + h - 4, 1, 2);
     }
     if (opts.ribbon) {
         ctx.fillStyle = opts.ribbon;
-        ctx.fillRect(x + 6, y - 4, Math.min(120, w - 12), 6);
+        ctx.fillRect(x + 6, y - 5, Math.min(120, w - 12), 7);
+        // Ribbon notch
+        ctx.fillStyle = fill;
+        ctx.fillRect(x + 6 + Math.min(120, w - 12) - 4, y - 5, 4, 2);
     }
     if (opts.spikes) {
         ctx.fillStyle = opts.spikes;
-        for (let i = 0; i < 4; i++) ctx.fillRect(x + w - 10 + i * 2, y + 4 + i * 4, 2, 2);
+        for (let i = 0; i < 6; i++) ctx.fillRect(x + w - 14 + i * 2, y + 2 + i * 3, 2, 2);
+        for (let i = 0; i < 6; i++) ctx.fillRect(x + w - 14 + i * 2, y + h - 4 - i * 3, 2, 2);
     }
 }
 
@@ -1623,33 +1646,45 @@ function drawPixelWorld() {
     gctx.fillStyle = UI.bg;
     gctx.fillRect(0, 0, PW, PH);
 
-    // Zine-textured floor — subtle dot grid like graph paper
+    // Zine-textured floor — dot grid with princessy color accents
     const ts = 32;
     const sx = -(camX%ts), sy = -(camY%ts);
     for (let gx=sx;gx<PW+ts;gx+=ts) for (let gy=sy;gy<PH+ts;gy+=ts) {
         const wx=Math.floor((gx+camX)/ts), wy=Math.floor((gy+camY)/ts);
         gctx.fillStyle = (wx+wy)%2===0 ? UI.bgStage : UI.bg;
         gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
-        // Dot grid intersection
-        gctx.fillStyle='rgba(255,255,255,0.04)';
+        // Cross-shaped dot grid intersection (more visible)
+        gctx.fillStyle='rgba(185,140,255,0.06)';
         gctx.fillRect(Math.floor(gx),Math.floor(gy),1,1);
-        // Occasional color splash
-        if ((wx*7+wy*13)%19===0) {
-            const pulse=Math.sin(gameTime*0.02+wx+wy)*0.2+0.2;
-            const colors=[UI.danger, UI.motifCrown, UI.cyan, UI.motifHeart];
-            gctx.globalAlpha=pulse*0.04;
+        gctx.fillRect(Math.floor(gx)+1,Math.floor(gy),1,1);
+        gctx.fillRect(Math.floor(gx),Math.floor(gy)+1,1,1);
+        // Color splashes — more frequent, princessy palette
+        if ((wx*7+wy*13)%11===0) {
+            const pulse=Math.sin(gameTime*0.02+wx+wy)*0.25+0.25;
+            const colors=[UI.danger, UI.motifCrown, UI.cyan, UI.motifHeart, UI.lilac, UI.mint];
+            gctx.globalAlpha=pulse*0.06;
             gctx.fillStyle=colors[(wx+wy)%colors.length];
             gctx.fillRect(Math.floor(gx),Math.floor(gy),ts,ts);
             gctx.globalAlpha=1;
         }
+        // Occasional tiny heart/crown motif on floor
+        if ((wx*13+wy*7)%47===0) {
+            gctx.fillStyle='rgba(255,147,200,0.08)';
+            const mx=Math.floor(gx)+ts/2, my=Math.floor(gy)+ts/2;
+            // Tiny heart shape
+            gctx.fillRect(mx-1,my,1,1); gctx.fillRect(mx+1,my,1,1);
+            gctx.fillRect(mx-2,my+1,5,1);
+            gctx.fillRect(mx-1,my+2,3,1);
+            gctx.fillRect(mx,my+3,1,1);
+        }
     }
 
-    // Moving scanlines / light leaks
-    for (let i = 0; i < 2; i++) {
-        const beamX = ((gameTime * 0.5 + i * 180) % (PW + 100)) - 50;
-        gctx.globalAlpha = 0.02;
-        gctx.fillStyle = [UI.danger, UI.cyan][i];
-        gctx.fillRect(Math.floor(beamX) - 10, 0, 20, PH);
+    // Moving scanlines / light leaks — wider and more colorful
+    for (let i = 0; i < 3; i++) {
+        const beamX = ((gameTime * 0.4 + i * 140) % (PW + 120)) - 60;
+        gctx.globalAlpha = 0.025;
+        gctx.fillStyle = [UI.danger, UI.cyan, UI.lilac][i];
+        gctx.fillRect(Math.floor(beamX) - 15, 0, 30, PH);
         gctx.globalAlpha = 1;
     }
 
@@ -1735,6 +1770,11 @@ function drawPixelWorld() {
             }
         } else {
             // === REGULAR ENEMY RENDERING ===
+            // Threat glow aura
+            gctx.globalAlpha = 0.12 + Math.sin(gameTime * 0.06 + e.phase) * 0.05;
+            gctx.fillStyle = e.type.color1;
+            gctx.beginPath(); gctx.arc(ex, ey, e.w/2 + 3, 0, Math.PI * 2); gctx.fill();
+            gctx.globalAlpha = 1;
             // Shadow
             gctx.fillStyle='rgba(0,0,0,0.25)';
             gctx.fillRect(ex-e.w/2+1,ey+e.h/2,e.w-2,2);
@@ -1819,12 +1859,25 @@ function drawPixelWorld() {
     if (player) {
         const px=Math.floor(player.x-camX), py=Math.floor(player.y-camY);
 
-        // Character glow aura (always on, subtle)
-        const glowPulse = Math.sin(gameTime * 0.06) * 0.04 + 0.08;
+        // Character glow aura (princessy sparkle ring)
+        const glowPulse = Math.sin(gameTime * 0.06) * 0.06 + 0.14;
         gctx.globalAlpha = glowPulse;
         gctx.fillStyle = player.charDef.color;
-        gctx.beginPath(); gctx.arc(px, py, 16, 0, Math.PI*2); gctx.fill();
+        gctx.beginPath(); gctx.arc(px, py, 18, 0, Math.PI*2); gctx.fill();
+        gctx.globalAlpha = glowPulse * 0.5;
+        gctx.fillStyle = UI.pink;
+        gctx.beginPath(); gctx.arc(px, py, 22, 0, Math.PI*2); gctx.fill();
         gctx.globalAlpha = 1;
+        // Orbiting sparkle pixels
+        for (let sp = 0; sp < 3; sp++) {
+            const sa = gameTime * 0.04 + sp * (Math.PI * 2 / 3);
+            const sr = 14 + Math.sin(gameTime * 0.08 + sp) * 3;
+            const spx = px + Math.cos(sa) * sr, spy = py + Math.sin(sa) * sr;
+            gctx.fillStyle = UI.motifCrown;
+            gctx.globalAlpha = 0.5 + Math.sin(gameTime * 0.12 + sp) * 0.3;
+            gctx.fillRect(Math.floor(spx), Math.floor(spy), 1, 1);
+            gctx.globalAlpha = 1;
+        }
 
         // Damage aura
         if (player.powers.dmgAura>0) {
@@ -1899,17 +1952,36 @@ function drawUI_HUD() {
     sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 11);
     sans(uctx, cd.hashtag, 18, 28, UI.textMuted, 8);
 
-    // HP — raw text, no bar frame, just highlighter
+    // HP bar — pixel panel frame with colored fill
     const hpR = player.hp/player.maxHp;
-    const hpCol = hpR>0.5 ? UI.danger : (hpR>0.25 ? UI.warning : UI.danger);
-    drawHighlight(uctx, 158, 10, 110 * hpR, 14, hpR>0.5 ? UI.danger + '40' : UI.danger + '4D');
-    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp + ' HP', 162, 10, hpCol, 11);
+    const hpCol = hpR>0.5 ? UI.motifHeart : (hpR>0.25 ? UI.warning : UI.danger);
+    // Heart icon prefix
+    uctx.fillStyle = hpCol;
+    uctx.fillRect(154, 12, 1, 1); uctx.fillRect(156, 12, 1, 1);
+    uctx.fillRect(153, 13, 5, 1);
+    uctx.fillRect(154, 14, 3, 1);
+    uctx.fillRect(155, 15, 1, 1);
+    // HP bar track
+    uctx.fillStyle = UI.panelAlt; uctx.fillRect(162, 11, 110, 10);
+    uctx.strokeStyle = hpCol + '80'; uctx.lineWidth = 1;
+    uctx.strokeRect(161.5, 10.5, 111, 11);
+    // HP fill with pulse when low
+    const hpPulse = hpR < 0.3 ? Math.sin(gameTime * 0.15) * 0.15 + 0.85 : 1;
+    uctx.globalAlpha = hpPulse;
+    uctx.fillStyle = hpCol; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 10);
+    // HP highlight shine
+    uctx.fillStyle = 'rgba(255,255,255,0.2)'; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 3);
+    uctx.globalAlpha = 1;
+    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp, 216, 11, UI.text, 8, 'center');
 
-    // XP — minimal line
+    // XP bar — styled with lilac fill
     const xpR = player.xp/player.xpToNext;
-    uctx.fillStyle = 'rgba(255,255,255,0.08)'; uctx.fillRect(158, 30, 110, 3);
-    uctx.fillStyle = Z.purple; uctx.fillRect(158, 30, 110 * xpR, 3);
-    sans(uctx, 'LV ' + player.level, 158, 36, 'rgba(255,255,255,0.45)', 9, 'left', 600);
+    uctx.fillStyle = UI.panelAlt; uctx.fillRect(162, 27, 110, 6);
+    uctx.strokeStyle = UI.lilac + '40'; uctx.lineWidth = 1;
+    uctx.strokeRect(161.5, 26.5, 111, 7);
+    uctx.fillStyle = UI.lilac; uctx.fillRect(162, 27, Math.ceil(110 * xpR), 6);
+    uctx.fillStyle = 'rgba(255,255,255,0.2)'; uctx.fillRect(162, 27, Math.ceil(110 * xpR), 2);
+    sans(uctx, 'LV ' + player.level, 158, 36, UI.textSecondary, 9, 'left', 600);
 
     // Timer — big editorial serif, right-aligned high
     const secs = Math.floor(survivalTime/60);
@@ -1972,48 +2044,48 @@ function drawUI_HUD() {
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
     if (activeSkills.length > 0) {
-        const iconY = UH - 56;
-        const totalW = activeSkills.length * 40;
+        const iconSize = 42;
+        const iconY = UH - iconSize - 16;
+        const totalW = activeSkills.length * (iconSize + 6);
         const startX = (UW - totalW) / 2;
 
         activeSkills.forEach((sk, idx) => {
-            const ix = startX + idx * 40;
+            const ix = startX + idx * (iconSize + 6);
             const lv = player.powers[sk.id];
-            drawPixelPanel(uctx, ix, iconY, 34, 38, { fill: UI.panelAlt, border: UI.lilac });
+            drawPixelPanel(uctx, ix, iconY, iconSize, iconSize + 8, { fill: UI.panelAlt, border: UI.lilac });
 
-            // Pixel icon instead of emoji
+            // Pixel icon instead of emoji — drawn at 2x for visibility
             const iconInfo = SKILL_ICON_MAP[sk.id];
             if (iconInfo) {
                 const iconCanvas = getPixelIcon(iconInfo.icon, iconInfo.c1, iconInfo.c2);
                 if (iconCanvas) {
                     uctx.imageSmoothingEnabled = false;
-                    uctx.drawImage(iconCanvas, ix + 9, iconY + 3, 16, 16);
+                    uctx.drawImage(iconCanvas, ix + 1, iconY + 1, 32, 32);
                     uctx.imageSmoothingEnabled = true;
                 }
             } else {
-                // Fallback to emoji for unmapped skills
-                uctx.font = '14px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-                uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + 17, iconY + 4);
+                uctx.font = '16px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+                uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + 17, iconY + 6);
             }
 
-            // Level gems — diamond chips instead of rectangle pips
+            // Level gems — diamond chips below icon
             const maxGems = Math.max(lv, 4);
             const gemsToShow = Math.min(maxGems, 7);
-            const gemStartX = ix + 17 - Math.floor(gemsToShow * 3);
+            const gemCenterX = ix + iconSize / 2;
+            const gemStartX = gemCenterX - Math.floor(gemsToShow * 3);
             for (let d = 0; d < gemsToShow; d++) {
-                drawGemChip(uctx, gemStartX + d * 6, iconY + 28, d < lv, UI.motifCrown);
+                drawGemChip(uctx, gemStartX + d * 7, iconY + iconSize + 1, d < lv, UI.motifCrown);
             }
 
             // Cooldown wipe — vertical dark wipe from top
             const cdRatio = getSkillCooldownRatio(sk.id);
             if (cdRatio > 0.01) {
-                const wipeH = Math.floor(38 * cdRatio);
+                const wipeH = Math.floor((iconSize + 8) * cdRatio);
                 uctx.fillStyle = UI.overlayCooldown;
-                uctx.fillRect(ix + 1, iconY + 1, 32, wipeH);
-                // Wipe edge line
-                if (wipeH < 36) {
+                uctx.fillRect(ix + 1, iconY + 1, iconSize - 2, wipeH);
+                if (wipeH < iconSize + 6) {
                     uctx.fillStyle = UI.cooldown;
-                    uctx.fillRect(ix + 1, iconY + wipeH, 32, 1);
+                    uctx.fillRect(ix + 1, iconY + wipeH, iconSize - 2, 1);
                 }
             }
         });
@@ -2101,6 +2173,17 @@ function drawUI_Title() {
 
     // === HOME FEED — collage layout ===
     uctx.fillStyle = Z.dark; uctx.fillRect(0, 0, UW, UH);
+
+    // Animated color wash background — shifting brand colors
+    const wash1 = Math.sin(gameTime * 0.01) * 0.5 + 0.5;
+    const wash2 = Math.sin(gameTime * 0.01 + 2) * 0.5 + 0.5;
+    uctx.globalAlpha = 0.04;
+    uctx.fillStyle = UI.pink;
+    uctx.fillRect(0, 0, UW * wash1, UH);
+    uctx.fillStyle = UI.cyan;
+    uctx.fillRect(UW * (1 - wash2), 0, UW * wash2, UH);
+    uctx.globalAlpha = 1;
+
     drawGrain(uctx, UW, UH, 0.04);
 
     // Big hero cutout — overlapping, rotated slightly
@@ -2205,11 +2288,21 @@ function drawUI_Select() {
 
     // === PROFILE / ZINE COVER ===
     uctx.fillStyle = Z.dark; uctx.fillRect(0, 0, UW, UH);
-    drawGrain(uctx, UW, UH, 0.035);
 
     const selChar = CHARACTERS[selectedChar];
     const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
     const selCol = charColors[selectedChar];
+
+    // Character color wash behind portrait area
+    uctx.globalAlpha = 0.06;
+    uctx.fillStyle = selCol;
+    uctx.fillRect(0, 30, 420, 440);
+    uctx.globalAlpha = 0.03;
+    uctx.fillStyle = UI.lilac;
+    uctx.fillRect(420, 0, UW - 420, UH);
+    uctx.globalAlpha = 1;
+
+    drawGrain(uctx, UW, UH, 0.035);
 
     // === TOP: Magazine header ===
     sans(uctx, 'SUPERNOVA ZINE', 30, 14, 'rgba(255,255,255,0.25)', 10, 'left', 800);
@@ -2416,6 +2509,14 @@ function drawUI_GameOver() {
     // === PROFILE RECAP — zine cover stats ===
     uctx.fillStyle = Z.dark;
     uctx.fillRect(0, 0, UW, UH);
+    // Dramatic vignette with character color
+    if (player) {
+        const accent = [Z.hot, Z.coral, Z.magenta, Z.sky][player.charIdx] || Z.hot;
+        uctx.globalAlpha = 0.05;
+        uctx.fillStyle = accent;
+        uctx.fillRect(0, 0, UW, UH);
+        uctx.globalAlpha = 1;
+    }
     drawGrain(uctx, UW, UH, 0.04);
 
     // Slow-drifting stickers in background
