@@ -625,6 +625,12 @@ const SPRITE_HAIR = {
         '0000D33D33000000','00D0333333D00000','0D33333333333D00','0D3333333333D300',
     ],
 };
+// === SPRITE DATA BUILDER ===
+  // Combine per-character hair + body into complete sprite data
+  const SPRITE_DATA = {};
+  for (const char of ['miho', 'hyunju', 'sujin', 'sohee']) {
+      SPRITE_DATA[char] = [...SPRITE_HAIR[char], ...SPRITE_BODY];
+  }
 
 // === SPRITE CACHE ===
 const spriteCache = {};
