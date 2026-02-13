@@ -435,47 +435,97 @@ function getSkillCooldownRatio(skillId) {
     return 0;
 }
 
-// Shared body template — ALL idols have identical face, body, and legs
-const SPRITE_BODY = [
-    '0033711111173300', // forehead + dark eyebrow hints
-    '00031EA1AE130000', // eyes: symmetric iris(E)+white(A) highlights
-    '0003111811130000', // nose(1) + centered cute mouth(8)
-    '0000218111820000', // chin shadow(2) + cheek blush(8)
-    '0000031991300000', // neck + accessory sparkle(9)
-    '0000556665500000', // collar with accent detail(6)
-    '0000555555500000', // upper outfit
-    '0005555F55550000', // outfit + belt sparkle(F)
-    '0005566666550000', // outfit accent band(6)
-    '0001555555510000', // arms(skin)
-    '0001055555010000', // waist
-    '0000055555000000', // skirt
-    '0000055055000000', // upper legs
-    '00000BB0BB000000', // lower legs
-    '00000CC0CC000000', // boots upper
-    '00000CC0CC000000', // boots
-];
-
-// Only the top 4 rows (hair) differ per character
-const SPRITE_HAIR = {
-    miho: [ // fox-ear tips, voluminous golden mane
-        '00D00333330D0000','0D333333333D0000','0D33033333033D00','0D3D33333D333D00',
+// === SPRITE DATA — fully unique per character (hair, face, outfit, boots) ===
+const SPRITE_DATA = {
+    miho: [ // Fox Princess — blonde twin-tail, fox ears, pink frilly idol dress
+        '04D003333300D400', // fox ear tips (4=inner, D=glow)
+        '43D33333333D3D40', // ears + luxurious golden crown
+        '4333D333333DD340', // highlight streaks in mane
+        '0D33333333333D00', // full golden volume
+        '0033711111173300', // forehead + dark brows
+        '00031EA1AE130000', // sparkly eyes (E=iris, A=highlight)
+        '0003111811130000', // nose + cute smile
+        '0000218111820000', // chin + pink blush
+        '0000019991000000', // neck + gold choker (9)
+        '0000566665500000', // ruffle collar
+        '0005559955500000', // bodice + gold gem buttons
+        '0015555555510000', // bodice + arms (1=skin)
+        '0005666966650000', // grand ruffle + gold buckle
+        '0005565556550000', // layered skirt top
+        '0000566666500000', // skirt accent tier
+        '0000555555500000', // skirt body
+        '0000055555000000', // skirt hem
+        '0000055055000000', // legs
+        '00000BB0BB000000', // boots
+        '00000CC0CC000000', // boot soles
     ],
-    hyunju: [ // long flowing wavy orange
-        '00000333D3000000','0003333D33330000','0033333333333000','0D333333333D3D00',
+    hyunju: [ // The Dreamer — orange flowing waves, long elegant dress
+        '0000D333D3000000', // gentle hair top + highlights
+        '000D333333D30000', // wavy crown
+        '00D333D3D333D000', // wave pattern in hair (D=curl shines)
+        '0D333333333333D0', // maximum wide flowing volume
+        '0D3371111173D300', // face + hair frames both sides
+        '03D31EA1AE13D300', // eyes framed by flowing strands
+        '00D3111811130D00', // nose + mouth, hair peeks
+        '0000218111820000', // chin + blush
+        '00000199910D3000', // neck + moon charm (9), hair R
+        '0000556655003000', // soft collar, hair strand
+        '0005555555500000', // flowing outfit upper
+        '0015559555510000', // outfit + moon accent (9) + arms
+        '0005556655500000', // waist sash
+        '0005555555500000', // long flowing skirt
+        '0005555555500000', // flowing skirt continues
+        '0005555555500000', // elegant length
+        '0000555555000000', // skirt hem
+        '0000011010000000', // legs
+        '00000BB0BB000000', // simple boots
+        '00000CC0CC000000', // boot soles
     ],
-    sujin: [ // sharp styled crimson bob
-        '00000DDD33000000','00003333D3300000','00333333333D3000','0033333333333000',
+    sujin: [ // The Genius — red sharp asymmetric bob, dark tech jacket + tall boots
+        '00000DDD33000000', // sharp hair top, asymmetric R
+        '0000D333D3300000', // angular bob shape
+        '000D33333333D000', // volume wider on left
+        '00D333333333D000', // sharp style edges
+        '0D337111117330D0', // face + sharp hair left, tip R
+        '0D331EA1AE130000', // eyes + longer hair framing L
+        '00D3111811130000', // nose + mouth, hair L
+        '00002181118200D0', // chin + blush, sharp tip R
+        '0000019991000000', // neck + star gem (9)
+        '0000556665500000', // tech V-collar
+        '0005555595500000', // dark jacket + star pin (9)
+        '0017555555710000', // jacket + dark sleeves (7=outline)
+        '0005566665500000', // belt detail
+        '0000555555000000', // shorts
+        '0000011111000000', // exposed legs (1=skin)
+        '0000011011000000', // legs
+        '0000BBB0BBB00000', // tall boots (wide!)
+        '0000BBB0BBB00000', // tall boot shaft
+        '0000BBC0CBB00000', // boot buckle detail
+        '00000CC0CC000000', // boot soles
     ],
-    sohee: [ // long straight blue, side part
-        '0000D33D33000000','00D0333333D00000','0033333333333000','003333333333D300',
+    sohee: [ // Quiet Storm — long straight blue hair (R side), light guardian dress
+        '0000D33D33000000', // straight hair top with part
+        '000D333333D00000', // neat hair + side part
+        '00D3333333330000', // straight volume
+        '0D33333333333D00', // long blue hair, strand R
+        '0033711111173D00', // face + hair falls right
+        '00031EA1AE133D00', // eyes + long hair strand R
+        '0003111811133D00', // nose + mouth + hair R
+        '0000218111823D00', // chin + blush + hair R
+        '0000019991003D00', // neck + gem (9=cyan) + hair R
+        '0000556655003D00', // soft collar + hair R
+        '0005559555503D00', // outfit + shield gem (9) + hair R
+        '0015555555103D00', // outfit + arms + hair R
+        '0005566665503D00', // belt detail + hair R
+        '0005556555503D00', // skirt pattern + hair R
+        '0000555555503D00', // skirt + hair R
+        '0000555555500000', // skirt lower
+        '0000055555000000', // skirt hem
+        '0000055055000000', // legs
+        '00000BB0BB000000', // boots
+        '00000CC0CC000000', // boot soles
     ],
 };
-
-// Combine hair + shared body into final sprite data
-const SPRITE_DATA = {};
-for (const name of ['miho','hyunju','sujin','sohee']) {
-    SPRITE_DATA[name] = [...SPRITE_HAIR[name], ...SPRITE_BODY];
-}
 
 // === SPRITE CACHE ===
 const spriteCache = {};
