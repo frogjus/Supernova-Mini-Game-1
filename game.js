@@ -59,6 +59,18 @@ const UI = {
     dangerGlow: 'rgba(255, 76, 125, 0.35)',
     focusGlow: 'rgba(109, 230, 255, 0.3)',
     borderUI: '#E8D8FF',
+    // Heart health bar tokens
+    heartFull: '#FF93C8',
+    heartHalf: '#FF6BA0',
+    heartEmpty: '#3A2C62',
+    heartOutline: '#A694C7',
+    // Arena tints (set during boss encounters)
+    arenaNeonNewsroom: '#FF44AA',
+    arenaDataCathedral: '#4488FF',
+    arenaBrokenStage: '#FFB347',
+    arenaMirrorHall: '#C8D6FF',
+    arenaChatAbyss: '#6A5AAA',
+    arenaFracturedThrone: '#443355',
 };
 
 // === ZINE UI TOOLKIT — Social Magazine Mashup ===
@@ -216,6 +228,7 @@ const Z = {
     white: UI.text, cream: UI.motifLace, offwhite: UI.textSecondary,
     dark: UI.bg, darkCard: UI.panel, darkGray: UI.panelAlt,
     gray: UI.textMuted, lightGray: UI.textSecondary, faint: 'rgba(255,255,255,0.06)',
+    heartFull: UI.heartFull, heartHalf: UI.heartHalf, heartEmpty: UI.heartEmpty, heartOutline: UI.heartOutline,
 };
 
 // === PIXEL ICON ATLAS — 16x16 pixel art for skill HUD ===
@@ -281,6 +294,42 @@ const PIXEL_ICONS = {
         '0000012321000000','0000012321000000','0000123210000000','0001232100000000',
         '0012321000000000','0012310000000000','0001100000000000','0000000000000000',
     ],
+    butterfly: [
+        '0000000000000000','0012100000121000','0123210001232100','1233321012333210',
+        '1233332123333210','1233333333333210','0123333333332100','0012333333321000',
+        '0001233333210000','0012333333321000','0123333333332100','1233333333333210',
+        '1233332123333210','1233321012333210','0123210001232100','0012100000121000',
+    ],
+    ribbon: [
+        '0000000000000000','0000001221000000','0000012332100000','0000123333210000',
+        '0001233333321000','0012332002332100','0123210000123210','1232100000012321',
+        '0123210000123210','0012332002332100','0001233333321000','0000123333210000',
+        '0000012332100000','0000001221000000','0000000000000000','0000000000000000',
+    ],
+    key: [
+        '0000011110000000','0000122221000000','0001210012100000','0001210012100000',
+        '0000122221000000','0000012210000000','0000012210000000','0000012210000000',
+        '0000012210000000','0000012210000000','0000012310000000','0000012210000000',
+        '0000012310000000','0000012210000000','0000011100000000','0000000000000000',
+    ],
+    wing: [
+        '0000000000100000','0000000001210000','0000000012321000','0000001123321000',
+        '0000012233321000','0000123333210000','0001233332100000','0012333321000000',
+        '0123333210000000','1233332100000000','0123321000000000','0012210000000000',
+        '0001100000000000','0000000000000000','0000000000000000','0000000000000000',
+    ],
+    bandaid: [
+        '0000000000000000','0000011110000000','0000122221000000','0001232321000000',
+        '0012323232100000','0123232323210000','1232323232321000','1232323232321000',
+        '0123232323210000','0012323232100000','0001232321000000','0000122221000000',
+        '0000011110000000','0000000000000000','0000000000000000','0000000000000000',
+    ],
+    skull: [
+        '0000000000000000','0000011110000000','0001233321000000','0012333332100000',
+        '0123333333210000','0123132313210000','0123132313210000','0123333333210000',
+        '0012333332100000','0001232321000000','0000123210000000','0000012100000000',
+        '0000000000000000','0000000000000000','0000000000000000','0000000000000000',
+    ],
 };
 
 // Map skill IDs to pixel icon names + colors
@@ -313,6 +362,30 @@ const SKILL_ICON_MAP = {
     dmgAura: { icon: 'sparkle', c1: '#ffdd88', c2: '#ffeeaa' },
     lightstick: { icon: 'flame', c1: '#ffffaa', c2: '#ffffdd' },
     fancam: { icon: 'heart', c1: '#ff88cc', c2: '#ffbbee' },
+    // New active skills
+    charmLock: { icon: 'sparkle', c1: '#ff66aa', c2: '#ffaadd' },
+    mirrorStep: { icon: 'bolt', c1: '#ddaaff', c2: '#eeddff' },
+    roseFilter: { icon: 'heart', c1: '#ffaa44', c2: '#ffdd88' },
+    algorithmBurst: { icon: 'bolt', c1: '#88ff88', c2: '#bbffbb' },
+    butterflyEffect: { icon: 'butterfly', c1: '#bb88ff', c2: '#ddbbff' },
+    // Utility skills
+    velvetDodge: { icon: 'ribbon', c1: '#ff66aa', c2: '#ffaacc' },
+    floatStep: { icon: 'wing', c1: '#ffaa44', c2: '#ffcc88' },
+    phaseSlide: { icon: 'bolt', c1: '#88ff88', c2: '#bbffbb' },
+    guardStep: { icon: 'shield', c1: '#88ccff', c2: '#aaddff' },
+    // Ultimates
+    throneOfNine: { icon: 'crown', c1: '#ffd700', c2: '#fff0a0' },
+    innerWorldUlt: { icon: 'heart', c1: '#ffbbdd', c2: '#ffddef' },
+    viralCodeUlt: { icon: 'sparkle', c1: '#ff44aa', c2: '#ff88cc' },
+    sanctuaryStage: { icon: 'shield', c1: '#88ccff', c2: '#bbddff' },
+    // Passives
+    stageHypnosis: { icon: 'sparkle', c1: '#ff79c6', c2: '#ffaadd' },
+    goldenInstinct: { icon: 'star', c1: '#ffd700', c2: '#fff0a0' },
+    comfortChorus: { icon: 'heart', c1: '#89FFD1', c2: '#bbffee' },
+    idolAura: { icon: 'crown', c1: '#FFE38A', c2: '#fff0c0' },
+    comboKernel: { icon: 'bolt', c1: '#88ff88', c2: '#bbffbb' },
+    coldFocus: { icon: 'beam', c1: '#6DE6FF', c2: '#aaeeff' },
+    steadyHeart: { icon: 'shield', c1: '#ff93c8', c2: '#ffbbdd' },
 };
 
 // Render a pixel icon to a cached canvas
@@ -365,10 +438,92 @@ const PALETTES = {
         5:'#2a2a3e', 6:'#3a3a55', 7:'#1a1028', 8:'#dd4466', 9:'#ffdd44',
         A:'#ffffff', B:'#333348', C:'#444466', D:'#ff3355', E:'#4488ff', F:'#ffffff' },
     sohee: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#3366cc', 4:'#2244aa',
-        5:'#e0e8f0', 6:'#c0d0e8', 7:'#1a1028', 8:'#ee8899', 9:'#88ddff',
-        A:'#ffffff', B:'#7799bb', C:'#5577aa', D:'#5599ff', E:'#44ccaa', F:'#ffffff' },
+        5:'#38a868', 6:'#2d8a54', 7:'#1a1028', 8:'#ee8899', 9:'#88ddff',
+        A:'#ffffff', B:'#5daa7a', C:'#3d8a5a', D:'#5599ff', E:'#44ccaa', F:'#ffffff' },
 };
 
+
+// === PIXEL HEART HP SYSTEM ===
+// 7x6 pixel heart shape matching reference art
+function drawPixelHeart(ctx, x, y, state, scale) {
+    const s = scale || 1;
+    const cols = {
+        filled: UI.heartFull,
+        half: UI.heartHalf,
+        empty: UI.heartEmpty,
+        outline: UI.heartOutline,
+    };
+    const fill = cols[state] || cols.filled;
+    // 7x6 heart shape
+    const heart = [
+        [0,1,1,0,1,1,0],
+        [1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,0],
+        [0,0,1,1,1,0,0],
+        [0,0,0,1,0,0,0],
+    ];
+    const halfMask = [
+        [0,1,1,0,0,0,0],
+        [1,1,1,1,0,0,0],
+        [1,1,1,1,0,0,0],
+        [0,1,1,0,0,0,0],
+        [0,0,1,0,0,0,0],
+        [0,0,0,0,0,0,0],
+    ];
+    // Draw outline first
+    ctx.fillStyle = UI.heartOutline;
+    for (let py = 0; py < 6; py++) for (let px = 0; px < 7; px++) {
+        if (heart[py][px]) ctx.fillRect(x + px * s, y + py * s, s, s);
+    }
+    // Fill interior (1px inset)
+    if (state === 'filled' || state === 'half') {
+        ctx.fillStyle = fill;
+        for (let py = 0; py < 6; py++) for (let px = 0; px < 7; px++) {
+            if (state === 'half' && !halfMask[py][px]) continue;
+            if (heart[py][px] && py > 0 && py < 5 && px > 0 && px < 6) {
+                ctx.fillRect(x + px * s, y + py * s, s, s);
+            }
+        }
+        // Highlight pixel on filled hearts
+        if (state === 'filled') {
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillRect(x + 1 * s, y + 1 * s, s, s);
+        }
+    } else if (state === 'empty') {
+        ctx.fillStyle = UI.heartEmpty;
+        for (let py = 1; py < 5; py++) for (let px = 1; px < 6; px++) {
+            if (heart[py][px]) ctx.fillRect(x + px * s, y + py * s, s, s);
+        }
+    }
+}
+
+function drawHeartHP(ctx, x, y, hp, maxHp) {
+    const hpPerHeart = 2;
+    const totalHearts = Math.min(10, Math.ceil(maxHp / hpPerHeart));
+    const spacing = 9; // 7px heart + 2px gap at 1x scale
+    const hpR = hp / maxHp;
+    // Color shift by threshold
+    let tintSave = null;
+    if (hpR <= 0.25) {
+        const pulse = Math.sin(gameTime * 0.15) * 0.15 + 0.85;
+        ctx.globalAlpha = pulse;
+    }
+    for (let i = 0; i < totalHearts; i++) {
+        const heartHpStart = i * hpPerHeart;
+        let state;
+        if (hp >= heartHpStart + hpPerHeart) state = 'filled';
+        else if (hp >= heartHpStart + 1) state = 'half';
+        else if (hp > heartHpStart) state = 'half';
+        else state = 'empty';
+        drawPixelHeart(ctx, x + i * spacing, y, state, 1);
+    }
+    ctx.globalAlpha = 1;
+    // Numeric overflow indicator if maxHP > 20
+    if (maxHp > 20) {
+        sans(ctx, Math.ceil(hp) + '/' + maxHp, x + totalHearts * spacing + 4, y, UI.textMuted, 8);
+    }
+}
 
 function drawPixelPanel(ctx, x, y, w, h, opts = {}) {
     const fill = opts.fill || UI.panel;
@@ -435,95 +590,39 @@ function getSkillCooldownRatio(skillId) {
     return 0;
 }
 
-// === SPRITE DATA — fully unique per character (hair, face, outfit, boots) ===
-const SPRITE_DATA = {
-    miho: [ // Fox Princess — blonde twin-tail, fox ears, pink frilly idol dress
-        '04D003333300D400', // fox ear tips (4=inner, D=glow)
-        '43D33333333D3D40', // ears + luxurious golden crown
-        '4333D333333DD340', // highlight streaks in mane
-        '0D33333333333D00', // full golden volume
-        '0033711111173300', // forehead + dark brows
-        '00031EA1AE130000', // sparkly eyes (E=iris, A=highlight)
-        '0003111811130000', // nose + cute smile
-        '0000218111820000', // chin + pink blush
-        '0000019991000000', // neck + gold choker (9)
-        '0000566665500000', // ruffle collar
-        '0005559955500000', // bodice + gold gem buttons
-        '0015555555510000', // bodice + arms (1=skin)
-        '0005666966650000', // grand ruffle + gold buckle
-        '0005565556550000', // layered skirt top
-        '0000566666500000', // skirt accent tier
-        '0000555555500000', // skirt body
-        '0000055555000000', // skirt hem
-        '0000055055000000', // legs
-        '00000BB0BB000000', // boots
-        '00000CC0CC000000', // boot soles
+// Shared body template — ALL idols have identical face, body, and legs
+const SPRITE_BODY = [
+    '0033711111173300', // forehead + dark eyebrow hints
+    '00031EA1AE130000', // eyes: symmetric iris(E)+white(A) highlights
+    '0003111811130000', // nose(1) + centered cute mouth(8)
+    '0000218111820000', // chin shadow(2) + cheek blush(8)
+    '0000031991300000', // neck + accessory sparkle(9)
+    '0000556665500000', // collar with accent detail(6)
+    '0000555555500000', // upper outfit
+    '0005555F55550000', // outfit + belt sparkle(F)
+    '0005566666550000', // outfit accent band(6)
+    '0001555555510000', // arms(skin)
+    '0001055555010000', // waist
+    '0000055555000000', // skirt
+    '0000055055000000', // upper legs
+    '00000BB0BB000000', // lower legs
+    '00000CC0CC000000', // boots upper
+    '00000CC0CC000000', // boots
+];
+
+// Only the top 4 rows (hair) differ per character
+const SPRITE_HAIR = {
+    miho: [ // prominent fox-ear points, golden twin-tail shapes
+        '0D900333330D9000','0D333333333D0000','DD33033333033DD0','0D3D33333D333D00',
     ],
-    hyunju: [ // The Dreamer — orange flowing waves, long elegant dress
-        '0000D333D3000000', // gentle hair top + highlights
-        '000D333333D30000', // wavy crown
-        '00D333D3D333D000', // wave pattern in hair (D=curl shines)
-        '0D333333333333D0', // maximum wide flowing volume
-        '0D3371111173D300', // face + hair frames both sides
-        '03D31EA1AE13D300', // eyes framed by flowing strands
-        '00D3111811130D00', // nose + mouth, hair peeks
-        '0000218111820000', // chin + blush
-        '00000199910D3000', // neck + moon charm (9), hair R
-        '0000556655003000', // soft collar, hair strand
-        '0005555555500000', // flowing outfit upper
-        '0015559555510000', // outfit + moon accent (9) + arms
-        '0005556655500000', // waist sash
-        '0005555555500000', // long flowing skirt
-        '0005555555500000', // flowing skirt continues
-        '0005555555500000', // elegant length
-        '0000555555000000', // skirt hem
-        '0000011010000000', // legs
-        '00000BB0BB000000', // simple boots
-        '00000CC0CC000000', // boot soles
+    hyunju: [ // wavy volume twintails, star clip accent (9)
+        '000003339D000000','0003333D33330000','0D33333333333D00','DD333333333D3DD0',
     ],
-    sujin: [ // The Genius — red sharp asymmetric bob, dark tech jacket + tall boots
-        '00000DDD33000000', // sharp hair top, asymmetric R
-        '0000D333D3300000', // angular bob shape
-        '000D33333333D000', // volume wider on left
-        '00D333333333D000', // sharp style edges
-        '0D337111117330D0', // face + sharp hair left, tip R
-        '0D331EA1AE130000', // eyes + longer hair framing L
-        '00D3111811130000', // nose + mouth, hair L
-        '00002181118200D0', // chin + blush, sharp tip R
-        '0000019991000000', // neck + star gem (9)
-        '0000556665500000', // tech V-collar
-        '0005555595500000', // dark jacket + star pin (9)
-        '0017555555710000', // jacket + dark sleeves (7=outline)
-        '0005566665500000', // belt detail
-        '0000555555000000', // shorts
-        '0000011111000000', // exposed legs (1=skin)
-        '0000011011000000', // legs
-        '0000BBB0BBB00000', // tall boots (wide!)
-        '0000BBB0BBB00000', // tall boot shaft
-        '0000BBC0CBB00000', // boot buckle detail
-        '00000CC0CC000000', // boot soles
+    sujin: [ // sharp bob silhouette, black bow accessory (7)
+        '000070DDD3000000','00003333D3300000','00733333333D3000','0073333333333000',
     ],
-    sohee: [ // Quiet Storm — long straight blue hair (R side), light guardian dress
-        '0000D33D33000000', // straight hair top with part
-        '000D333333D00000', // neat hair + side part
-        '00D3333333330000', // straight volume
-        '0D33333333333D00', // long blue hair, strand R
-        '0033711111173D00', // face + hair falls right
-        '00031EA1AE133D00', // eyes + long hair strand R
-        '0003111811133D00', // nose + mouth + hair R
-        '0000218111823D00', // chin + blush + hair R
-        '0000019991003D00', // neck + gem (9=cyan) + hair R
-        '0000556655003D00', // soft collar + hair R
-        '0005559555503D00', // outfit + shield gem (9) + hair R
-        '0015555555103D00', // outfit + arms + hair R
-        '0005566665503D00', // belt detail + hair R
-        '0005556555503D00', // skirt pattern + hair R
-        '0000555555503D00', // skirt + hair R
-        '0000555555500000', // skirt lower
-        '0000055555000000', // skirt hem
-        '0000055055000000', // legs
-        '00000BB0BB000000', // boots
-        '00000CC0CC000000', // boot soles
+    sohee: [ // long flowing hair, bow/ribbon accent (D)
+        '0000D33D33000000','00D0333333D00000','0D33333333333D00','0D3333333333D300',
     ],
 };
 
@@ -550,6 +649,101 @@ function renderSpriteFlipped(name) {
     const c = document.createElement('canvas'); c.width = s.width; c.height = s.height;
     const cx = c.getContext('2d'); cx.translate(s.width, 0); cx.scale(-1,1); cx.drawImage(s,0,0);
     spriteCache[k] = c; return c;
+}
+
+// === ENEMY SPRITE TEMPLATES ===
+// Hex-encoded pixel data: 0=transparent, 1=outline, 2=fill, 3=highlight
+const SPRITE_ENEMIES = {
+    flash_stalker: { w:8, h:10, data:[
+        '00111100','01222210','12222321','12233221','12222221','01222210','00122100','00122100','00100100','00100100',
+    ]},
+    tabloid_runner: { w:10, h:10, data:[
+        '0001111000','0012222100','0122232100','1222222210','1222222210','0122222100','0012332100','0012222100','0010000100','0010000100',
+    ]},
+    comment_wasp: { w:8, h:8, data:[
+        '00122100','01233210','12233221','12222221','01222210','00311300','03000030','30000003',
+    ]},
+    gatekeeper_knight: { w:12, h:12, data:[
+        '001111111100','012222222210','122222222221','122233332221','122233332221','122222222221','122222222221','012222222210','001222222100','000122221000','000100001000','000100001000',
+    ]},
+    fancam_leech: { w:9, h:9, data:[
+        '001111100','013333310','132222310','132232310','132222310','132222310','013333310','001111100','000010000',
+    ]},
+    spoiler_imp: { w:8, h:9, data:[
+        '01000010','01222210','12233221','12222221','01222210','00122100','00133100','00100100','01000010',
+    ]},
+    doomscroll_slug: { w:12, h:8, data:[
+        '000111111000','001222222100','012222223210','122222222221','122233222221','012222222100','001222222100','000111111000',
+    ]},
+    leak_rat: { w:8, h:8, data:[
+        '01100110','12213221','12222221','01222210','00122100','00122100','00100100','01000010',
+    ]},
+    echo_fan: { w:10, h:11, data:[
+        '0001111000','0012222100','0122232100','0122232100','1222222210','1223332210','1222222210','0122222100','0012222100','0010000100','0010000100',
+    ]},
+    receipt_hunter: { w:11, h:12, data:[
+        '00011100000','00122210000','01222221000','01222221000','12222222100','12223322100','12222222100','01222222310','00122222100','00012221000','00010001000','00010001000',
+    ]},
+};
+
+const SPRITE_ELITES = {
+    paparazzi_rig: { w:14, h:18, data:[
+        '00011111111000','00122222222100','01222232222210','01222233222210','12222222222221','12222222222221','12233333332221','12233333332221','12222222222221','12222222222221','01222222222210','01222222222210','00122222222100','00012222221000','00010000001000','00100000000100','00100000000100','01000000000010',
+    ]},
+    trending_executor: { w:14, h:16, data:[
+        '00001111110000','00012222221000','00122222222100','01222233222210','01222233222210','12222222222221','12222222222221','12222222222221','01222222222210','01222222222210','00122222222100','00012222221000','00001222210000','00000122100000','00000100100000','00001000010000',
+    ]},
+    archive_warden: { w:16, h:18, data:[
+        '0001111111110000','0012222222221000','0122222222222100','1222233332222210','1222233332222210','1222222222222210','1222222222222210','1222333333222210','1222333333222210','1222222222222210','1222222222222210','0122222222222100','0122222222222100','0012222222221000','0001222222210000','0000122222100000','0000010001000000','0000010001000000',
+    ]},
+    reply_hydra: { w:14, h:16, data:[
+        '01100001100110','12210012211221','12221122221221','01222222222210','01222222222210','00122222222100','00122222222100','01222222222210','12222222222221','12222332222221','12222332222221','01222222222210','00122222222100','00012222221000','00001222210000','00000111100000',
+    ]},
+    blacklist_duelist: { w:14, h:18, data:[
+        '00001111110000','00012222221000','00122222222100','01222233222210','01222233222210','12222222222221','12222222222221','12233222233221','12233222233221','12222222222221','01222222222210','01222222222210','00122222222100','00012222221000','00001222210000','00000100100000','00001000010000','00010000001000',
+    ]},
+};
+
+const SPRITE_BOSSES = {
+    queen_of_clickbait: { w:24, h:24, data:[
+        '000000111111111100000000','000001222222222210000000','000012222222222221000000','000122223333332222100000','001222233333332222210000','012222233333332222221000','012222222222222222221000','122222222222222222222100','122222233222233222222100','122222233222233222222100','122222222222222222222100','122222222222222222222100','122233333333333333222100','122233333333333333222100','122222222222222222222100','012222222222222222221000','012222222222222222221000','001222222222222222210000','000122222222222222100000','000012222222222221000000','000001222222222210000000','000000122222222100000000','000000012222221000000000','000000001111110000000000',
+    ]},
+    mr_algorithm: { w:22, h:22, data:[
+        '0000011111111110000000','0000122222222221000000','0001222222222222100000','0012222333332222210000','0122222333332222221000','1222222222222222222100','1222223322233222222100','1222223322233222222100','1222222222222222222100','1222233333333332222100','1222233333333332222100','1222222222222222222100','1222222222222222222100','0122222222222222221000','0012222222222222210000','0001222222222222100000','0000122222222221000000','0000012222222210000000','0000001222222100000000','0000000122221000000000','0000000010010000000000','0000000100001000000000',
+    ]},
+    director_cut: { w:24, h:24, data:[
+        '000000111111111100000000','000001222222222210000000','000012222222222221000000','000122222333322222100000','001222223333322222210000','012222222222222222221000','012222233222233222221000','122222233222233222222100','122222222222222222222100','122222222222222222222100','122223333333333332222100','122223333333333332222100','122222222222222222222100','122222222222222222222100','012222222222222222221000','012222222222222222221000','001222222222222222210000','000122222222222222100000','000012222222222221000000','000001222222222210000000','000000122222222100000000','000000012222221000000000','000000001222210000000000','000000000111100000000000',
+    ]},
+    glass_prince: { w:20, h:20, data:[
+        '00001111111111000000','00012222222222100000','00122222222222210000','01222223333222221000','01222223333222221000','12222222222222222100','12222233223322222100','12222233223322222100','12222222222222222100','12222222222222222100','12222222222222222100','12222222222222222100','01222222222222221000','01222222222222221000','00122222222222210000','00012222222222100000','00001222222221000000','00000122222210000000','00000010001000000000','00000100000100000000',
+    ]},
+    midnight_forum: { w:26, h:26, data:[
+        '00000001111111111000000000','00000012222222222100000000','00000122222222222210000000','00001222222222222221000000','00012222222222222222100000','00122222233333222222210000','01222222233333222222221000','01222222222222222222221000','12222222222222222222222100','12222222332222332222222100','12222222332222332222222100','12222222222222222222222100','12222222222222222222222100','12222233333333333322222100','12222233333333333322222100','12222222222222222222222100','01222222222222222222221000','01222222222222222222221000','00122222222222222222210000','00012222222222222222100000','00001222222222222221000000','00000122222222222210000000','00000012222222222100000000','00000001222222221000000000','00000000122222210000000000','00000000011111100000000000',
+    ]},
+    the_disbander: { w:32, h:32, data:[
+        '00000000011111111111110000000000','00000000122222222222221000000000','00000001222222222222222100000000','00000012222222222222222210000000','00000122222222222222222221000000','00001222222233333332222222100000','00012222222233333332222222210000','00122222222222222222222222221000','01222222222222222222222222222100','01222222222332222233222222222100','12222222222332222233222222222210','12222222222222222222222222222210','12222222222222222222222222222210','12222222222222222222222222222210','12222222333333333333333222222210','12222222333333333333333222222210','12222222222222222222222222222210','12222222222222222222222222222210','12222222222222222222222222222210','01222222222222222222222222222100','01222222222222222222222222222100','00122222222222222222222222221000','00012222222222222222222222210000','00001222222222222222222222100000','00000122222222222222222221000000','00000012222222222222222210000000','00000001222222222222222100000000','00000000122222222222221000000000','00000000012222222222210000000000','00000000001222222222100000000000','00000000000122222221000000000000','00000000000011111110000000000000',
+    ]},
+};
+
+// Render enemy sprite to cached canvas
+const enemySpriteCache = {};
+function renderEnemySprite(typeId, c1, c2, c3) {
+    const key = typeId + c1 + c2;
+    if (enemySpriteCache[key]) return enemySpriteCache[key];
+    const tmpl = SPRITE_ENEMIES[typeId] || SPRITE_ELITES[typeId] || SPRITE_BOSSES[typeId];
+    if (!tmpl) return null;
+    const c = document.createElement('canvas');
+    c.width = tmpl.w; c.height = tmpl.h;
+    const cx = c.getContext('2d');
+    const colors = { '0': null, '1': '#000000', '2': c1, '3': c3 || c2 };
+    for (let y = 0; y < tmpl.data.length; y++) {
+        for (let x = 0; x < tmpl.data[y].length; x++) {
+            const col = colors[tmpl.data[y][x]];
+            if (col) { cx.fillStyle = col; cx.fillRect(x, y, 1, 1); }
+        }
+    }
+    enemySpriteCache[key] = c;
+    return c;
 }
 
 // === SCALED SPRITE CACHE (for UI screens) ===
@@ -617,6 +811,7 @@ const SFX = (() => {
 // === PERFORMANCE: Array caps & fast removal ===
 const MAX_PARTICLES = 200;
 const MAX_PROJECTILES = 300;
+const MAX_ENEMY_PROJECTILES = 100;
 const MAX_FANCHANTS = 10;
 const MAX_FLOATING = 20;
 const enemySet = new Set(); // O(1) alive-check for homing
@@ -649,6 +844,10 @@ const CHARACTERS = [
               levels:['0.5s on hit','0.8s on hit','1s + speed boost','1.2s + heal','Phantom fox mode'] },
             { id:'feast', name:'Gumiho\'s Feast', emoji:'💀', desc:'Steal life from fallen enemies', color:'#ff4466',
               levels:['+0.3 HP/kill','+0.5 HP/kill','+0.7 HP/kill','+1 HP/kill','Full restore every 50 KO'] },
+            { id:'charmLock', name:'Charm Lock', emoji:'💫', desc:'Root enemies in a pink sigil', color:'#ff66aa',
+              levels:['1s root','1.5s root','2s root +dmg','2.5s root +vuln','PERMA-CHARM ZONE'] },
+            { id:'mirrorStep', name:'Mirror Step', emoji:'👤', desc:'Dash + slash with afterimages', color:'#ddaaff',
+              levels:['Short dash','Longer dash','Dash +dmg','Dash +speed','PHANTOM DANCE'] },
         ],
     },
     {
@@ -669,6 +868,8 @@ const CHARACTERS = [
               levels:['1 buff type','2 buff types','3 types, stronger','4 types, faster','ALL MOODS AT ONCE'] },
             { id:'innerWorld', name:'Inner World', emoji:'🌸', desc:'Healing cherry blossom zone', color:'#ffbbdd',
               levels:['Heal 0.2/s','Heal 0.3/s','Larger zone','Heal 0.5/s + allies','SAKURA PARADISE'] },
+            { id:'roseFilter', name:'Rose Filter', emoji:'🌹', desc:'Enemies lose accuracy in soft zone', color:'#ffaa44',
+              levels:['-10% accuracy','-15% accuracy','-20% +range','-25% accuracy','FULL BLUR ZONE'] },
         ],
     },
     {
@@ -689,6 +890,8 @@ const CHARACTERS = [
               levels:['2s every 15s','3s every 12s','3s every 10s','4s every 8s','PERMANENT OC MODE'] },
             { id:'viralCode', name:'Viral Code', emoji:'💻', desc:'Killed enemies explode', color:'#ff44aa',
               levels:['Small blast','Medium blast','Large + chain','Massive blast','SYSTEM CRASH AoE'] },
+            { id:'algorithmBurst', name:'Algorithm Burst', emoji:'🧮', desc:'Triple-hit auto combo', color:'#88ff88',
+              levels:['3x 50%','3x 60%','3x 70%','3x 75% +speed','3x 100% TURBO'] },
         ],
     },
     {
@@ -709,6 +912,8 @@ const CHARACTERS = [
               levels:['0.1 HP/3s','0.2 HP/3s','0.3 HP/2s','0.5 HP/2s','UNBREAKABLE SPIRIT'] },
             { id:'butterfly', name:'Butterfly Effect', emoji:'🦋', desc:'Shields multiply on contact', color:'#bb88ff',
               levels:['10% split','15% split','20% split + size','25% split','BUTTERFLY STORM'] },
+            { id:'butterflyEffect', name:'Wing Shatter', emoji:'🦋', desc:'Shield pop AoE + slow', color:'#bb88ff',
+              levels:['Small AoE','Medium AoE','AoE +slow','Large AoE +slow','WING STORM'] },
         ],
     },
 ];
@@ -734,7 +939,7 @@ let state = State.TITLE;
 let selectedChar = 0;
 let gameTime = 0, frameCount = 0;
 let player = null;
-let projectiles = [], enemies = [], xpGems = [], particles = [], floatingTexts = [];
+let projectiles = [], enemies = [], xpGems = [], particles = [], floatingTexts = [], enemyProjectiles = [];
 let camX = 0, camY = 0;
 const ARENA_W = 800, ARENA_H = 800;
 let difficulty = 1, spawnTimer = 0, killCount = 0, survivalTime = 0;
@@ -747,6 +952,8 @@ let trendingTimer = 0, trendingText = '';
 let score = 0;
 let bossIntroTimer = 0, bossIntroText = '';
 let questModalOpen = false, chapterIdx = 0;
+let chapterTransitionTimer = 0, chapterTransitionText = '', chapterTransitionBeat = '';
+let collectedLoreCards = [];
 let lastLoreCard = '';
 
 // === CHARM SYSTEM ===
@@ -882,7 +1089,8 @@ function handleKey(code) {
     } else if (state === State.PLAYING) {
         if (code === 'Escape') state = State.PAUSED;
         else if (code === 'KeyQ') questModalOpen = !questModalOpen;
-        else if (code === 'KeyC') { state = State.CHARM_INVENTORY; charmInventoryOpen = true; }
+        else if (code === 'ShiftLeft' || code === 'ShiftRight') useUtility();
+        else if (code === 'KeyR') fireUltimate();
     } else if (state === State.PAUSED) {
         if (code === 'Escape' || code === 'Space') state = State.PLAYING;
         else if (code === 'KeyC') { state = State.CHARM_INVENTORY; charmInventoryOpen = true; }
@@ -971,6 +1179,7 @@ function startGame() {
     followers = 0; comboCount = 0; comboTimer = 0; bestCombo = 0; score = 0;
     notifications = []; fanChants = []; trendingTimer = 0;
     nextBossTime = 3600; bossesKilled = 0;
+    utilityUses = 0; ultActivations = 0;
     bossIntroTimer = 0; bossIntroText = '';
     questModalOpen = false; chapterIdx = 0;
     lastLoreCard = CONTENT.story?.opening || '';
@@ -998,6 +1207,11 @@ function startGame() {
         overclockTimer: 0, overclockCD: 0,
         spiritTimer: 0, dashCD: 0, regenTimer: 0,
         healPerKill: 0,
+        // New skill cooldowns
+        charmLockCD: 0, mirrorStepCD: 0, roseFilterCD: 0, algorithmBurstCD: 0, butterflyEffectCD: 0,
+        // Utility & ultimate
+        utilityCD: 0,
+        ultCharge: 0, ultCD: 0,
     };
 
     // Initialize all power levels to 0
@@ -1007,13 +1221,16 @@ function startGame() {
     // Set signature skill to level 1
     player.powers[cd.skills[0].id] = 1;
 
+    // Idol Aura passive (Hyunju) — +20% followers
+    if (cd.id === 'hyunju') player.followerMult += 0.2;
+
     // Init Sohee shields
     if (cd.id === 'sohee') {
         for (let i = 0; i < 2; i++)
             player.shields.push({ angle: (i/2)*Math.PI*2, dist: 28 });
     }
 
-    projectiles = []; enemies = []; xpGems = []; particles = []; floatingTexts = [];
+    projectiles = []; enemies = []; xpGems = []; particles = []; floatingTexts = []; enemyProjectiles = [];
     enemySet.clear();
 
     addNotification(cd.name + ' just entered the chat 🔥', Z.hot);
@@ -1123,32 +1340,69 @@ function openBossChest() {
 // ================================================================
 
 const ENEMY_TYPES = [
-    { id:'antifan', name:'Anti', w:7, h:9, hp:2, speed:0.8, damage:1, xp:1, color1:'#5A5478', color2:'#3A2C62', emoji:'🚫', shape:'tall' },
-    { id:'hater', name:'Hater', w:11, h:8, hp:4, speed:0.6, damage:1, xp:2, color1:'#994455', color2:'#6E2233', emoji:'💢', shape:'wide' },
-    { id:'sasaeng', name:'Sasaeng', w:7, h:7, hp:3, speed:1.4, damage:1, xp:2, color1:'#8A6B4A', color2:'#5E4530', emoji:'📸', shape:'diamond' },
-    { id:'critic', name:'Critic', w:13, h:11, hp:8, speed:0.4, damage:2, xp:4, color1:'#4A5D6E', color2:'#2C3A48', emoji:'📝', shape:'wide' },
-    { id:'troll', name:'Troll', w:9, h:10, hp:5, speed:1.0, damage:1, xp:3, color1:'#4A7744', color2:'#2E5528', emoji:'👺', shape:'tall' },
-    { id:'dispatch', name:'Dispatch', w:10, h:10, hp:6, speed:0.9, damage:2, xp:4, color1:'#6B6B78', color2:'#464654', emoji:'📰', shape:'square' },
+    // Original 6 (backward compatible)
+    { id:'antifan', name:'Anti', w:7, h:9, hp:2, speed:0.8, damage:1, xp:1, color1:'#5A5478', color2:'#3A2C62', emoji:'🚫', shape:'tall', behavior:'chase', minDiff:1, maxDiff:4 },
+    { id:'hater', name:'Hater', w:11, h:8, hp:4, speed:0.6, damage:1, xp:2, color1:'#994455', color2:'#6E2233', emoji:'💢', shape:'wide', behavior:'chase', minDiff:1, maxDiff:6 },
+    { id:'sasaeng', name:'Sasaeng', w:7, h:7, hp:3, speed:1.4, damage:1, xp:2, color1:'#8A6B4A', color2:'#5E4530', emoji:'📸', shape:'diamond', behavior:'dash', minDiff:1, maxDiff:8 },
+    { id:'critic', name:'Critic', w:13, h:11, hp:8, speed:0.4, damage:2, xp:4, color1:'#4A5D6E', color2:'#2C3A48', emoji:'📝', shape:'wide', behavior:'block', minDiff:2, maxDiff:99 },
+    { id:'troll', name:'Troll', w:9, h:10, hp:5, speed:1.0, damage:1, xp:3, color1:'#4A7744', color2:'#2E5528', emoji:'👺', shape:'tall', behavior:'chase', minDiff:2, maxDiff:99 },
+    { id:'dispatch', name:'Dispatch', w:10, h:10, hp:6, speed:0.9, damage:2, xp:4, color1:'#6B6B78', color2:'#464654', emoji:'📰', shape:'square', behavior:'chase', minDiff:3, maxDiff:99 },
+    // New 10 from game_content.json
+    { id:'flash_stalker', name:'Flash Stalker', w:8, h:10, hp:3, speed:1.2, damage:1, xp:2, color1:'#5A5478', color2:'#3A2C62', emoji:'📸', shape:'tall', behavior:'dash', minDiff:1, maxDiff:5 },
+    { id:'tabloid_runner', name:'Tabloid Runner', w:10, h:10, hp:4, speed:0.7, damage:1, xp:2, color1:'#8A8A9A', color2:'#6A6A7A', emoji:'📰', shape:'square', behavior:'ranged', minDiff:2, maxDiff:7 },
+    { id:'comment_wasp', name:'Comment Wasp', w:8, h:8, hp:2, speed:1.3, damage:1, xp:2, color1:'#7A5AA8', color2:'#5A3A88', emoji:'🐝', shape:'diamond', behavior:'zigzag', minDiff:1, maxDiff:6 },
+    { id:'gatekeeper_knight', name:'Gatekeeper', w:12, h:12, hp:10, speed:0.35, damage:2, xp:4, color1:'#8A7AAA', color2:'#6A5A8A', emoji:'🛡️', shape:'square', behavior:'block', minDiff:3, maxDiff:99 },
+    { id:'fancam_leech', name:'Fancam Leech', w:9, h:9, hp:4, speed:0.6, damage:1, xp:3, color1:'#6DE6FF', color2:'#222222', emoji:'📹', shape:'diamond', behavior:'tether', minDiff:2, maxDiff:8 },
+    { id:'spoiler_imp', name:'Spoiler Imp', w:8, h:9, hp:3, speed:1.1, damage:1, xp:2, color1:'#FF4FA3', color2:'#1A1028', emoji:'💣', shape:'tall', behavior:'burst', minDiff:2, maxDiff:7 },
+    { id:'doomscroll_slug', name:'Doomscroll Slug', w:12, h:8, hp:6, speed:0.3, damage:1, xp:3, color1:'#6A5A8A', color2:'#4A3A6A', emoji:'🐛', shape:'wide', behavior:'trail', minDiff:3, maxDiff:99 },
+    { id:'leak_rat', name:'Leak Rat', w:8, h:8, hp:2, speed:1.5, damage:1, xp:1, color1:'#6A6A7A', color2:'#4A4A5A', emoji:'🐀', shape:'diamond', behavior:'stealth', minDiff:1, maxDiff:5 },
+    { id:'echo_fan', name:'Echo Fan', w:10, h:11, hp:5, speed:0.7, damage:2, xp:3, color1:'#4ABABA', color2:'#2A8A8A', emoji:'📢', shape:'tall', behavior:'ranged', minDiff:3, maxDiff:99 },
+    { id:'receipt_hunter', name:'Receipt Hunter', w:11, h:12, hp:7, speed:0.8, damage:2, xp:4, color1:'#9A7A5A', color2:'#7A5A3A', emoji:'📋', shape:'tall', behavior:'chase', minDiff:4, maxDiff:99 },
 ];
 
-// === BOSS TYPES ===
+// === ELITE TYPES ===
+const ELITE_TYPES = [
+    { id:'paparazzi_rig', name:'PAPARAZZI RIG', w:14, h:18, hp:30, speed:0.5, damage:2, xp:12, color1:'#888888', color2:'#555555', emoji:'📷', mechanic:'barrage' },
+    { id:'trending_executor', name:'TRENDING EXEC', w:14, h:16, hp:25, speed:0.7, damage:3, xp:15, color1:'#CC44CC', color2:'#882288', emoji:'📈', mechanic:'mark' },
+    { id:'archive_warden', name:'ARCHIVE WARDEN', w:16, h:18, hp:40, speed:0.3, damage:2, xp:18, color1:'#4A6A8A', color2:'#2A4A6A', emoji:'📁', mechanic:'deny' },
+    { id:'reply_hydra', name:'REPLY HYDRA', w:14, h:16, hp:20, speed:0.6, damage:2, xp:14, color1:'#44AA44', color2:'#228822', emoji:'🐉', mechanic:'split' },
+    { id:'blacklist_duelist', name:'BLACKLIST DUEL', w:14, h:18, hp:35, speed:0.9, damage:3, xp:16, color1:'#AA2222', color2:'#662222', emoji:'⚔️', mechanic:'dash' },
+];
+
+// === BOSS TYPES (full 6-boss roster) ===
 const BOSS_TYPES = [
-    { id:'netizen', name:'NETIZEN MOB', w:20, h:20, hp:60, speed:0.45, damage:2, xp:25,
-      color1:'#8844cc', color2:'#6622aa', emoji:'👥' },
-    { id:'scandal', name:'SCANDAL STORM', w:24, h:24, hp:120, speed:0.38, damage:3, xp:50,
-      color1:'#cc3333', color2:'#992222', emoji:'📰' },
-    { id:'disbandment', name:'DISBANDMENT', w:28, h:28, hp:250, speed:0.32, damage:4, xp:100,
-      color1:'#443355', color2:'#221133', emoji:'💀' },
+    { id:'queen_of_clickbait', name:'QUEEN OF CLICKBAIT', w:24, h:24, hp:80, speed:0.4, damage:2, xp:30,
+      color1:'#FF44AA', color2:'#CC2288', emoji:'👑', chapter:1, arena:'neon_newsroom',
+      intro:'Every crown has a scandal.', telegraphs:['headline_slash','camera_cone'] },
+    { id:'mr_algorithm', name:'MR. ALGORITHM', w:22, h:22, hp:120, speed:0.35, damage:3, xp:50,
+      color1:'#4488FF', color2:'#2266CC', emoji:'🤖', chapter:2, arena:'data_cathedral',
+      intro:'I decide what they see.', telegraphs:['grid_lock','ranking_beam'] },
+    { id:'director_cut', name:'DIRECTOR CUT', w:24, h:24, hp:160, speed:0.38, damage:3, xp:60,
+      color1:'#FFB347', color2:'#CC8822', emoji:'🎬', chapter:3, arena:'broken_stage_set',
+      intro:'Say it again, but louder.', telegraphs:['spotlight_snipe','clap_shockwave'] },
+    { id:'glass_prince', name:'GLASS PRINCE', w:20, h:20, hp:200, speed:0.42, damage:3, xp:75,
+      color1:'#C8D6FF', color2:'#8A9ABB', emoji:'🪞', chapter:4, arena:'mirror_hall',
+      intro:'Reflection is a weapon.', telegraphs:['mirror_clone','shard_rain'] },
+    { id:'midnight_forum', name:'MIDNIGHT FORUM', w:26, h:26, hp:250, speed:0.3, damage:4, xp:90,
+      color1:'#6A5AAA', color2:'#4A3A88', emoji:'💬', chapter:5, arena:'floating_chat_abyss',
+      intro:'Consensus becomes cage.', telegraphs:['vote_circle','thread_chain'] },
+    { id:'the_disbander', name:'THE DISBANDER', w:32, h:32, hp:400, speed:0.28, damage:5, xp:150,
+      color1:'#443355', color2:'#221133', emoji:'💀', chapter:5, arena:'fractured_throne_stage',
+      intro:'End of story.', telegraphs:['phase_tear','void_wedge'] },
 ];
 
 let nextBossTime = 3600, bossesKilled = 0;
+let utilityUses = 0, ultActivations = 0;
+let currentArena = null; // Set during boss encounter
 
 function spawnBoss() {
-    let bi = 0;
-    if (difficulty >= 6) bi = 2;
-    else if (difficulty >= 3) bi = 1;
+    // Chapter-based boss selection
+    let bi = Math.min(chapterIdx, BOSS_TYPES.length - 1);
+    // After first cycle, loop with scaling
+    if (bossesKilled >= BOSS_TYPES.length) bi = bossesKilled % BOSS_TYPES.length;
 
     const type = BOSS_TYPES[bi];
+    currentArena = type.arena || null;
     const hpMult = 1 + (difficulty - 1) * 0.5;
     const side = Math.floor(Math.random() * 4);
     const dist = 180;
@@ -1174,18 +1428,40 @@ function spawnBoss() {
     SFX.bossSpawn();
     screenFlash = 12; screenFlashColor = UI.danger;
     bossIntroTimer = 210;
-    bossIntroText = type.name + ' · HOLD THE STAGE';
+    bossIntroText = type.intro || (type.name + ' · HOLD THE STAGE');
     addNotification('BOSS INCOMING: ' + type.name + ' ' + type.emoji + ' 💀', Z.magenta);
 }
 
-function spawnEnemy() {
-    let ti;
-    const r = Math.random();
-    if (difficulty < 3) ti = r < 0.6 ? 0 : (r < 0.85 ? 2 : 1);
-    else if (difficulty < 6) ti = r < 0.2 ? 0 : (r < 0.4 ? 1 : (r < 0.6 ? 2 : (r < 0.8 ? 4 : (r < 0.95 ? 3 : 5))));
-    else ti = r < 0.1 ? 0 : (r < 0.25 ? 1 : (r < 0.4 ? 2 : (r < 0.6 ? 4 : (r < 0.8 ? 3 : 5))));
+function spawnElite() {
+    const type = ELITE_TYPES[Math.floor(Math.random() * ELITE_TYPES.length)];
+    const hpMult = 1 + (difficulty - 1) * 0.5;
+    const side = Math.floor(Math.random() * 4);
+    const dist = 180;
+    let ex, ey;
+    if (side === 0) { ex = player.x + (Math.random() - 0.5) * dist; ey = player.y - dist; }
+    else if (side === 1) { ex = player.x + (Math.random() - 0.5) * dist; ey = player.y + dist; }
+    else if (side === 2) { ex = player.x - dist; ey = player.y + (Math.random() - 0.5) * dist; }
+    else { ex = player.x + dist; ey = player.y + (Math.random() - 0.5) * dist; }
+    ex = Math.max(20, Math.min(ARENA_W - 20, ex));
+    ey = Math.max(20, Math.min(ARENA_H - 20, ey));
 
-    const type = ENEMY_TYPES[ti];
+    const eliteEnemy = {
+        x: ex, y: ey, type,
+        hp: Math.ceil(type.hp * hpMult), maxHp: Math.ceil(type.hp * hpMult),
+        speed: type.speed, damage: type.damage, xp: type.xp, w: type.w, h: type.h,
+        flashTimer: 0, phase: Math.random() * Math.PI * 2,
+        frozen: 0, scanned: false, elite: true,
+    };
+    enemies.push(eliteEnemy);
+    enemySet.add(eliteEnemy);
+    addNotification('ELITE: ' + type.name + ' ' + type.emoji, Z.purple);
+    screenFlash = 6; screenFlashColor = UI.lilac;
+}
+
+function spawnEnemy() {
+    // Data-driven pool: filter by difficulty range
+    const pool = ENEMY_TYPES.filter(t => difficulty >= (t.minDiff || 1) && difficulty <= (t.maxDiff || 99));
+    const type = pool[Math.floor(Math.random() * pool.length)] || ENEMY_TYPES[0];
     const hpMult = 1 + (difficulty-1) * 0.35;
     const side = Math.floor(Math.random()*4);
     const dist = 170, margin = 25;
@@ -1215,7 +1491,10 @@ function fireProjectiles() {
     player.atkTimer = Math.max(8, player.atkSpeed - player.comboSpeedBonus);
     if (player.overclockTimer > 0) player.atkTimer = Math.floor(player.atkTimer * 0.5);
 
-    const crit = Math.random() < (player.powers.critChance * 0.12);
+    const baseCritChance = player.powers.critChance * 0.12;
+    // Golden Instinct (Miho) — crit scales with combo
+    const comboBonus = (player.charId === 'miho') ? Math.min(0.3, comboCount * 0.01) : 0;
+    const crit = Math.random() < (baseCritChance + comboBonus);
     const dm = (crit ? 2.5 : 1) * player.dmgMult;
     if (crit) spawnFloatingText(player.x, player.y - 14, 'CRIT!', UI.motifCrown);
 
@@ -1227,6 +1506,13 @@ function fireProjectiles() {
 
     // Nine Tails (Miho)
     if (player.powers.nineTails > 0) fireNineTails(dm);
+
+    // New active skill auto-fire (cooldown-gated)
+    if (player.charmLockCD <= 0 && player.powers.charmLock > 0) { fireCharmLock(dm); player.charmLockCD = 720; }
+    if (player.mirrorStepCD <= 0 && player.powers.mirrorStep > 0) { fireMirrorStep(dm); player.mirrorStepCD = 360; }
+    if (player.roseFilterCD <= 0 && player.powers.roseFilter > 0) { fireRoseFilter(dm); player.roseFilterCD = 540; }
+    if (player.algorithmBurstCD <= 0 && player.powers.algorithmBurst > 0) { fireAlgorithmBurst(dm); player.algorithmBurstCD = 600; }
+    if (player.butterflyEffectCD <= 0 && player.powers.butterflyEffect > 0) { fireButterflyEffect(dm); player.butterflyEffectCD = 780; }
 }
 
 function fireFoxFire(dm) {
@@ -1294,6 +1580,251 @@ function fireNineTails(dm) {
             const a = Math.random()*Math.PI*2;
             particles.push({ x:player.x+Math.cos(a)*range, y:player.y+Math.sin(a)*range,
                 vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#f7e065', size:2 });
+        }
+    }
+}
+
+// === NEW SKILL FIRING FUNCTIONS ===
+
+function fireCharmLock(dm) {
+    // Miho root skill — area freeze + pink sigil VFX
+    const range = 50 + player.level * 2;
+    const r2 = range * range;
+    let frozen = 0;
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx = e.x - player.x, dy = e.y - player.y;
+        if (dx * dx + dy * dy < r2 && frozen < 5) {
+            e.frozen = 150; // 2.5s root
+            e.scanned = true; // +15% vuln via scan system
+            frozen++;
+        }
+    }
+    // Pink sigil VFX
+    if (particles.length < MAX_PARTICLES) {
+        for (let i = 0; i < Math.min(8, MAX_PARTICLES - particles.length); i++) {
+            const a = (i / 8) * Math.PI * 2;
+            particles.push({ x: player.x + Math.cos(a) * 20, y: player.y + Math.sin(a) * 20,
+                vx: Math.cos(a) * 0.5, vy: Math.sin(a) * 0.5, life: 25, color: '#ff66aa', size: 2 });
+        }
+    }
+    addNotification('Charm Lock ✨ enemies rooted!', Z.pink);
+}
+
+function fireMirrorStep(dm) {
+    // Miho dash + slash
+    const dir = player.facingLeft ? -1 : 1;
+    const dashDist = 40;
+    player.x += dir * dashDist;
+    player.x = Math.max(8, Math.min(ARENA_W - 8, player.x));
+    player.invTimer = Math.max(player.invTimer, 15);
+    // Slash damage to nearby enemies
+    const slashRange = 30;
+    const sr2 = slashRange * slashRange;
+    const slashDmg = player.atk * 0.8 * dm;
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx = e.x - player.x, dy = e.y - player.y;
+        if (dx * dx + dy * dy < sr2) damageEnemy(e, slashDmg);
+    }
+    // Afterimage particles
+    if (particles.length < MAX_PARTICLES) {
+        for (let i = 0; i < Math.min(5, MAX_PARTICLES - particles.length); i++) {
+            particles.push({ x: player.x - dir * i * 8, y: player.y,
+                vx: 0, vy: 0, life: 15, color: '#ddaaff', size: 3 });
+        }
+    }
+}
+
+function fireRoseFilter(dm) {
+    // Hyunju debuff zone — enemies in area get accuracy down (implemented as slow)
+    const range = 45;
+    const r2 = range * range;
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx = e.x - player.x, dy = e.y - player.y;
+        if (dx * dx + dy * dy < r2) {
+            e.speed = e.type.speed * 0.5; // 50% slow = accuracy metaphor
+            e.frozen = Math.max(e.frozen, 30);
+        }
+    }
+    if (particles.length < MAX_PARTICLES) {
+        for (let i = 0; i < Math.min(6, MAX_PARTICLES - particles.length); i++) {
+            const a = Math.random() * Math.PI * 2;
+            particles.push({ x: player.x + Math.cos(a) * range * 0.7, y: player.y + Math.sin(a) * range * 0.7,
+                vx: 0, vy: -0.3, life: 20, color: '#ffaa88', size: 1.5 });
+        }
+    }
+}
+
+function fireAlgorithmBurst(dm) {
+    // Sujin 3-hit combo
+    const near = findNearest(3, player.range + 30);
+    for (let hit = 0; hit < 3; hit++) {
+        const t = near[hit % Math.max(1, near.length)];
+        if (t) {
+            const burstDmg = player.atk * 0.75 * dm;
+            setTimeout(() => { if (enemies.includes(t)) damageEnemy(t, burstDmg); }, hit * 100);
+        }
+    }
+    if (particles.length < MAX_PARTICLES) {
+        for (let i = 0; i < Math.min(4, MAX_PARTICLES - particles.length); i++) {
+            const a = Math.random() * Math.PI * 2;
+            particles.push({ x: player.x + Math.cos(a) * 15, y: player.y + Math.sin(a) * 15,
+                vx: Math.cos(a) * 2, vy: Math.sin(a) * 2, life: 12, color: '#88ff88', size: 1.5 });
+        }
+    }
+}
+
+function fireButterflyEffect(dm) {
+    // Sohee shield pop AoE + slow
+    const range = 35;
+    const r2 = range * range;
+    const popDmg = player.atk * 1.2 * dm;
+    for (let i = 0; i < enemies.length; i++) {
+        const e = enemies[i];
+        const dx = e.x - player.x, dy = e.y - player.y;
+        if (dx * dx + dy * dy < r2) {
+            damageEnemy(e, popDmg);
+            e.speed = e.type.speed * 0.6; // slow
+        }
+    }
+    // Wing shatter particles
+    if (particles.length < MAX_PARTICLES) {
+        for (let i = 0; i < Math.min(10, MAX_PARTICLES - particles.length); i++) {
+            const a = Math.random() * Math.PI * 2;
+            particles.push({ x: player.x + Math.cos(a) * 10, y: player.y + Math.sin(a) * 10,
+                vx: Math.cos(a) * 2.5, vy: Math.sin(a) * 2.5, life: 20, color: '#bb88ff', size: 2 });
+        }
+    }
+    addNotification('Butterfly Effect 🦋 shield pop!', Z.purple);
+}
+
+// === UTILITY SKILL SYSTEM ===
+function useUtility() {
+    if (!player || player.utilityCD > 0) return;
+    const id = player.charId;
+    if (id === 'miho') {
+        // Velvet Dodge — iframe sidestep
+        const dir = player.facingLeft ? 1 : -1;
+        player.x += dir * 25;
+        player.x = Math.max(8, Math.min(ARENA_W - 8, player.x));
+        player.invTimer = Math.max(player.invTimer, 20);
+        player.utilityCD = 300; // 5s
+    } else if (id === 'hyunju') {
+        // Float Step — hover ignores floor hazards + brief invuln
+        player.invTimer = Math.max(player.invTimer, 25);
+        player.utilityCD = 420; // 7s
+        addNotification('Float Step 🌙 hovering~', Z.peach);
+    } else if (id === 'sujin') {
+        // Phase Slide — micro-teleport
+        const dir = player.facingLeft ? -1 : 1;
+        player.x += dir * 50;
+        player.x = Math.max(8, Math.min(ARENA_W - 8, player.x));
+        player.invTimer = Math.max(player.invTimer, 10);
+        player.utilityCD = 360; // 6s
+    } else if (id === 'sohee') {
+        // Guard Step — reposition + taunt pulse
+        const dir = player.facingLeft ? -1 : 1;
+        player.x += dir * 20;
+        player.x = Math.max(8, Math.min(ARENA_W - 8, player.x));
+        // Taunt: pull nearby enemies toward player
+        const tr = 60, tr2 = tr * tr;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const dx = player.x - e.x, dy = player.y - e.y;
+            if (dx * dx + dy * dy < tr2) {
+                const d = Math.hypot(dx, dy);
+                e.x += (dx / d) * 10;
+                e.y += (dy / d) * 10;
+            }
+        }
+        player.utilityCD = 240; // 4s
+    }
+    utilityUses++;
+    screenFlash = 4; screenFlashColor = UI.cyan;
+}
+
+// === ULTIMATE SYSTEM ===
+function fireUltimate() {
+    if (!player || player.ultCharge < 100 || player.ultCD > 0) return;
+    player.ultCharge = 0;
+    player.ultCD = 180; // 3s cooldown after use
+    const dm = player.dmgMult;
+    const id = player.charId;
+
+    ultActivations++;
+    screenFlash = 15; screenFlashColor = UI.motifCrown;
+    addNotification('ULTIMATE ✨ ' + player.charDef.name + ' UNLEASHED!', Z.yellow);
+
+    if (id === 'miho') {
+        // Throne of Nine — 8-hit + execute pulse
+        const near = findNearest(8, 120);
+        for (let i = 0; i < 8; i++) {
+            const t = near[i % Math.max(1, near.length)];
+            if (t) {
+                const ultDmg = player.atk * 0.7 * dm;
+                setTimeout(() => { if (enemies.includes(t)) damageEnemy(t, ultDmg); }, i * 80);
+            }
+        }
+        // Execute pulse — kill enemies below 15% hp in range
+        setTimeout(() => {
+            const execR2 = 100 * 100;
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                const dx = e.x - player.x, dy = e.y - player.y;
+                if (dx * dx + dy * dy < execR2 && e.hp / e.maxHp < 0.15 && !e.boss) {
+                    killEnemy(e);
+                }
+            }
+        }, 700);
+    } else if (id === 'hyunju') {
+        // Inner World — massive heal + enemy confusion
+        player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.5);
+        const confRange = 80, cr2 = confRange * confRange;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const dx = e.x - player.x, dy = e.y - player.y;
+            if (dx * dx + dy * dy < cr2) {
+                e.frozen = 120; // confusion = freeze
+            }
+        }
+        if (particles.length < MAX_PARTICLES) {
+            for (let i = 0; i < Math.min(15, MAX_PARTICLES - particles.length); i++) {
+                const a = Math.random() * Math.PI * 2;
+                particles.push({ x: player.x + Math.cos(a) * 30, y: player.y + Math.sin(a) * 30,
+                    vx: Math.cos(a), vy: Math.sin(a) - 0.5, life: 30, color: '#ffbbdd', size: 2 });
+            }
+        }
+    } else if (id === 'sujin') {
+        // Viral Code — infect wave, chain detonations
+        const infectR = 70, ir2 = infectR * infectR;
+        const infected = [];
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const dx = e.x - player.x, dy = e.y - player.y;
+            if (dx * dx + dy * dy < ir2) {
+                infected.push(e);
+                damageEnemy(e, player.atk * 1.5 * dm);
+            }
+        }
+        // Chain detonation from killed enemies handled by existing viralCode
+    } else if (id === 'sohee') {
+        // Sanctuary Stage — team barrier + reflect
+        player.invTimer = Math.max(player.invTimer, 180); // 3s invuln
+        // Reflect: damage all nearby enemies
+        const refR = 60, rr2 = refR * refR;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const dx = e.x - player.x, dy = e.y - player.y;
+            if (dx * dx + dy * dy < rr2) damageEnemy(e, player.atk * 2 * dm);
+        }
+        if (particles.length < MAX_PARTICLES) {
+            for (let i = 0; i < Math.min(12, MAX_PARTICLES - particles.length); i++) {
+                const a = (i / 12) * Math.PI * 2;
+                particles.push({ x: player.x + Math.cos(a) * refR, y: player.y + Math.sin(a) * refR,
+                    vx: 0, vy: 0, life: 30, color: '#88ccff', size: 3 });
+            }
         }
     }
 }
@@ -1476,6 +2007,56 @@ function updatePlayer() {
         else player.invTimer += 60;
         addNotification('Mood Ring proc → ' + buffs[idx], Z.purple);
     }
+
+    // === NEW PASSIVE EFFECTS ===
+
+    // Stage Hypnosis (Miho) — nearby enemies lose 8% speed
+    if (player.charId === 'miho') {
+        const hypR = 60, hypR2 = hypR * hypR;
+        for (let i = 0; i < enemies.length; i++) {
+            const e = enemies[i];
+            const dx = e.x - player.x, dy = e.y - player.y;
+            if (dx * dx + dy * dy < hypR2) {
+                e.speed = Math.min(e.speed, e.type.speed * 0.92);
+            }
+        }
+    }
+
+    // Golden Instinct (Miho) — crit scales with combo
+    // (Applied in fireProjectiles via crit chance calculation)
+
+    // Comfort Chorus (Hyunju) — regen when stationary
+    if (player.charId === 'hyunju' && !(keys['ArrowLeft']||keys['KeyA']||keys['ArrowRight']||keys['KeyD']||keys['ArrowUp']||keys['KeyW']||keys['ArrowDown']||keys['KeyS'])) {
+        if (frameCount % 60 === 0 && player.hp < player.maxHp) {
+            player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.06);
+        }
+    }
+
+    // Idol Aura (Hyunju) — +20% followers (applied via followerMult at start)
+
+    // Combo Kernel (Sujin) — +4% ATK speed per 10 combo
+    if (player.charId === 'sujin' && comboCount > 0) {
+        player.comboSpeedBonus = Math.floor(comboCount / 10) * 0.04 * player.atkSpeed;
+    }
+
+    // Cold Focus (Sujin) — first hit on full HP target crits (applied in projectile hit)
+
+    // Steady Heart (Sohee) — reduced damage during low HP
+    // (Applied in playerTakeDamage)
+
+    // Tick cooldowns
+    if (player.charmLockCD > 0) player.charmLockCD--;
+    if (player.mirrorStepCD > 0) player.mirrorStepCD--;
+    if (player.roseFilterCD > 0) player.roseFilterCD--;
+    if (player.algorithmBurstCD > 0) player.algorithmBurstCD--;
+    if (player.butterflyEffectCD > 0) player.butterflyEffectCD--;
+    if (player.utilityCD > 0) player.utilityCD--;
+    if (player.ultCD > 0) player.ultCD--;
+
+    // Ultimate charge from kills + combos
+    if (comboCount > 0 && comboTimer === 119) { // just started a combo
+        player.ultCharge = Math.min(100, player.ultCharge + 0.5);
+    }
 }
 
 function updateProjectiles() {
@@ -1537,6 +2118,9 @@ function killEnemy(e) {
     const followerGain = Math.floor((e.xp * 10 + comboCount) * player.followerMult);
     followers += followerGain;
     score += followerGain;
+
+    // Ultimate charge from kills
+    player.ultCharge = Math.min(100, player.ultCharge + (e.boss ? 25 : e.xp * 1.5));
 
     // Fan chant on kills (every few kills or on combos)
     if (killCount % 5 === 0 || comboCount >= 10) {
@@ -1615,6 +2199,7 @@ function killEnemy(e) {
     // Boss kill rewards
     if (e.boss) {
         bossesKilled++;
+        currentArena = null; // Clear arena backdrop
         addNotification(e.bossType.name + ' DOWN 👑 absolutely bodied', Z.yellow);
         screenFlash = 15; screenFlashColor = UI.motifCrown;
         SFX.bossKill();
@@ -1672,18 +2257,61 @@ function updateEnemies() {
 
         const dx=player.x-e.x, dy=player.y-e.y;
         const d2=dx*dx+dy*dy;
-        if (d2>0) { const dist=Math.sqrt(d2); e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        const dist = d2 > 0 ? Math.sqrt(d2) : 1;
         if (e.flashTimer>0) e.flashTimer--;
+
+        // Behavior-driven movement
+        const beh = e.type.behavior || 'chase';
+        if (beh === 'chase' || e.boss) {
+            if (d2>0) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        } else if (beh === 'dash') {
+            // Dash: charge fast when close, slow otherwise
+            const dashSpd = d2 < 4000 ? e.speed * 2.2 : e.speed * 0.6;
+            if (d2>0) { e.x+=(dx/dist)*dashSpd; e.y+=(dy/dist)*dashSpd; }
+        } else if (beh === 'zigzag') {
+            const zig = Math.sin(e.phase * 3) * e.speed * 1.5;
+            if (d2>0) { e.x+=(dx/dist)*e.speed + (-dy/dist)*zig; e.y+=(dy/dist)*e.speed + (dx/dist)*zig; }
+        } else if (beh === 'block') {
+            // Block: advance slowly, stop when close
+            if (d2 > 2500) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        } else if (beh === 'tether') {
+            // Tether: orbit at fixed distance
+            const orbDist = 50;
+            if (d2 > orbDist * orbDist + 400) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+            else { e.x += Math.cos(e.phase) * e.speed; e.y += Math.sin(e.phase) * e.speed; }
+        } else if (beh === 'burst') {
+            // Burst: rush in, pause, rush again
+            if (Math.sin(e.phase * 2) > 0) { e.x+=(dx/dist)*e.speed*1.8; e.y+=(dy/dist)*e.speed*1.8; }
+        } else if (beh === 'trail') {
+            // Trail: slow, steady
+            if (d2>0) { e.x+=(dx/dist)*e.speed*0.5; e.y+=(dy/dist)*e.speed*0.5; }
+        } else if (beh === 'stealth') {
+            // Stealth: fast, erratic
+            const szig = Math.sin(e.phase * 5) * e.speed;
+            if (d2>0) { e.x+=(dx/dist)*e.speed*1.3+szig; e.y+=(dy/dist)*e.speed*1.3; }
+        } else if (beh === 'ranged') {
+            // Ranged: approach to medium distance, then circle
+            if (d2 > 6400) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+            else { e.x += Math.cos(e.phase) * e.speed * 0.8; e.y += Math.sin(e.phase) * e.speed * 0.8; }
+            // Fire enemy projectile
+            if (frameCount % 90 === 0 && d2 < 10000 && enemyProjectiles.length < MAX_ENEMY_PROJECTILES) {
+                enemyProjectiles.push({ x:e.x, y:e.y, vx:(dx/dist)*2, vy:(dy/dist)*2, damage:e.damage, life:60, color:e.type.color1, size:2 });
+            }
+        } else {
+            if (d2>0) { e.x+=(dx/dist)*e.speed; e.y+=(dy/dist)*e.speed; }
+        }
 
         // Boss telegraph — pulsing AoE warning before attack
         if (e.boss) {
             if (e.telegraphTimer > 0) {
                 e.telegraphTimer--;
             } else if (d2 < 3600 && Math.random() < 0.005) {
-                // Start telegraph: 45 frames warning at player's current position
                 e.telegraphTimer = 45;
                 e.telegraphX = player.x;
                 e.telegraphY = player.y;
+                // Pick random telegraph type from boss definition
+                const tels = e.bossType.telegraphs;
+                e.telegraphType = tels ? tels[Math.floor(Math.random() * tels.length)] : 'circle';
             }
         }
 
@@ -1713,7 +2341,12 @@ function updateEnemies() {
 
 function playerTakeDamage(dmg) {
     if (player.invTimer>0 || player.spiritTimer>0) return;
-    player.hp -= dmg;
+    // Steady Heart (Sohee) — reduced damage when low HP
+    let finalDmg = dmg;
+    if (player.charId === 'sohee' && player.hp / player.maxHp < 0.3) {
+        finalDmg = Math.max(1, Math.floor(dmg * 0.65));
+    }
+    player.hp -= finalDmg;
     player.invTimer = 60;
     SFX.playerHit();
     screenFlash = 6; screenFlashColor = UI.danger;
@@ -1788,6 +2421,24 @@ function updateNotifications() {
     }
 }
 
+function updateEnemyProjectiles() {
+    let i = enemyProjectiles.length;
+    while (i-- > 0) {
+        const p = enemyProjectiles[i];
+        p.x += p.vx; p.y += p.vy; p.life--;
+        if (p.life <= 0 || p.x < -20 || p.x > ARENA_W + 20 || p.y < -20 || p.y > ARENA_H + 20) {
+            fastRemove(enemyProjectiles, i); continue;
+        }
+        // Hit player
+        const dx = p.x - player.x, dy = p.y - player.y;
+        if (dx * dx + dy * dy < 64) {
+            playerTakeDamage(p.damage);
+            fastRemove(enemyProjectiles, i);
+        }
+    }
+    if (enemyProjectiles.length > MAX_ENEMY_PROJECTILES) enemyProjectiles.length = MAX_ENEMY_PROJECTILES;
+}
+
 function spawnHitParticles(x,y,color) {
     if (particles.length >= MAX_PARTICLES) return;
     const count = Math.min(3, MAX_PARTICLES - particles.length);
@@ -1817,6 +2468,11 @@ function updateSpawning() {
         nextBossTime = survivalTime + 2700;
     }
 
+    // Elite spawn (difficulty >= 4, every ~30s)
+    if (difficulty >= 4 && survivalTime % 1800 === 900 && !enemies.some(e => e.elite)) {
+        spawnElite();
+    }
+
     const baseRate = Math.max(8, 55 - difficulty*5);
     spawnTimer--;
     if (spawnTimer<=0) {
@@ -1840,6 +2496,209 @@ function updateCamera() {
 // ================================================================
 // PIXEL LAYER DRAWING (game world at 320x240)
 // ================================================================
+
+// === BOSS TELEGRAPH SHAPES ===
+function drawBossTelegraph(tx, ty, progress, pulse, type, bossColor) {
+    const radius = 16 + progress * 8;
+    switch (type) {
+        case 'headline_slash': {
+            // Wide horizontal slash line
+            const w = 30 + progress * 20;
+            gctx.globalAlpha = 0.2 + progress * 0.3;
+            gctx.fillStyle = bossColor;
+            gctx.fillRect(tx - w, ty - 1, w * 2, 3);
+            gctx.globalAlpha = pulse * progress;
+            gctx.fillStyle = UI.danger;
+            gctx.fillRect(tx - w - 2, ty - 2, w * 2 + 4, 5);
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'camera_cone': {
+            // Cone shape pointing from boss toward target
+            gctx.globalAlpha = 0.15 + progress * 0.25;
+            gctx.fillStyle = bossColor;
+            gctx.beginPath();
+            gctx.moveTo(tx, ty);
+            gctx.lineTo(tx - 12 - progress * 10, ty + 20 + progress * 12);
+            gctx.lineTo(tx + 12 + progress * 10, ty + 20 + progress * 12);
+            gctx.closePath(); gctx.fill();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'grid_lock': {
+            // Grid square pattern
+            const gs = 20 + progress * 10;
+            gctx.globalAlpha = 0.2 + progress * 0.3;
+            gctx.strokeStyle = bossColor;
+            gctx.lineWidth = 1;
+            gctx.strokeRect(tx - gs, ty - gs, gs * 2, gs * 2);
+            // Inner grid lines
+            gctx.globalAlpha = pulse * progress * 0.5;
+            gctx.beginPath();
+            gctx.moveTo(tx - gs, ty); gctx.lineTo(tx + gs, ty);
+            gctx.moveTo(tx, ty - gs); gctx.lineTo(tx, ty + gs);
+            gctx.stroke();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'ranking_beam': {
+            // Vertical beam dropping down
+            const bw = 6 + progress * 4;
+            gctx.globalAlpha = 0.15 + progress * 0.35;
+            gctx.fillStyle = bossColor;
+            gctx.fillRect(tx - bw / 2, ty - 40, bw, 80);
+            gctx.globalAlpha = pulse * progress;
+            gctx.fillStyle = UI.danger;
+            gctx.fillRect(tx - bw / 2 - 1, ty - 42, bw + 2, 84);
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'spotlight_snipe': {
+            // Small focused circle with crosshair lines
+            const sr = 8 + progress * 5;
+            gctx.globalAlpha = 0.25 + progress * 0.35;
+            gctx.fillStyle = bossColor;
+            gctx.beginPath(); gctx.arc(tx, ty, sr, 0, Math.PI * 2); gctx.fill();
+            gctx.globalAlpha = pulse;
+            gctx.strokeStyle = UI.danger;
+            gctx.lineWidth = 1;
+            gctx.beginPath();
+            gctx.moveTo(tx - sr - 4, ty); gctx.lineTo(tx + sr + 4, ty);
+            gctx.moveTo(tx, ty - sr - 4); gctx.lineTo(tx, ty + sr + 4);
+            gctx.stroke();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'clap_shockwave': {
+            // Expanding ring
+            gctx.globalAlpha = pulse * progress;
+            gctx.strokeStyle = bossColor;
+            gctx.lineWidth = 2;
+            gctx.beginPath(); gctx.arc(tx, ty, radius + progress * 12, 0, Math.PI * 2); gctx.stroke();
+            gctx.globalAlpha = 0.1 + progress * 0.15;
+            gctx.fillStyle = UI.danger;
+            gctx.beginPath(); gctx.arc(tx, ty, radius, 0, Math.PI * 2); gctx.fill();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'mirror_clone': {
+            // Reflected diamond shapes
+            const ms = 10 + progress * 8;
+            gctx.globalAlpha = 0.2 + progress * 0.3;
+            gctx.fillStyle = bossColor;
+            gctx.save(); gctx.translate(tx, ty); gctx.rotate(Math.PI / 4);
+            gctx.fillRect(-ms, -ms, ms * 2, ms * 2);
+            gctx.restore();
+            // Mirror copy offset
+            gctx.globalAlpha = pulse * progress * 0.5;
+            gctx.save(); gctx.translate(tx + 8, ty - 8); gctx.rotate(Math.PI / 4);
+            gctx.fillRect(-ms * 0.6, -ms * 0.6, ms * 1.2, ms * 1.2);
+            gctx.restore();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'shard_rain': {
+            // Falling vertical lines
+            gctx.globalAlpha = 0.15 + progress * 0.3;
+            gctx.fillStyle = bossColor;
+            for (let si = 0; si < 5; si++) {
+                const sx = tx - 16 + si * 8;
+                const sl = 8 + progress * 12;
+                gctx.fillRect(sx, ty - sl / 2 + Math.sin(gameTime * 0.2 + si) * 3, 2, sl);
+            }
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'vote_circle': {
+            // Concentric ring shrinking inward
+            gctx.globalAlpha = 0.15 + progress * 0.25;
+            gctx.strokeStyle = bossColor;
+            gctx.lineWidth = 1;
+            for (let ri = 0; ri < 3; ri++) {
+                const rr = radius + (2 - ri) * 6 - progress * (2 - ri) * 4;
+                gctx.beginPath(); gctx.arc(tx, ty, Math.max(2, rr), 0, Math.PI * 2); gctx.stroke();
+            }
+            gctx.globalAlpha = pulse * progress * 0.3;
+            gctx.fillStyle = UI.danger;
+            gctx.beginPath(); gctx.arc(tx, ty, radius * 0.5, 0, Math.PI * 2); gctx.fill();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'thread_chain': {
+            // Chain of connected dots
+            gctx.globalAlpha = 0.2 + progress * 0.3;
+            gctx.fillStyle = bossColor;
+            gctx.strokeStyle = bossColor;
+            gctx.lineWidth = 1;
+            const pts = 4;
+            for (let ci = 0; ci < pts; ci++) {
+                const ca = (ci / pts) * Math.PI * 2 + gameTime * 0.05;
+                const cr = radius * 0.8;
+                const cx = tx + Math.cos(ca) * cr, cy = ty + Math.sin(ca) * cr;
+                gctx.fillRect(cx - 1, cy - 1, 3, 3);
+                if (ci > 0) {
+                    const pa = ((ci - 1) / pts) * Math.PI * 2 + gameTime * 0.05;
+                    gctx.beginPath();
+                    gctx.moveTo(tx + Math.cos(pa) * cr, ty + Math.sin(pa) * cr);
+                    gctx.lineTo(cx, cy);
+                    gctx.stroke();
+                }
+            }
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'phase_tear': {
+            // Jagged tear line
+            gctx.globalAlpha = 0.2 + progress * 0.4;
+            gctx.strokeStyle = bossColor;
+            gctx.lineWidth = 2;
+            gctx.beginPath();
+            gctx.moveTo(tx - 20, ty - 15);
+            gctx.lineTo(tx - 5, ty - 3); gctx.lineTo(tx - 12, ty + 2);
+            gctx.lineTo(tx + 5, ty + 8); gctx.lineTo(tx - 2, ty + 15);
+            gctx.lineTo(tx + 20, ty + 20);
+            gctx.stroke();
+            gctx.globalAlpha = pulse * progress * 0.3;
+            gctx.fillStyle = UI.danger;
+            gctx.fillRect(tx - 3, ty - 3, 6, 6);
+            gctx.globalAlpha = 1;
+            break;
+        }
+        case 'void_wedge': {
+            // V-shaped wedge
+            const vw = 18 + progress * 12;
+            gctx.globalAlpha = 0.2 + progress * 0.35;
+            gctx.fillStyle = bossColor;
+            gctx.beginPath();
+            gctx.moveTo(tx, ty - vw);
+            gctx.lineTo(tx - vw, ty + vw);
+            gctx.lineTo(tx + vw, ty + vw);
+            gctx.closePath(); gctx.fill();
+            gctx.globalAlpha = pulse * progress;
+            gctx.strokeStyle = UI.danger;
+            gctx.lineWidth = 1;
+            gctx.stroke();
+            gctx.globalAlpha = 1;
+            break;
+        }
+        default: {
+            // Fallback: generic AoE circle
+            gctx.globalAlpha = pulse * progress;
+            gctx.fillStyle = UI.motifSpike;
+            gctx.beginPath(); gctx.arc(tx, ty, radius + 3, 0, Math.PI * 2); gctx.fill();
+            gctx.globalAlpha = 0.2 + progress * 0.3;
+            gctx.fillStyle = UI.danger;
+            gctx.beginPath(); gctx.arc(tx, ty, radius, 0, Math.PI * 2); gctx.fill();
+            gctx.fillStyle = UI.motifSpike;
+            for (let si = 0; si < 4; si++) {
+                const sa = (si / 4) * Math.PI * 2 + gameTime * 0.1;
+                gctx.fillRect(tx + Math.cos(sa) * radius - 1, ty + Math.sin(sa) * radius - 1, 2, 2);
+            }
+            gctx.globalAlpha = 1;
+            break;
+        }
+    }
+}
 
 function drawPixelWorld() {
     gctx.fillStyle = UI.bg;
@@ -1875,6 +2734,29 @@ function drawPixelWorld() {
             gctx.fillRect(mx-2,my+1,5,1);
             gctx.fillRect(mx-1,my+2,3,1);
             gctx.fillRect(mx,my+3,1,1);
+        }
+    }
+
+    // Arena backdrop overlay (active during boss encounters)
+    if (currentArena) {
+        const arenaTints = {
+            neon_newsroom: { floor: '#1A0A1A', accent: '#FF44AA' },
+            data_cathedral: { floor: '#0A0A1A', accent: '#4488FF' },
+            broken_stage_set: { floor: '#1A1008', accent: '#FFB347' },
+            mirror_hall: { floor: '#0E0E1A', accent: '#C8D6FF' },
+            floating_chat_abyss: { floor: '#0A0A14', accent: '#6A5AAA' },
+            fractured_throne_stage: { floor: '#0A0008', accent: '#443355' },
+        };
+        const at = arenaTints[currentArena];
+        if (at) {
+            gctx.globalAlpha = 0.15;
+            gctx.fillStyle = at.floor;
+            gctx.fillRect(0, 0, PW, PH);
+            // Arena accent fog
+            gctx.globalAlpha = 0.04 + Math.sin(gameTime * 0.02) * 0.02;
+            gctx.fillStyle = at.accent;
+            gctx.fillRect(0, 0, PW, PH);
+            gctx.globalAlpha = 1;
         }
     }
 
@@ -1918,26 +2800,31 @@ function drawPixelWorld() {
             // Shadow
             gctx.fillStyle='rgba(0,0,0,0.35)';
             gctx.fillRect(ex-e.w/2+2,ey+e.h/2+1,e.w-4,3);
-            // Body
-            gctx.fillStyle = frozen ? UI.info : (flash ? '#ffffff' : e.type.color1);
-            gctx.fillRect(ex-e.w/2,ey-e.h/2,e.w,e.h);
-            gctx.fillStyle = frozen ? UI.cyan : (flash ? UI.motifHeart : e.type.color2);
-            gctx.fillRect(ex-e.w/2+2,ey-e.h/2+2,e.w-4,e.h-4);
-            // Inner pattern
-            gctx.fillStyle = e.type.color1;
-            gctx.globalAlpha = 0.3;
-            for (let px=0;px<3;px++) for (let py=0;py<3;py++) {
-                if ((px+py)%2===0) gctx.fillRect(ex-e.w/4+px*4,ey-e.h/4+py*4,3,3);
+            // Body — try sprite, fallback to procedural
+            const bossSprite = !frozen && !flash && renderEnemySprite(e.type.id, e.type.color1, e.type.color2);
+            if (bossSprite) {
+                gctx.drawImage(bossSprite, ex - Math.floor(bossSprite.width/2), ey - Math.floor(bossSprite.height/2));
+            } else {
+                gctx.fillStyle = frozen ? UI.info : (flash ? '#ffffff' : e.type.color1);
+                gctx.fillRect(ex-e.w/2,ey-e.h/2,e.w,e.h);
+                gctx.fillStyle = frozen ? UI.cyan : (flash ? UI.motifHeart : e.type.color2);
+                gctx.fillRect(ex-e.w/2+2,ey-e.h/2+2,e.w-4,e.h-4);
+                // Inner pattern
+                gctx.fillStyle = e.type.color1;
+                gctx.globalAlpha = 0.3;
+                for (let px=0;px<3;px++) for (let py=0;py<3;py++) {
+                    if ((px+py)%2===0) gctx.fillRect(ex-e.w/4+px*4,ey-e.h/4+py*4,3,3);
+                }
+                gctx.globalAlpha = 1;
+                // Boss face (larger, angrier)
+                gctx.fillStyle = flash ? UI.danger : UI.danger;
+                gctx.fillRect(ex-5,ey-4,3,3); gctx.fillRect(ex+3,ey-4,3,3);
+                gctx.fillStyle=UI.danger;
+                gctx.fillRect(ex-4,ey-5,2,1); gctx.fillRect(ex+3,ey-5,2,1);
+                gctx.fillStyle='#000';
+                gctx.fillRect(ex-3,ey+2,7,2);
+                gctx.fillRect(ex-4,ey+2,1,1); gctx.fillRect(ex+4,ey+2,1,1);
             }
-            gctx.globalAlpha = 1;
-            // Boss face (larger, angrier)
-            gctx.fillStyle = flash ? UI.danger : UI.danger;
-            gctx.fillRect(ex-5,ey-4,3,3); gctx.fillRect(ex+3,ey-4,3,3);
-            gctx.fillStyle=UI.danger;
-            gctx.fillRect(ex-4,ey-5,2,1); gctx.fillRect(ex+3,ey-5,2,1);
-            gctx.fillStyle='#000';
-            gctx.fillRect(ex-3,ey+2,7,2);
-            gctx.fillRect(ex-4,ey+2,1,1); gctx.fillRect(ex+4,ey+2,1,1);
             // Boss outline pulse
             gctx.strokeStyle = e.type.color1;
             gctx.lineWidth = 1;
@@ -1945,30 +2832,42 @@ function drawPixelWorld() {
             gctx.strokeRect(ex-e.w/2-1,ey-e.h/2-1,e.w+2,e.h+2);
             gctx.globalAlpha = 1;
 
-            // Boss telegraph — pulsing AoE danger circle
+            // Boss telegraph — shape varies by boss attack type
             if (e.telegraphTimer > 0) {
                 const tx = Math.floor(e.telegraphX - camX), ty = Math.floor(e.telegraphY - camY);
                 const progress = 1 - (e.telegraphTimer / 45);
-                const radius = 16 + progress * 8;
                 const pulse = Math.sin(gameTime * 0.3) * 0.15 + 0.35;
-                // Outer danger glow
-                gctx.globalAlpha = pulse * progress;
-                gctx.fillStyle = UI.motifSpike;
-                gctx.beginPath(); gctx.arc(tx, ty, radius + 3, 0, Math.PI * 2); gctx.fill();
-                // Inner danger circle
-                gctx.globalAlpha = (0.2 + progress * 0.3);
-                gctx.fillStyle = UI.danger;
-                gctx.beginPath(); gctx.arc(tx, ty, radius, 0, Math.PI * 2); gctx.fill();
-                // Spike accents around edge (4 small squares)
-                gctx.fillStyle = UI.motifSpike;
-                for (let si = 0; si < 4; si++) {
-                    const sa = (si / 4) * Math.PI * 2 + gameTime * 0.1;
-                    gctx.fillRect(tx + Math.cos(sa) * radius - 1, ty + Math.sin(sa) * radius - 1, 2, 2);
-                }
-                gctx.globalAlpha = 1;
+                const bossColor = e.type.color1;
+                drawBossTelegraph(tx, ty, progress, pulse, e.telegraphType || 'circle', bossColor);
             }
         } else {
             // === REGULAR ENEMY RENDERING ===
+            // Try sprite-based rendering first
+            const enemySprite = !frozen && !flash && renderEnemySprite(e.type.id, e.type.color1, e.type.color2);
+            if (enemySprite) {
+                // Threat glow aura
+                gctx.globalAlpha = 0.12 + Math.sin(gameTime * 0.06 + e.phase) * 0.05;
+                gctx.fillStyle = e.type.color1;
+                gctx.beginPath(); gctx.arc(ex, ey, e.w/2 + 3, 0, Math.PI * 2); gctx.fill();
+                gctx.globalAlpha = 1;
+                // Shadow
+                gctx.fillStyle='rgba(0,0,0,0.25)';
+                gctx.fillRect(ex-e.w/2+1,ey+e.h/2,e.w-2,2);
+                // Draw sprite centered
+                gctx.drawImage(enemySprite, ex - Math.floor(enemySprite.width/2), ey - Math.floor(enemySprite.height/2));
+                // Scanned indicator
+                if (e.scanned) {
+                    gctx.strokeStyle=UI.info; gctx.lineWidth=0.5;
+                    gctx.strokeRect(ex-e.w/2-1,ey-e.h/2-1,e.w+2,e.h+2);
+                }
+                if (e.maxHp>3) {
+                    const bw=e.w, hr=e.hp/e.maxHp;
+                    gctx.fillStyle=UI.bg; gctx.fillRect(ex-bw/2,ey-e.h/2-4,bw,2);
+                    gctx.fillStyle=hr>0.5?UI.success:(hr>0.25?UI.warning:UI.danger);
+                    gctx.fillRect(ex-bw/2,ey-e.h/2-4,Math.ceil(bw*hr),2);
+                }
+            } else {
+            // Fallback: procedural rendering
             // Threat glow aura
             gctx.globalAlpha = 0.12 + Math.sin(gameTime * 0.06 + e.phase) * 0.05;
             gctx.fillStyle = e.type.color1;
@@ -2030,6 +2929,7 @@ function drawPixelWorld() {
                 gctx.fillStyle=hr>0.5?UI.success:(hr>0.25?UI.warning:UI.danger);
                 gctx.fillRect(ex-bw/2,ey-e.h/2-4,Math.ceil(bw*hr),2);
             }
+            } // end fallback else
         }
     });
 
@@ -2042,6 +2942,16 @@ function drawPixelWorld() {
         else if(p.type==='heart'){ gctx.fillRect(px-1,py-1,3,3); gctx.fillStyle='#ffaacc'; gctx.fillRect(px,py,1,1); }
         else if(p.type==='beam'){ const a=Math.atan2(p.vy,p.vx); gctx.save(); gctx.translate(px,py); gctx.rotate(a); gctx.fillRect(-4,-1,8,2); gctx.fillStyle='#fff'; gctx.fillRect(-3,0,6,1); gctx.restore(); }
         else if(p.type==='aura'){ gctx.fillRect(px-1,py-1,3,3); gctx.fillStyle='#fff'; gctx.fillRect(px,py,1,1); }
+    });
+
+    // Enemy projectiles
+    enemyProjectiles.forEach(p => {
+        const px=Math.floor(p.x-camX), py=Math.floor(p.y-camY);
+        if(px<-10||px>PW+10||py<-10||py>PH+10) return;
+        gctx.fillStyle = p.color || UI.danger;
+        gctx.fillRect(px-1,py-1,3,3);
+        gctx.fillStyle = UI.danger;
+        gctx.fillRect(px,py,1,1);
     });
 
     // Particles
@@ -2151,27 +3061,8 @@ function drawUI_HUD() {
     sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 11);
     sans(uctx, cd.hashtag, 18, 28, UI.textMuted, 8);
 
-    // HP bar — pixel panel frame with colored fill
-    const hpR = player.hp/player.maxHp;
-    const hpCol = hpR>0.5 ? UI.motifHeart : (hpR>0.25 ? UI.warning : UI.danger);
-    // Heart icon prefix
-    uctx.fillStyle = hpCol;
-    uctx.fillRect(154, 12, 1, 1); uctx.fillRect(156, 12, 1, 1);
-    uctx.fillRect(153, 13, 5, 1);
-    uctx.fillRect(154, 14, 3, 1);
-    uctx.fillRect(155, 15, 1, 1);
-    // HP bar track
-    uctx.fillStyle = UI.panelAlt; uctx.fillRect(162, 11, 110, 10);
-    uctx.strokeStyle = hpCol + '80'; uctx.lineWidth = 1;
-    uctx.strokeRect(161.5, 10.5, 111, 11);
-    // HP fill with pulse when low
-    const hpPulse = hpR < 0.3 ? Math.sin(gameTime * 0.15) * 0.15 + 0.85 : 1;
-    uctx.globalAlpha = hpPulse;
-    uctx.fillStyle = hpCol; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 10);
-    // HP highlight shine
-    uctx.fillStyle = 'rgba(255,255,255,0.2)'; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 3);
-    uctx.globalAlpha = 1;
-    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp, 216, 11, UI.text, 8, 'center');
+    // HP hearts — pixel heart row
+    drawHeartHP(uctx, 154, 12, player.hp, player.maxHp);
 
     // XP bar — styled with lilac fill
     const xpR = player.xp/player.xpToNext;
@@ -2330,6 +3221,41 @@ function drawUI_HUD() {
         uctx.globalAlpha = tpulse;
         sans(uctx, trendingText, 16, UH - 58, 'rgba(255,255,255,0.3)', 9, 'left', 400);
         uctx.globalAlpha = 1;
+    }
+
+    // === Ultimate charge meter ===
+    if (player.ultCharge !== undefined) {
+        const ultX = UW - 50, ultY = UH - 80;
+        const ultH = 60;
+        const ultR = player.ultCharge / 100;
+        // Track
+        drawPixelPanel(uctx, ultX, ultY, 28, ultH + 8, { fill: UI.panelAlt, border: UI.lilac, noLace: true });
+        // Fill
+        const fillH = Math.floor(ultH * ultR);
+        uctx.fillStyle = ultR >= 1 ? UI.motifCrown : UI.lilac;
+        if (ultR >= 1) {
+            const glow = Math.sin(gameTime * 0.1) * 0.2 + 0.8;
+            uctx.globalAlpha = glow;
+        }
+        uctx.fillRect(ultX + 2, ultY + 4 + (ultH - fillH), 24, fillH);
+        uctx.globalAlpha = 1;
+        // Label
+        pixel(uctx, 'R', ultX + 8, ultY + ultH + 10, ultR >= 1 ? UI.motifCrown : UI.textMuted, 8);
+        if (ultR >= 1) {
+            sans(uctx, 'ULT', ultX + 14, ultY - 12, UI.motifCrown, 8, 'center', 800);
+        }
+    }
+
+    // === Utility cooldown indicator ===
+    if (player.utilityCD !== undefined) {
+        const utilR = player.utilityCD > 0 ? player.utilityCD / 300 : 0;
+        const utilX = UW - 88, utilY = UH - 58;
+        drawPixelPanel(uctx, utilX, utilY, 28, 28, { fill: UI.panelAlt, border: utilR > 0 ? UI.cooldown : UI.cyan, noLace: true });
+        if (utilR > 0) {
+            uctx.fillStyle = UI.overlayCooldown;
+            uctx.fillRect(utilX + 1, utilY + 1, 26, Math.floor(26 * utilR));
+        }
+        pixel(uctx, 'SH', utilX + 4, utilY + 10, utilR > 0 ? UI.cooldown : UI.cyan, 8);
     }
 
     // Quest / story access hint
@@ -2588,37 +3514,89 @@ function drawUI_Select() {
     drawTape(uctx, 420, 225, 200, 22, 'rgba(255,255,255,0.07)', 0);
     sans(uctx, '← A/D to browse  •  SPACE or click →', 432, 228, 'rgba(255,255,255,0.45)', 10, 'left', 500);
 
-    // === BOTTOM: Skill tree as "article preview" cards ===
+    // === BOTTOM: Full skill kit display ===
     const treeY = 468;
     uctx.fillStyle = 'rgba(255,255,255,0.03)'; uctx.fillRect(0, treeY - 6, UW, UH - treeY + 6);
     uctx.fillStyle = 'rgba(255,255,255,0.06)'; uctx.fillRect(0, treeY - 6, UW, 1);
 
     drawHighlight(uctx, 30, treeY + 2, 80, 16, selCol + '35');
-    sansBold(uctx, 'SKILL TREE', 34, treeY + 3, Z.white, 11);
+    sansBold(uctx, 'SKILL KIT', 34, treeY + 3, Z.white, 11);
     sans(uctx, selChar.name + ' ' + selChar.emoji, 130, treeY + 5, 'rgba(255,255,255,0.4)', 10, 'left', 500);
 
-    selChar.skills.forEach((sk, idx) => {
-        const sx2 = 28 + idx * 182;
+    // Active skills (first 5 from skills array, displayed in cards)
+    const displaySkills = selChar.skills.slice(0, 5);
+    displaySkills.forEach((sk, idx) => {
+        const sx2 = 28 + idx * 130;
         const sy2 = treeY + 28;
 
-        drawCutout(uctx, sx2, sy2, 174, 198, UI.panel, (idx%2===0 ? 0.5 : -0.3));
+        drawCutout(uctx, sx2, sy2, 124, 140, UI.panel, (idx%2===0 ? 0.5 : -0.3));
 
-        uctx.font = '20px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-        uctx.fillStyle='#fff'; uctx.fillText(sk.emoji, sx2 + 87, sy2 + 6);
-        sansBold(uctx, sk.name, sx2 + 87, sy2 + 32, selCol, 10, 'center');
-        sans(uctx, sk.desc, sx2 + 87, sy2 + 48, Z.gray, 7, 'center', 400);
+        uctx.font = '16px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
+        uctx.fillStyle = UI.text; uctx.fillText(sk.emoji, sx2 + 62, sy2 + 6);
+        sansBold(uctx, sk.name, sx2 + 62, sy2 + 26, selCol, 9, 'center');
+        sans(uctx, sk.desc, sx2 + 62, sy2 + 40, Z.gray, 7, 'center', 400);
 
-        sk.levels.forEach((lv, li) => {
-            const ly = sy2 + 68 + li * 22;
+        sk.levels.slice(0, 3).forEach((lv, li) => {
+            const ly = sy2 + 58 + li * 18;
             const isFirst = li === 0 && idx === 0;
-            sans(uctx, (li+1) + '. ' + lv, sx2 + 12, ly, isFirst ? Z.yellow : '#555', 7, 'left', isFirst ? 600 : 400);
+            sans(uctx, (li+1) + '. ' + lv, sx2 + 8, ly, isFirst ? Z.yellow : UI.textMuted, 6, 'left', isFirst ? 600 : 400);
         });
 
         if (idx === 0) {
-            drawTape(uctx, sx2 + 44, sy2 + 180, 80, 14, UI.motifCrown + '66', -2);
-            sans(uctx, 'SIGNATURE', sx2 + 52, sy2 + 181, UI.textInverse, 7, 'left', 800);
+            drawTape(uctx, sx2 + 22, sy2 + 124, 80, 14, UI.motifCrown + '66', -2);
+            sans(uctx, 'SIGNATURE', sx2 + 30, sy2 + 125, UI.textInverse, 7, 'left', 800);
         }
     });
+
+    // Get idol data from CONTENT for utility/passives/ultimate
+    const idolData = (CONTENT.idols || []).find(i => i.id === selChar.id);
+
+    // Utility + Passives + Ultimate + Extra skills summary panel
+    const infoX = 680, infoY = treeY + 28;
+    drawCutout(uctx, infoX, infoY, 260, 200, UI.panelAlt, -0.3);
+
+    let infoOffset = 4;
+
+    // Extra skills (beyond first 5)
+    const extraSkills = selChar.skills.slice(5);
+    if (extraSkills.length > 0) {
+        sans(uctx, 'BONUS SKILLS', infoX + 10, infoY + infoOffset, UI.rose, 8, 'left', 700);
+        infoOffset += 14;
+        extraSkills.forEach(sk => {
+            sans(uctx, sk.emoji + ' ' + sk.name + ' — ' + sk.desc, infoX + 10, infoY + infoOffset, Z.gray, 7, 'left', 400);
+            infoOffset += 12;
+        });
+        infoOffset += 4;
+    }
+
+    // Utility
+    if (idolData?.utilitySkill) {
+        drawTape(uctx, infoX + 8, infoY + infoOffset, 60, 12, UI.cyan + '66', 0);
+        sans(uctx, 'UTILITY', infoX + 14, infoY + infoOffset + 1, UI.textInverse, 7, 'left', 800);
+        infoOffset += 16;
+        sans(uctx, idolData.utilitySkill.name + ' [SHIFT]', infoX + 10, infoY + infoOffset, UI.cyan, 9, 'left', 600);
+        infoOffset += 14;
+        sans(uctx, idolData.utilitySkill.effect, infoX + 10, infoY + infoOffset, Z.gray, 7, 'left', 400);
+        infoOffset += 16;
+    }
+
+    // Passives
+    if (idolData?.passives) {
+        sans(uctx, 'PASSIVES', infoX + 10, infoY + infoOffset, UI.mint, 8, 'left', 700);
+        infoOffset += 14;
+        idolData.passives.forEach(p => {
+            sans(uctx, p.name + ': ' + p.effect, infoX + 10, infoY + infoOffset, Z.gray, 7, 'left', 400);
+            infoOffset += 12;
+        });
+        infoOffset += 4;
+    }
+
+    // Ultimate
+    if (idolData?.ultimate) {
+        sans(uctx, 'ULTIMATE [R]', infoX + 10, infoY + infoOffset, UI.motifCrown, 8, 'left', 700);
+        infoOffset += 14;
+        sans(uctx, idolData.ultimate.name + ' — ' + idolData.ultimate.scaling, infoX + 10, infoY + infoOffset, Z.gray, 7, 'left', 400);
+    }
 
     // Page number
     sans(uctx, '002', UW - 40, UH - 20, 'rgba(255,255,255,0.12)', 9, 'right', 300);
@@ -2673,7 +3651,7 @@ function drawUI_LevelUp() {
 
         // Emoji
         uctx.font = '26px serif'; uctx.textAlign = 'left'; uctx.textBaseline = 'top';
-        uctx.fillStyle = '#fff'; uctx.fillText(choice.emoji, bx + 56, by + 14);
+        uctx.fillStyle = UI.text; uctx.fillText(choice.emoji, bx + 56, by + 14);
 
         // Name — editorial weight
         serif(uctx, choice.name, bx + 92, by + 10, Z.white, 20, 'left');
@@ -2799,6 +3777,8 @@ function drawUI_GameOver() {
             ['💕', 'Follows', formatNum(followers)],
             ['🔥', 'Best Combo', bestCombo + 'x'],
             ['👑', 'Bosses', bossesKilled.toString()],
+            ['⚡', 'Utilities', utilityUses.toString()],
+            ['✨', 'Ultimates', ultActivations.toString()],
         ];
 
         const statsX = 320;
@@ -2812,14 +3792,14 @@ function drawUI_GameOver() {
             const row = Math.floor(idx / 2);
             const col = idx % 2;
             const sx = statsX + 24 + col * 290;
-            const sy = 172 + row * 68;
+            const sy = 172 + row * 56;
 
             // Mini cutout per stat
-            drawCutout(uctx, sx, sy, 270, 56, 'rgba(255,255,255,0.03)', col === 0 ? 0.3 : -0.2);
+            drawCutout(uctx, sx, sy, 270, 46, 'rgba(255,255,255,0.03)', col === 0 ? 0.3 : -0.2);
 
             // Emoji + label
             uctx.font = '18px serif'; uctx.textAlign = 'left'; uctx.textBaseline = 'top';
-            uctx.fillStyle = '#fff'; uctx.fillText(s[0], sx + 10, sy + 6);
+            uctx.fillStyle = UI.text; uctx.fillText(s[0], sx + 10, sy + 6);
             sans(uctx, s[1], sx + 36, sy + 10, Z.gray, 10, 'left', 500);
 
             // Value — big serif
@@ -2831,12 +3811,12 @@ function drawUI_GameOver() {
                         killCount >= 50 ? 'Main Character Energy 🔥' :
                         killCount >= 25 ? 'Rising Star ✨' :
                         'First Chapter 📖';
-        drawPullQuote(uctx, statsX + 20, 390, '"' + verdict + '"', Z.yellow, 18);
+        drawPullQuote(uctx, statsX + 20, 400, '"' + verdict + '"', Z.yellow, 18);
 
         // Comment bubble
         const quips = ['no bc this was actually insane', 'the way they ATE', 'ok legend behavior', 'not bad for a first run'];
         const quip = quips[killCount % quips.length];
-        drawCommentBubble(uctx, statsX + 20, 430, quip, 'fan_' + (killCount % 99), 'rgba(255,255,255,0.05)');
+        drawCommentBubble(uctx, statsX + 20, 440, quip, 'fan_' + (killCount % 99), 'rgba(255,255,255,0.05)');
     }
 
     // === BOTTOM: CTA + social ===
@@ -2852,22 +3832,87 @@ function drawUI_GameOver() {
 }
 
 
+function drawUI_ChapterTransition() {
+    if (chapterTransitionTimer <= 0) return;
+    // Fade in/out
+    const fadeIn = Math.min(1, (180 - chapterTransitionTimer) / 30);
+    const fadeOut = Math.min(1, chapterTransitionTimer / 30);
+    const alpha = Math.min(fadeIn, fadeOut);
+
+    uctx.globalAlpha = alpha * 0.85;
+    uctx.fillStyle = UI.scrim;
+    uctx.fillRect(0, 0, UW, UH);
+
+    uctx.globalAlpha = alpha;
+    drawPixelPanel(uctx, UW/2 - 280, UH/2 - 80, 560, 160, { fill: UI.panel, border: UI.quest, ribbon: UI.quest });
+
+    // Ribbon strips
+    uctx.fillStyle = UI.quest;
+    uctx.fillRect(UW/2 - 270, UH/2 - 70, 540, 2);
+    uctx.fillRect(UW/2 - 270, UH/2 + 68, 540, 2);
+
+    // Chapter title
+    serif(uctx, chapterTransitionText, UW/2, UH/2 - 50, UI.text, 32, 'center');
+
+    // Beat text
+    sans(uctx, chapterTransitionBeat, UW/2, UH/2 + 10, UI.textMuted, 12, 'center', 500);
+
+    // Lore card snippet
+    if (lastLoreCard) {
+        drawHighlight(uctx, UW/2 - 200, UH/2 + 40, 400, 16, UI.pink + '20');
+        sans(uctx, '"' + lastLoreCard + '"', UW/2, UH/2 + 42, UI.motifHeart, 10, 'center', 400);
+    }
+
+    uctx.globalAlpha = 1;
+    chapterTransitionTimer--;
+}
+
 function drawUI_QuestModal() {
     const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
     const lore = lastLoreCard || (CONTENT.story?.loreCards || [])[0] || '';
+    const idolArc = CONTENT.story?.idolArcs?.[player?.charId] || '';
     uctx.fillStyle = UI.scrim;
     uctx.fillRect(0, 0, UW, UH);
-    drawPixelPanel(uctx, UW/2 - 260, UH/2 - 150, 520, 300, { fill: UI.panel, border: UI.quest, ribbon: UI.quest, spikes: UI.danger });
-    sansBold(uctx, 'QUEST / STORY PROMPT', UW/2 - 236, UH/2 - 140, UI.bg, 9);
-    serif(uctx, chapter ? chapter.title : 'CHAPTER', UW/2, UH/2 - 105, UI.text, 28, 'center');
-    sans(uctx, chapter ? chapter.objective : 'Hold the stage and survive.', UW/2, UH/2 - 64, UI.textMuted, 12, 'center', 600);
+    drawPixelPanel(uctx, UW/2 - 280, UH/2 - 200, 560, 400, { fill: UI.panel, border: UI.quest, ribbon: UI.quest, spikes: UI.danger });
+    sansBold(uctx, 'QUEST / STORY PROMPT', UW/2 - 256, UH/2 - 190, UI.bg, 9);
+    serif(uctx, chapter ? chapter.title : 'CHAPTER', UW/2, UH/2 - 165, UI.text, 28, 'center');
+    sans(uctx, chapter ? chapter.objective : 'Hold the stage and survive.', UW/2, UH/2 - 124, UI.textMuted, 12, 'center', 600);
 
-    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 16, 440, 88, { fill: UI.panelAlt, border: UI.pink });
-    sansBold(uctx, 'LORE CARD', UW/2 - 200, UH/2 - 7, UI.pink, 9);
-    sans(uctx, lore, UW/2 - 200, UH/2 + 20, UI.text, 12, 'left', 500);
-    // Footer key prompt with styled chip
-    drawPixelPanel(uctx, UW/2 - 60, UH/2 + 90, 120, 22, { fill: UI.surfaceChip, border: UI.borderUI, noLace: true });
-    sans(uctx, '[Q] Close', UW/2, UH/2 + 94, UI.textSecondary, 10, 'center', 600);
+    // Chapter beat
+    if (chapter && chapter.beat) {
+        drawHighlight(uctx, UW/2 - 240, UH/2 - 100, 480, 14, UI.quest + '15');
+        sans(uctx, chapter.beat, UW/2, UH/2 - 98, UI.quest, 10, 'center', 400);
+    }
+
+    // Progress indicators
+    const chapters = CONTENT.story?.chapters || [];
+    const progY = UH/2 - 74;
+    for (let i = 0; i < chapters.length; i++) {
+        const px = UW/2 - 100 + i * 50;
+        uctx.fillStyle = i <= chapterIdx ? UI.quest : UI.surfaceChip;
+        uctx.fillRect(px, progY, 40, 4);
+    }
+
+    // Lore card
+    drawPixelPanel(uctx, UW/2 - 240, UH/2 - 56, 480, 68, { fill: UI.panelAlt, border: UI.pink });
+    sansBold(uctx, 'LORE CARD (' + collectedLoreCards.length + ' collected)', UW/2 - 220, UH/2 - 47, UI.pink, 9);
+    sans(uctx, '"' + lore + '"', UW/2 - 220, UH/2 - 24, UI.text, 11, 'left', 500);
+
+    // Character arc
+    if (idolArc) {
+        drawPixelPanel(uctx, UW/2 - 240, UH/2 + 24, 480, 50, { fill: UI.panelAlt, border: UI.cyan });
+        sansBold(uctx, player.charDef.name + ' ARC', UW/2 - 220, UH/2 + 33, UI.cyan, 9);
+        sans(uctx, idolArc, UW/2 - 220, UH/2 + 50, UI.textSecondary, 10, 'left', 400);
+    }
+
+    // Controls hint
+    drawPixelPanel(uctx, UW/2 - 240, UH/2 + 86, 480, 68, { fill: 'rgba(255,255,255,0.03)', border: UI.textMuted, noLace: true });
+    sans(uctx, 'SHIFT = Utility skill  •  R = Ultimate  •  Q = Close this', UW/2, UH/2 + 100, UI.textMuted, 9, 'center', 400);
+    sans(uctx, 'Ultimate charge: ' + Math.floor(player?.ultCharge || 0) + '%', UW/2, UH/2 + 118, UI.lilac, 9, 'center', 600);
+
+    // Footer key prompt
+    drawPixelPanel(uctx, UW/2 - 60, UH/2 + 164, 120, 22, { fill: UI.surfaceChip, border: UI.borderUI, noLace: true });
+    sans(uctx, '[Q] Close', UW/2, UH/2 + 168, UI.textSecondary, 10, 'center', 600);
 }
 
 function drawUI_Paused() {
@@ -3085,10 +4130,18 @@ function update() {
             chapterIdx++;
             lastLoreCard = (CONTENT.story?.loreCards || [])[chapterIdx % Math.max(1, (CONTENT.story?.loreCards || []).length)] || '';
             addNotification(chapters[chapterIdx].title + ' unlocked', UI.quest);
+            // Chapter transition overlay
+            chapterTransitionTimer = 180; // 3 seconds
+            chapterTransitionText = chapters[chapterIdx].title;
+            chapterTransitionBeat = chapters[chapterIdx].beat || chapters[chapterIdx].objective || '';
+            // Collect lore card
+            if (lastLoreCard && !collectedLoreCards.includes(lastLoreCard)) {
+                collectedLoreCards.push(lastLoreCard);
+            }
         }
     }
     if (state === State.PLAYING) {
-        updatePlayer(); updateProjectiles(); updateEnemies(); updateXPGems();
+        updatePlayer(); updateProjectiles(); updateEnemies(); updateEnemyProjectiles(); updateXPGems();
         updateParticles(); updateFloatingTexts(); updateFanChants();
         updateNotifications(); updateSpawning(); updateCamera();
     } else if (state === State.GAMEOVER) {
@@ -3114,6 +4167,7 @@ function draw() {
         if (state === State.PAUSED) drawUI_Paused();
         if (state === State.GAMEOVER) drawUI_GameOver();
         if (state === State.PLAYING && questModalOpen) drawUI_QuestModal();
+        if (state === State.PLAYING && chapterTransitionTimer > 0) drawUI_ChapterTransition();
     }
 }
 

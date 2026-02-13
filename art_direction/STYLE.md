@@ -125,20 +125,45 @@ All colors MUST come from `TOKENS.json`. Never use ad-hoc hex values.
 
 ## 5. UI Component Specifications
 
-### Buttons
-- Sizes: Small (64x20), Medium (96x24), Large (140x30)
-- States: default, hover (glow), pressed (dark), disabled (hatch)
-- Must have ribbon accent for primary actions
+### Per-Character Silhouette Specs (from reference images)
 
-### Panels
-- Lace corner decorations (princess)
-- Optional spike notches for danger variants
-- Title strip with crown/heart motif chip
+#### Miho 🦊 — Fox-Princess Striker
+- **Hair**: Golden blonde twin-tails with volumetric fox-ear points at crown. Hair mass is the largest read — ear tips extend 3-4px above head.
+- **Accessories**: Heart-shaped gloves, fox-ear headband with pink tips, golden tail accents (visible during cast/ultimate).
+- **Outfit**: Pink/magenta idol outfit with gold trim. Belt sparkle at waist. Skirt with gradient to darker pink.
+- **Silhouette key**: Tall ear points + wide twin-tail spread = instant recognition at 16px.
+- **Reference**: `refs/character/Warudo_2026-01-06`, `refs/character/미호.png`
 
-### Modals
-- Scrim overlay: `rgba(8, 8, 16, 0.78)`
-- Centered panel with header/body/footer
-- Boss intros: 2-second animated banner
+#### Sohee 🦋 — Guardian Ballerina
+- **Hair**: Long straight blue hair with side part, falls past shoulders. Subtle bow/ribbon accent at crown.
+- **Accessories**: Butterfly-wing cape contour visible in idle, layered skirt edges.
+- **Outfit**: Green jacket over white blouse (ref: `supernova ep5 06.png`). Skirt layers in teal/blue tones.
+- **Silhouette key**: Straight vertical hair lines + cape width = calm, grounded read.
+- **Reference**: `refs/character/supernova ep5 06.png`, `refs/character/소희.png`
+
+#### Sujin ⭐ — Precision Techno-Princess
+- **Hair**: Sharp maroon/crimson bob cut, asymmetric fringe. Black bow accessory on one side.
+- **Accessories**: Angular sleeve cuts, neon accent strips on outfit, chrome stud details.
+- **Outfit**: Dark outfit (near-black with purple undertone), pink eye accents, yellow star motifs.
+- **Silhouette key**: Compact head shape + angular shoulders = sharp, aggressive read.
+- **Reference**: `refs/character/캐릭터등신대_SUPERNOVA.png`
+
+#### Hyunju 🌙 — Dreamwave Empath
+- **Hair**: Auburn/orange wavy twintails with volume. Star hair clip accent on right side.
+- **Accessories**: Soft cape sleeves, star/moon motifs, ribbon ties on twintails.
+- **Outfit**: Cream/warm white base with orange-peach accents. Teal/mint accessory highlights.
+- **Silhouette key**: Wide wavy hair volume + star clip = warm, dynamic read.
+- **Reference**: `refs/character/Warudo_2026-01-12`, `refs/character/캐릭터등신대_소희SUPERNOVA.png`
+
+### Face/Eyes
+- Big expressive eyes with clear upper lash line.
+- Eye highlights used sparingly as focal points.
+- Eye color is character-identity: Miho = pink, Sohee = teal, Sujin = blue, Hyunju = orange.
+
+### Hair Rendering
+- Chunked volume shapes + clear strand direction.
+- Bright accent streaks allowed for identity.
+- Hair outline uses darkened local tone (not pure black).
 
 ### HUD Zones
 1. **Top-Left**: Avatar tag + HP bar + XP bar
@@ -216,16 +241,25 @@ Each stage has a unique visual identity within the Princess Goth theme:
 - **Projectile**: Distinct silhouette + trail color
 - **Area**: Dotted circle outline + danger color fill
 
-### Telegraph Timing
-- Fast attacks: 0.3-0.5s warning
-- Medium attacks: 0.8-1.2s warning
-- Slow/big attacks: 1.5-2.0s warning
+- Base world lighting: low-key dark stage with bright character/UI accents.
+- Character rim light: cool cyan or pink depending on role.
 
-### Color Coding
-- Melee: Rose `#FF4FA3`
-- Ranged: Cyan `#6DE6FF`
-- Area: Warning `#FFB347`
-- Boss: Crown `#FFE38A`
+### Boss Telegraph Color Reservations
+
+Each boss family has reserved telegraph colors to prevent confusion:
+
+| Boss | Arena | Telegraph Primary | Telegraph Secondary | Glow |
+|------|-------|------------------|-------------------|------|
+| Queen of Clickbait | Neon Newsroom | `#FF44AA` (hot pink) | `#FFE38A` (gold) | `#FF79C6` |
+| Mr. Algorithm | Data Cathedral | `#4488FF` (data blue) | `#89FFD1` (mint) | `#6DE6FF` |
+| Director Cut | Broken Stage Set | `#FFB347` (spotlight amber) | `#FF4C7D` (danger red) | `#FFE38A` |
+| Glass Prince | Mirror Hall | `#C8D6FF` (chrome silver) | `#B98CFF` (lilac) | `#E6D7FF` |
+| Midnight Forum | Floating Chat Abyss | `#6A5AAA` (deep purple) | `#FF4FA3` (rose) | `#B98CFF` |
+| The Disbander | Fractured Throne | `#443355` (void purple) | `#FF4C7D` (danger) | `#8F66FF` |
+
+- Glitch highlight usage only for danger/ultimate moments.
+- No two bosses share the same primary telegraph color.
+- Arena floor tinting shifts to match boss family palette during encounters.
 
 ---
 
