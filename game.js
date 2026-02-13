@@ -626,12 +626,6 @@ const SPRITE_HAIR = {
     ],
 };
 
-// Combine hair + shared body into final sprite data
-const SPRITE_DATA = {};
-for (const name of ['miho','hyunju','sujin','sohee']) {
-    SPRITE_DATA[name] = [...SPRITE_HAIR[name], ...SPRITE_BODY];
-}
-
 // === SPRITE CACHE ===
 const spriteCache = {};
 function renderSprite(name) {
@@ -940,7 +934,7 @@ const SHARED_POWERS = [
 // GAME STATE
 // ================================================================
 
-const State = { TITLE:0, SELECT:1, PLAYING:2, LEVELUP:3, GAMEOVER:4, PAUSED:5 };
+const State = { TITLE:0, SELECT:1, PLAYING:2, LEVELUP:3, GAMEOVER:4, PAUSED:5, BOSS_CHEST:6, CHARM_INVENTORY:7 };
 let state = State.TITLE;
 let selectedChar = 0;
 let gameTime = 0, frameCount = 0;
@@ -961,6 +955,93 @@ let questModalOpen = false, chapterIdx = 0;
 let chapterTransitionTimer = 0, chapterTransitionText = '', chapterTransitionBeat = '';
 let collectedLoreCards = [];
 let lastLoreCard = '';
+
+// === CHARM SYSTEM ===
+let bossesKilled = 0;
+let playerCharms = []; // Array of charm objects player has collected
+let currentBossChestChoices = []; // Current 3 charm options from boss chest
+let charmInventoryOpen = false;
+
+// Get active charm effects (called by gameplay systems)
+function getCharmEffect(effectType) {
+    let total = 0;
+    playerCharms.forEach(charm => {
+        if (charm.effects && charm.effects[effectType] !== undefined) {
+            total += charm.effects[effectType];
+        }
+    });
+    return total;
+}
+
+// Check if player has a specific charm
+function hasCharm(charmId) {
+    return playerCharms.some(c => c.id === charmId);
+}
+
+// Add a charm to player collection
+function addCharm(charmData) {
+    if (!charmData) return;
+    playerCharms.push(charmData);
+    // Show notification
+    addNotification(`Charm Acquired: ${charmData.name}`, charmData.rarity);
+}
+
+// Generate boss chest choices
+function generateBossChestChoices() {
+    const choices = [];
+    // 1 common, 1 rare, 1 epic (weighted random)
+    const roll = Math.random();
+    let rarity;
+    if (roll < 0.6) rarity = 'common';
+    else if (roll < 0.9) rarity = 'rare';
+    else rarity = 'epic';
+
+    // Get random charms of that rarity
+    const allCharms = getAllCharms();
+    const pool = allCharms.filter(c => c.rarity === rarity);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+
+    // If not enough of that rarity, fill with others
+    while (choices.length < 3) {
+        if (shuffled.length > 0) {
+            choices.push(shuffled.pop());
+        } else {
+            // Fallback: any random charm
+            const any = allCharms[Math.floor(Math.random() * allCharms.length)];
+            if (any && !choices.some(c => c.id === any.id)) {
+                choices.push(any);
+            }
+        }
+    }
+    currentBossChestChoices = choices;
+    return choices;
+}
+
+// Apply charm effects to player stats
+function applyCharmEffects() {
+    if (!player) return;
+
+    // Speed
+    player.speed = player.charDef.stats.speed * (1 + getCharmEffect('speed_mult') - 1);
+
+    // HP modifier
+    const hpMult = getCharmEffect('hp_mult') || 1;
+    if (hpMult !== 1) {
+        player.maxHp = Math.floor(player.charDef.stats.hp * hpMult);
+    }
+
+    // Magnet range
+    const magnetMult = getCharmEffect('magnet_range_mult') || 1;
+    if (magnetMult !== 1 && player.magnetRange) {
+        player.magnetRange = Math.floor(player.magnetRange * magnetMult);
+    }
+
+    // Crit chance
+    const critBonus = getCharmEffect('crit_chance') || 0;
+    if (critBonus > 0) {
+        player.critChance = (player.charDef.stats.crit || 0.1) + critBonus;
+    }
+}
 
 // === SOCIAL CAPTIONS ===
 const KILL_CHANTS = [
@@ -1012,12 +1093,20 @@ function handleKey(code) {
         else if (code === 'KeyR') fireUltimate();
     } else if (state === State.PAUSED) {
         if (code === 'Escape' || code === 'Space') state = State.PLAYING;
+        else if (code === 'KeyC') { state = State.CHARM_INVENTORY; charmInventoryOpen = true; }
     } else if (state === State.LEVELUP) {
         if (code === 'Digit1' || code === 'Numpad1') choosePowerUp(0);
         else if (code === 'Digit2' || code === 'Numpad2') choosePowerUp(1);
         else if (code === 'Digit3' || code === 'Numpad3') choosePowerUp(2);
     } else if (state === State.GAMEOVER) {
         if (code === 'Space' || code === 'Enter') state = State.TITLE;
+    } else if (state === State.BOSS_CHEST) {
+        if (code === 'Digit1' || code === 'Numpad1') selectBossCharm(0);
+        else if (code === 'Digit2' || code === 'Numpad2') selectBossCharm(1);
+        else if (code === 'Digit3' || code === 'Numpad3') selectBossCharm(2);
+        else if (code === 'Escape' || code === 'Space') skipBossCharm();
+    } else if (state === State.CHARM_INVENTORY) {
+        if (code === 'Escape') { state = State.PLAYING; charmInventoryOpen = false; }
     }
 }
 
@@ -1050,6 +1139,32 @@ function handleClick() {
         }
     } else if (state === State.GAMEOVER) {
         state = State.TITLE;
+    } else if (state === State.BOSS_CHEST) {
+        // Check click on charm cards
+        const cardW = 180;
+        const startX = UW/2 - (cardW * 3 + 20 * 2) / 2;
+        const cardY = UH/2 - 80;
+        for (let i = 0; i < currentBossChestChoices.length; i++) {
+            const cx = startX + i * (cardW + 20);
+            if (mouseX >= cx && mouseX <= cx + cardW && mouseY >= cardY && mouseY <= cardY + 240) {
+                selectBossCharm(i);
+                return;
+            }
+        }
+        // Skip button
+        const skipX = UW/2 - 60;
+        const skipY = UH/2 + 140;
+        if (mouseX >= skipX && mouseX <= skipX + 120 && mouseY >= skipY && mouseY <= skipY + 30) {
+            skipBossCharm();
+        }
+    } else if (state === State.CHARM_INVENTORY) {
+        // Close button
+        const closeX = UW - 130;
+        const closeY = 60;
+        if (mouseX >= closeX && mouseX <= closeX + 80 && mouseY >= closeY && mouseY <= closeY + 30) {
+            state = State.PLAYING;
+            charmInventoryOpen = false;
+        }
     }
 }
 
@@ -1068,6 +1183,10 @@ function startGame() {
     bossIntroTimer = 0; bossIntroText = '';
     questModalOpen = false; chapterIdx = 0;
     lastLoreCard = CONTENT.story?.opening || '';
+    // Reset charm system for new run
+    playerCharms = [];
+    currentBossChestChoices = [];
+    charmInventoryOpen = false;
 
     const cd = CHARACTERS[selectedChar];
     player = {
@@ -1195,6 +1314,25 @@ function choosePowerUp(index) {
     spawnFloatingText(player.x, player.y - 20, choice.emoji + ' ' + choice.name, Z.coral);
     screenFlash = 8; screenFlashColor = choice.color;
     state = State.PLAYING;
+}
+
+// Boss chest functions
+function selectBossCharm(index) {
+    if (index >= currentBossChestChoices.length) return;
+    const charm = currentBossChestChoices[index];
+    addCharm(charm);
+    SFX.pickup();
+    addNotification(`Charm Acquired: ${charm.name}`, getCharmRarityColor(charm.rarity));
+    state = State.PLAYING;
+}
+
+function skipBossCharm() {
+    state = State.PLAYING;
+}
+
+function openBossChest() {
+    generateBossChestChoices();
+    state = State.BOSS_CHEST;
 }
 
 // ================================================================
@@ -2074,6 +2212,10 @@ function killEnemy(e) {
                 xp: Math.ceil(e.xp / 5), life: 600, size: 5
             });
         }
+        // Open boss chest for charm selection after a delay
+        setTimeout(() => {
+            openBossChest();
+        }, 500);
         // Big death explosion (reduced from 25)
         if (particles.length < MAX_PARTICLES) {
             const count = Math.min(12, MAX_PARTICLES - particles.length);
@@ -2947,6 +3089,24 @@ function drawUI_HUD() {
     // KO — bottom of top cluster
     sans(uctx, killCount + ' KOs', UW - 152, 30, 'rgba(255,255,255,0.35)', 9, 'left', 600);
 
+    // Charm count indicator
+    if (playerCharms.length > 0) {
+        const charmY = 50;
+        drawPixelPanel(uctx, 10, charmY, 90, 22, {
+            fill: UI.panelAlt,
+            border: UI.motifCrown
+        });
+        // Crown icon
+        uctx.fillStyle = UI.motifCrown;
+        uctx.fillRect(16, charmY + 5, 1, 1);
+        uctx.fillRect(14, charmY + 6, 3, 1);
+        uctx.fillRect(13, charmY + 7, 5, 1);
+        uctx.fillRect(13, charmY + 8, 5, 1);
+        uctx.fillRect(14, charmY + 9, 3, 1);
+        uctx.fillRect(16, charmY + 10, 1, 1);
+        sansBold(uctx, playerCharms.length.toString(), 36, charmY + 6, UI.motifCrown, 10);
+    }
+
     // Combo — pull quote style when active
     if (comboCount >= 3) {
         const comboCol = comboCount>=25 ? Z.yellow : (comboCount>=10 ? Z.coral : Z.pink);
@@ -3779,6 +3939,184 @@ function drawUI_Paused() {
     drawSticker(uctx, '⏸️', UW/2 + 200, UH/2 - 50, 8, 28);
 }
 
+// === BOSS CHEST UI ===
+function drawUI_BossChest() {
+    // Scrim
+    uctx.fillStyle = UI.scrim;
+    uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.04);
+
+    // Decorative particles
+    for (let i = 0; i < 5; i++) {
+        const px = ((i * 173 + gameTime * 0.3) % UW);
+        const py = ((i * 97 + gameTime * 0.2) % UH);
+        uctx.globalAlpha = 0.1 + Math.sin(gameTime * 0.05 + i) * 0.05;
+        uctx.fillStyle = i % 2 === 0 ? UI.motifCrown : UI.motifHeart;
+        uctx.beginPath();
+        uctx.arc(px, py, 3 + Math.sin(gameTime * 0.03 + i * 2) * 2, 0, Math.PI * 2);
+        uctx.fill();
+    }
+    uctx.globalAlpha = 1;
+
+    // Main panel
+    drawPixelPanel(uctx, UW/2 - 320, UH/2 - 200, 640, 400, {
+        fill: UI.panel,
+        glow: UI.motifCrown
+    });
+
+    // Header
+    serif(UCTX, '★ BOSS DEFEATED ★', UW/2, UH/2 - 180, UI.motifCrown, 28, 'center');
+    sans(UCTX, 'Choose Your Reward', UW/2, UH/2 - 140, UI.textSecondary, 14, 'center', 500);
+
+    // Charm cards
+    const cardW = 180;
+    const cardH = 240;
+    const startX = UW/2 - (cardW * 3 + 20 * 2) / 2;
+    const cardY = UH/2 - 80;
+
+    currentBossChestChoices.forEach((charm, idx) => {
+        const cx = startX + idx * (cardW + 20);
+        const isHovered = mouseX >= cx && mouseX <= cx + cardW && mouseY >= cardY && mouseY <= cardY + cardH;
+
+        // Card background with rarity border
+        const rarityColor = getCharmRarityColor(charm.rarity);
+        drawPixelPanel(uctx, cx, cardY, cardW, cardH, {
+            fill: isHovered ? UI.surfaceCardSoft : UI.surfaceCard,
+            border: rarityColor,
+            glow: isHovered ? rarityColor : null
+        });
+
+        // Rarity badge
+        const rarityIcon = charm.rarity === 'epic' ? '★' : charm.rarity === 'rare' ? '♥' : '◇';
+        sansBold(uctx, rarityIcon + ' ' + charm.rarity.toUpperCase(), cx + 12, cardY + 12, rarityColor, 8);
+
+        // Charm icon placeholder (use pixel icon)
+        const iconKey = charm.icon || 'sparkle';
+        const iconColors = { c1: rarityColor, c2: UI.text };
+        const iconImg = getPixelIcon(iconKey, iconColors.c1, iconColors.c2);
+        if (iconImg) {
+            uctx.drawImage(iconImg, cx + cardW/2 - 24, cardY + 40, 48, 48);
+        }
+
+        // Charm name
+        serif(uctx, charm.name, cx + cardW/2, cardY + 100, UI.text, 14, 'center');
+
+        // Description
+        sans(uctx, charm.description, cx + 12, cardY + 130, UI.textSecondary, 10, 'left', 400);
+
+        // Tags
+        if (charm.tags) {
+            const tagStr = charm.tags.slice(0, 2).join(' · ');
+            sans(uctx, tagStr, cx + cardW/2, cardY + 180, UI.textMuted, 8, 'center', 500);
+        }
+
+        // Hover hint
+        if (isHovered) {
+            sans(uctx, '[CLICK TO SELECT]', cx + cardW/2, cardY + cardH - 20, UI.motifCrown, 8, 'center', 700);
+        }
+    });
+
+    // Skip button
+    const skipX = UW/2 - 60;
+    const skipY = UH/2 + 140;
+    const skipHover = mouseX >= skipX && mouseX <= skipX + 120 && mouseY >= skipY && mouseY <= skipY + 30;
+    drawPixelPanel(uctx, skipX, skipY, 120, 30, {
+        fill: skipHover ? UI.surfaceCardSoft : 'rgba(255,255,255,0.05)',
+        border: UI.textMuted
+    });
+    sans(uctx, 'SKIP', skipX + 60, skipY + 10, skipHover ? UI.text : UI.textMuted, 10, 'center', 600);
+}
+
+// === CHARM INVENTORY UI ===
+function drawUI_CharmInventory() {
+    // Scrim
+    uctx.fillStyle = UI.scrim;
+    uctx.fillRect(0, 0, UW, UH);
+    drawGrain(uctx, UW, UH, 0.03);
+
+    // Main panel
+    drawPixelPanel(uctx, 50, 50, UW - 100, UH - 100, {
+        fill: UI.panel,
+        glow: UI.motifHeart
+    });
+
+    // Header
+    serif(uctx, 'CHARMS', 80, 70, UI.motifHeart, 32, 'left');
+    sans(uctx, `Collected: ${playerCharms.length}/30`, UW - 180, 75, UI.textMuted, 12, 'left', 500);
+
+    // Close button
+    const closeX = UW - 130;
+    const closeY = 60;
+    const closeHover = mouseX >= closeX && mouseX <= closeX + 80 && mouseY >= closeY && mouseY <= closeY + 30;
+    drawPixelPanel(uctx, closeX, closeY, 80, 30, {
+        fill: closeHover ? UI.danger : 'rgba(255,255,255,0.05)',
+        border: closeHover ? UI.danger : UI.textMuted
+    });
+    sans(uctx, 'CLOSE', closeX + 40, closeY + 10, UI.text, 10, 'center', 600);
+
+    // Charm grid
+    const cols = 4;
+    const cardW = 180;
+    const cardH = 100;
+    const startX = 80;
+    const startY = 130;
+    const gapX = 20;
+    const gapY = 15;
+
+    playerCharms.forEach((charm, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        const cx = startX + col * (cardW + gapX);
+        const cy = startY + row * (cardH + gapY);
+
+        if (cy > UH - 150) return; // Don't draw if off screen
+
+        const rarityColor = getCharmRarityColor(charm.rarity);
+
+        // Card
+        drawPixelPanel(uctx, cx, cy, cardW, cardH, {
+            fill: UI.surfaceCard,
+            border: rarityColor
+        });
+
+        // Icon
+        const iconKey = charm.icon || 'sparkle';
+        const iconImg = getPixelIcon(iconKey, rarityColor, UI.text);
+        if (iconImg) {
+            uctx.drawImage(iconImg, cx + 12, cy + 12, 24, 24);
+        }
+
+        // Name
+        sansBold(uctx, charm.name, cx + 44, cy + 14, UI.text, 10);
+
+        // Rarity
+        const rarityIcon = charm.rarity === 'epic' ? '★' : charm.rarity === 'rare' ? '♥' : '◇';
+        sans(uctx, rarityIcon + ' ' + charm.rarity, cx + 44, cy + 28, rarityColor, 8, 'left', 500);
+
+        // Effect
+        sans(uctx, charm.description, cx + 12, cy + 55, UI.textSecondary, 9, 'left', 400);
+    });
+
+    // Empty state
+    if (playerCharms.length === 0) {
+        serif(uctx, 'No charms collected yet', UW/2, UH/2, UI.textMuted, 18, 'center');
+        sans(uctx, 'Defeat bosses to earn charms', UW/2, UH/2 + 30, UI.textMuted, 12, 'center', 500);
+    }
+}
+
+// Helper for drawing UCTX (alias for consistency)
+const UCTX = uctx;
+
+// Get charm rarity color from content system
+function getCharmRarityColor(rarity) {
+    const colors = {
+        common: '#B98CFF',
+        rare: '#6DE6FF',
+        epic: '#FFE38A'
+    };
+    return colors[rarity] || colors.common;
+}
+
 // ================================================================
 // MAIN LOOP
 // ================================================================
@@ -3818,6 +4156,10 @@ function draw() {
     } else if (state === State.SELECT) {
         gctx.clearRect(0, 0, PW, PH);
         drawUI_Select();
+    } else if (state === State.BOSS_CHEST) {
+        drawUI_BossChest();
+    } else if (state === State.CHARM_INVENTORY) {
+        drawUI_CharmInventory();
     } else if (state === State.PLAYING || state === State.PAUSED || state === State.LEVELUP || state === State.GAMEOVER) {
         drawPixelWorld();
         drawUI_HUD();

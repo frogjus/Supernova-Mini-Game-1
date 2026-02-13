@@ -1,0 +1,336 @@
+{
+  "charms": [
+    {
+      "id": "fox_instinct",
+      "name": "Fox Instinct",
+      "description": "Crit chance increased by 8%",
+      "rarity": "common",
+      "tags": ["crown", "attack"],
+      "effects": {"crit_chance": 0.08},
+      "synergy": ["Works well with Miho"],
+      "icon": "flame"
+    },
+    {
+      "id": "cherry_bloom",
+      "name": "Cherry Bloom",
+      "description": "Heal for 1 HP every 30 seconds",
+      "rarity": "common",
+      "tags": ["heart", "defense"],
+      "effects": {"regen": 0.033},
+      "synergy": ["Stacks with other healing"],
+      "icon": "heart"
+    },
+    {
+      "id": "quick_step",
+      "name": "Quick Step",
+      "description": "Move speed +10%",
+      "rarity": "common",
+      "tags": ["idol", "utility"],
+      "effects": {"speed_mult": 1.10},
+      "synergy": ["Good for positioning"],
+      "icon": "bolt"
+    },
+    {
+      "id": "gem_shield",
+      "name": "Gem Shield",
+      "description": "Start each stage with a small shield",
+      "rarity": "common",
+      "tags": ["idol", "defense"],
+      "effects": {"starting_shield": 2},
+      "synergy": ["Blocks first hits"],
+      "icon": "shield"
+    },
+    {
+      "id": "energy_drain",
+      "name": "Energy Drain",
+      "description": "Attacks have 5% lifesteal",
+      "rarity": "common",
+      "tags": ["thorn", "attack"],
+      "effects": {"lifesteal": 0.05},
+      "synergy": ["Works with all attacks"],
+      "icon": "flame"
+    },
+    {
+      "id": "magnet_aura",
+      "name": "Magnet Aura",
+      "description": "XP gem pickup range +25%",
+      "rarity": "common",
+      "tags": ["idol", "utility"],
+      "effects": {"magnet_range_mult": 1.25},
+      "synergy": ["Levels up faster"],
+      "icon": "sparkle"
+    },
+    {
+      "id": "glass_cannon",
+      "name": "Glass Cannon",
+      "description": "Damage +20%, but max HP -15%",
+      "rarity": "common",
+      "tags": ["thorn", "attack", "curse"],
+      "effects": {"damage_mult": 1.20, "hp_mult": 0.85},
+      "synergy": ["High risk, high reward"],
+      "icon": "bolt"
+    },
+    {
+      "id": "second_wind",
+      "name": "Second Wind",
+      "description": "Once per run, survive a fatal blow with 1 HP",
+      "rarity": "common",
+      "tags": ["heart", "defense"],
+      "effects": {"extra_life": 1},
+      "synergy": ["One save per run"],
+      "icon": "heart"
+    },
+    {
+      "id": "chain_reaction",
+      "name": "Chain Reaction",
+      "description": "Kills have 10% chance to spawn an additional XP gem",
+      "rarity": "common",
+      "tags": ["idol", "utility"],
+      "effects": {"kill_spawn_chance": 0.10},
+      "synergy": ["Faster leveling"],
+      "icon": "star"
+    },
+    {
+      "id": "thorns_aura",
+      "name": "Thorns Aura",
+      "description": "Enemies that melee attack you take 3 damage",
+      "rarity": "common",
+      "tags": ["thorn", "defense"],
+      "effects": {"thorns_damage": 3},
+      "synergy": ["Punishes melee enemies"],
+      "icon": "shield"
+    },
+    {
+      "id": "double_strike",
+      "name": "Double Strike",
+      "description": "10% chance for attacks to hit twice",
+      "rarity": "common",
+      "tags": ["idol", "attack"],
+      "effects": {"double_hit_chance": 0.10},
+      "synergy": ["Extra damage procs"],
+      "icon": "bolt"
+    },
+    {
+      "id": "golden_charm",
+      "name": "Golden Charm",
+      "description": "XP gained from gems +15%",
+      "rarity": "common",
+      "tags": ["crown", "utility"],
+      "effects": {"xp_mult": 1.15},
+      "synergy": ["Levels faster"],
+      "icon": "star"
+    },
+    {
+      "id": "piercing_shot",
+      "name": "Piercing Shot",
+      "description": "Projectiles pierce 1 additional enemy",
+      "rarity": "common",
+      "tags": ["idol", "attack"],
+      "effects": {"pierce": 1},
+      "synergy": ["Cleave through mobs"],
+      "icon": "beam"
+    },
+    {
+      "id": "vampiric_touch",
+      "name": "Vampiric Touch",
+      "description": "Heal for 0.5 HP when you kill an enemy",
+      "rarity": "common",
+      "tags": ["heart", "attack"],
+      "effects": {"heal_on_kill": 0.5},
+      "synergy": ["Sustained healing"],
+      "icon": "heart"
+    },
+    {
+      "id": "soft_landing",
+      "name": "Soft Landing",
+      "description": "Knockback distance reduced by 30%",
+      "rarity": "common",
+      "tags": ["idol", "defense"],
+      "effects": {"knockback_resist": 0.30},
+      "synergy": ["Stay in the fight"],
+      "icon": "shield"
+    },
+    {
+      "id": "executioner",
+      "name": "Executioner",
+      "description": "Deal 25% extra damage to enemies below 30% HP",
+      "rarity": "rare",
+      "tags": ["crown", "attack"],
+      "effects": {"execute_damage_mult": 1.25, "execute_threshold": 0.30},
+      "synergy": ["Finish enemies faster"],
+      "icon": "flame"
+    },
+    {
+      "id": "frozen_heart",
+      "name": "Frozen Heart",
+      "description": "Enemies within range move 20% slower",
+      "rarity": "rare",
+      "tags": ["idol", "utility"],
+      "effects": {"slow_aura": 0.20, "slow_radius": 50},
+      "synergy": ["Kiting power"],
+      "icon": "sparkle"
+    },
+    {
+      "id": "blood_moon",
+      "name": "Blood Moon",
+      "description": "At 50% HP or below, damage +30%",
+      "rarity": "rare",
+      "tags": ["thorn", "attack"],
+      "effects": {"low_hp_damage_mult": 1.30, "low_hp_threshold": 0.50},
+      "synergy": ["Desperation mode"],
+      "icon": "flame"
+    },
+    {
+      "id": "divine_shield",
+      "name": "Divine Shield",
+      "description": "Every 20 seconds, gain a 3-second invincibility window",
+      "rarity": "rare",
+      "tags": ["crown", "defense"],
+      "effects": {"iframe_duration": 3, "iframe_cooldown": 20},
+      "synergy": ["Survival tool"],
+      "icon": "shield"
+    },
+    {
+      "id": "bounty_hunter",
+      "name": "Bounty Hunter",
+      "description": "Bosses have a 25% chance to drop bonus XP",
+      "rarity": "rare",
+      "tags": ["idol", "utility"],
+      "effects": {"boss_xp_bonus_chance": 0.25, "boss_xp_bonus_mult": 2},
+      "synergy": ["Levels from bosses"],
+      "icon": "star"
+    },
+    {
+      "id": "shadow_step",
+      "name": "Shadow Step",
+      "description": "After killing an enemy, you have 15% dodge chance for 2s",
+      "rarity": "rare",
+      "tags": ["idol", "defense"],
+      "effects": {"kill_dodge_chance": 0.15, "kill_dodge_duration": 2},
+      "synergy": ["Dodge when fighting"],
+      "icon": "sparkle"
+    },
+    {
+      "id": "explosive_rounds",
+      "name": "Explosive Rounds",
+      "description": "Projectiles explode on impact, dealing 50% damage in AoE",
+      "rarity": "rare",
+      "tags": ["idol", "attack"],
+      "effects": {"explosion_damage_mult": 0.50, "explosion_radius": 30},
+      "synergy": ["Cleave builds"],
+      "icon": "flame"
+    },
+    {
+      "id": "crowd_pleaser",
+      "name": "Crowd Pleaser",
+      "description": "Damage increases by 1% for each enemy on screen",
+      "rarity": "rare",
+      "tags": ["idol", "attack"],
+      "effects": {"enemy_count_damage": 0.01},
+      "synergy": ["More enemies = more power"],
+      "icon": "star"
+    },
+    {
+      "id": "phoenix_feather",
+      "name": "Phoenix Feather",
+      "description": "On death, revive once with 50% HP (5 minute cooldown)",
+      "rarity": "rare",
+      "tags": ["heart", "defense"],
+      "effects": {"revive_hp_mult": 0.50, "revive_cooldown": 300},
+      "synergy": ["Second chance"],
+      "icon": "heart"
+    },
+    {
+      "id": "sniper_lens",
+      "name": "Sniper Lens",
+      "description": "Projectile range +40% and speed +20%",
+      "rarity": "rare",
+      "tags": ["idol", "attack"],
+      "effects": {"projectile_range_mult": 1.40, "projectile_speed_mult": 1.20},
+      "synergy": ["Poke builds"],
+      "icon": "beam"
+    },
+    {
+      "id": "crown_of_thorns",
+      "name": "Crown of Thorns",
+      "description": "While above 80% HP, deal 40% extra damage",
+      "rarity": "rare",
+      "tags": ["crown", "attack"],
+      "effects": {"high_hp_damage_mult": 1.40, "high_hp_threshold": 0.80},
+      "synergy": ["Keep HP high for power"],
+      "icon": "crown"
+    },
+    {
+      "id": "time_warp",
+      "name": "Time Warp",
+      "description": "Cooldowns recover 20% faster",
+      "rarity": "rare",
+      "tags": ["glitch", "utility"],
+      "effects": {"cooldown_mult": 0.80},
+      "synergy": ["Ability spam"],
+      "icon": "bolt"
+    },
+    {
+      "id": "soul_collector",
+      "name": "Soul Collector",
+      "description": "Every 10 kills, gain a stack that increases all damage by 5%",
+      "rarity": "epic",
+      "tags": ["idol", "attack"],
+      "effects": {"stack_damage": 0.05, "stack_kills": 10, "max_stacks": 10},
+      "synergy": ["Scales infinitely"],
+      "icon": "star"
+    },
+    {
+      "id": "angel_wings",
+      "name": "Angel Wings",
+      "description": "You emit a healing aura that heals nearby allies for 3 HP/s",
+      "rarity": "epic",
+      "tags": ["heart", "defense"],
+      "effects": {"healing_aura": 3, "healing_aura_radius": 60},
+      "synergy": ["Team support"],
+      "icon": "heart"
+    },
+    {
+      "id": "void_walker",
+      "name": "Void Walker",
+      "description": "Every 8 seconds, blink to a random nearby position",
+      "rarity": "epic",
+      "tags": ["glitch", "utility"],
+      "effects": {"blink_distance": 80, "blink_cooldown": 8},
+      "synergy": ["Mobility master"],
+      "icon": "sparkle"
+    },
+    {
+      "id": "galaxy_brain",
+      "name": "Galaxy Brain",
+      "description": "Gain 2% damage for every 10 seconds survived",
+      "rarity": "epic",
+      "tags": ["idol", "attack"],
+      "effects": {"time_damage": 0.02, "time_interval": 10},
+      "synergy": ["Late game power"],
+      "icon": "star"
+    },
+    {
+      "id": "royal_flush",
+      "name": "Royal Flush",
+      "description": "Having 5 different charms grants +50% to all stats",
+      "rarity": "epic",
+      "tags": ["crown", "idol"],
+      "effects": {"full_set_bonus": 0.50, "set_size": 5},
+      "synergy": ["Build around charms"],
+      "icon": "crown"
+    }
+  ],
+  "rarity_colors": {
+    "common": "#B98CFF",
+    "rare": "#6DE6FF",
+    "epic": "#FFE38A"
+  },
+  "tag_info": {
+    "crown": {"color": "#FFE38A", "description": "Royalty, boss-related"},
+    "heart": {"color": "#FF93C8", "description": "Health, healing"},
+    "idol": {"color": "#FF79C6", "description": "Idol, star power"},
+    "thorn": {"color": "#A7A0C8", "description": "Danger, curse"},
+    "glitch": {"color": "#46D8FF", "description": "Tech, time"}
+  }
+}

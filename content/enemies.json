@@ -1,0 +1,967 @@
+{
+  "mobs": [
+    {
+      "id": "flash_stalker",
+      "name": "Flash Stalker",
+      "fantasy": "camera-obsessed lurker",
+      "silhouette": "hunched lens-head with glowing red eye",
+      "palette": {"body": "#4A4A5E", "accent": "#FF4C7D", "outline": "#1A1230"},
+      "size": [8, 10],
+      "hp": 2,
+      "speed": 1.8,
+      "attacks": [
+        {
+          "id": "flash_dash",
+          "type": "dash",
+          "damage": 1,
+          "telegraph_time": 0.5,
+          "telegraph_color": "#FF4C7D",
+          "telegraph_shape": "cone",
+          "pattern": "quick_dash"
+        }
+      ],
+      "drops": {"xp": 1, "shutter_shards": 1},
+      "sprite_needs": "8x10 sprite, flash VFX"
+    },
+    {
+      "id": "tabloid_runner",
+      "name": "Tabloid Runner",
+      "fantasy": "headline chaser",
+      "silhouette": "paper stack cape flowing behind",
+      "palette": {"body": "#A0A0B0", "accent": "#FF79C6", "outline": "#1A1230"},
+      "size": [10, 10],
+      "hp": 3,
+      "speed": 1.4,
+      "attacks": [
+        {
+          "id": "page_barrage",
+          "type": "projectile",
+          "projectile_type": "page",
+          "damage": 1,
+          "speed": 3,
+          "count": 3,
+          "spread": 0.5,
+          "telegraph_time": 0.8,
+          "telegraph_color": "#FF79C6",
+          "telegraph_shape": "arc"
+        }
+      ],
+      "drops": {"xp": 1, "ink_scraps": 1},
+      "sprite_needs": "10x10 sprite, page projectile"
+    },
+    {
+      "id": "comment_wasp",
+      "name": "Comment Wasp",
+      "fantasy": "toxic buzz unit",
+      "silhouette": "winged chat bubble with stinger",
+      "palette": {"body": "#8F66FF", "accent": "#FF4FA3", "outline": "#1A1230"},
+      "size": [8, 8],
+      "hp": 1,
+      "speed": 2.2,
+      "attacks": [
+        {
+          "id": "zigzag_sting",
+          "type": "projectile",
+          "projectile_type": "stinger",
+          "damage": 1,
+          "speed": 4,
+          "pattern": "zigzag",
+          "telegraph_time": 0.3,
+          "telegraph_color": "#FF4FA3"
+        }
+      ],
+      "drops": {"xp": 1, "buzz_cores": 1},
+      "sprite_needs": "8x8 sprite, zigzag trail"
+    },
+    {
+      "id": "gatekeeper_knight",
+      "name": "Gatekeeper Knight",
+      "fantasy": "opinion wall",
+      "silhouette": "shield icon block with armored body",
+      "palette": {"body": "#6B5B95", "accent": "#B98CFF", "outline": "#1A1230"},
+      "size": [12, 12],
+      "hp": 6,
+      "speed": 0.8,
+      "attacks": [
+        {
+          "id": "shield_shove",
+          "type": "melee",
+          "damage": 2,
+          "range": 20,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#B98CFF",
+          "telegraph_shape": "rect"
+        }
+      ],
+      "drops": {"xp": 2, "lock_sigils": 1},
+      "sprite_needs": "12x12 sprite, shield hit"
+    },
+    {
+      "id": "fancam_leech",
+      "name": "Fancam Leech",
+      "fantasy": "attention drain orb",
+      "silhouette": "floating lens orb with tether",
+      "palette": {"body": "#1A1630", "accent": "#6DE6FF", "outline": "#0A0A14"},
+      "size": [9, 9],
+      "hp": 2,
+      "speed": 1.2,
+      "attacks": [
+        {
+          "id": "tether_beam",
+          "type": "beam",
+          "damage": 0.5,
+          "duration": 2,
+          "telegraph_time": 1.0,
+          "telegraph_color": "#6DE6FF",
+          "telegraph_shape": "line"
+        }
+      ],
+      "drops": {"xp": 1, "view_chips": 1},
+      "sprite_needs": "9x9 sprite, tether line"
+    },
+    {
+      "id": "spoiler_imp",
+      "name": "Spoiler Imp",
+      "fantasy": "plot-ruin sprite",
+      "silhouette": "jagged imp with glitch effects",
+      "palette": {"body": "#FF4FA3", "accent": "#1A1230", "outline": "#0A0A14"},
+      "size": [8, 9],
+      "hp": 2,
+      "speed": 2.0,
+      "attacks": [
+        {
+          "id": "spoiler_burst",
+          "type": "projectile",
+          "projectile_type": "glitch",
+          "damage": 2,
+          "speed": 2.5,
+          "pattern": "burst",
+          "count": 5,
+          "telegraph_time": 0.4,
+          "telegraph_color": "#FF4FA3"
+        }
+      ],
+      "drops": {"xp": 2, "glitch_petals": 1},
+      "sprite_needs": "8x9 sprite, burst VFX"
+    },
+    {
+      "id": "doomscroll_slug",
+      "name": "Doomscroll Slug",
+      "fantasy": "slow debuff crawler",
+      "silhouette": "long blob with phone screen body",
+      "palette": {"body": "#5A4A6E", "accent": "#FFB347", "outline": "#1A1230"},
+      "size": [12, 8],
+      "hp": 5,
+      "speed": 0.5,
+      "attacks": [
+        {
+          "id": "slow_goo",
+          "type": "aoe",
+          "damage": 0.5,
+          "radius": 25,
+          "debuff": "slow",
+          "duration": 3,
+          "telegraph_time": 0.8,
+          "telegraph_color": "#FFB347",
+          "telegraph_shape": "circle"
+        }
+      ],
+      "drops": {"xp": 1, "battery_gel": 1},
+      "sprite_needs": "12x8 sprite, trail tile"
+    },
+    {
+      "id": "leak_rat",
+      "name": "Leak Rat",
+      "fantasy": "file-snatching nuisance",
+      "silhouette": "small hooded rodent with data cable tail",
+      "palette": {"body": "#4A4A5E", "accent": "#FF79C6", "outline": "#1A1230"},
+      "size": [8, 8],
+      "hp": 1,
+      "speed": 2.5,
+      "attacks": [
+        {
+          "id": "steal_nibble",
+          "type": "melee",
+          "damage": 1,
+          "steals_xp": true,
+          "telegraph_time": 0.2,
+          "telegraph_color": "#FF79C6",
+          "telegraph_shape": "jump_arc"
+        }
+      ],
+      "drops": {"xp": 1, "cache_crumb": 1},
+      "sprite_needs": "8x8 sprite, hop anim"
+    },
+    {
+      "id": "echo_fan",
+      "name": "Echo Fan",
+      "fantasy": "chant-loop drone",
+      "silhouette": "speaker backpack with antenna",
+      "palette": {"body": "#3A6B6B", "accent": "#6DE6FF", "outline": "#1A1230"},
+      "size": [10, 11],
+      "hp": 4,
+      "speed": 1.0,
+      "attacks": [
+        {
+          "id": "shockwave",
+          "type": "projectile",
+          "projectile_type": "wave",
+          "damage": 2,
+          "speed": 2,
+          "pattern": "ring",
+          "telegraph_time": 1.0,
+          "telegraph_color": "#6DE6FF",
+          "telegraph_shape": "ring_pulse"
+        }
+      ],
+      "drops": {"xp": 2, "amp_screws": 1},
+      "sprite_needs": "10x11 sprite, wave ring"
+    },
+    {
+      "id": "receipt_hunter",
+      "name": "Receipt Hunter",
+      "fantasy": "expose-seeker",
+      "silhouette": "long coat with note spear",
+      "palette": {"body": "#6E5A4A", "accent": "#FF4C7D", "outline": "#1A1230"},
+      "size": [11, 12],
+      "hp": 4,
+      "speed": 1.6,
+      "attacks": [
+        {
+          "id": "receipt_jab",
+          "type": "projectile",
+          "projectile_type": "paper_spear",
+          "damage": 2,
+          "speed": 5,
+          "telegraph_time": 0.4,
+          "telegraph_color": "#FF4C7D",
+          "telegraph_shape": "line"
+        }
+      ],
+      "drops": {"xp": 2, "receipt_strips": 1},
+      "sprite_needs": "11x12 sprite, jab frame"
+    }
+  ],
+  "projectile_mobs": [
+    {
+      "id": "spark_caster",
+      "name": "Spark Caster",
+      "fantasy": "electric archer",
+      "silhouette": "thin robe with bow shape",
+      "palette": {"body": "#4A3774", "accent": "#46D8FF", "outline": "#1A1230"},
+      "size": [9, 12],
+      "hp": 3,
+      "speed": 1.2,
+      "attacks": [
+        {
+          "id": "lightning_arrow",
+          "type": "projectile",
+          "projectile_type": "lightning",
+          "damage": 1,
+          "speed": 4,
+          "count": 1,
+          "telegraph_time": 0.8,
+          "telegraph_color": "#46D8FF",
+          "telegraph_shape": "aimed"
+        }
+      ],
+      "drops": {"xp": 2, "spark_orbs": 1}
+    },
+    {
+      "id": "heart_thrower",
+      "name": "Heart Thrower",
+      "fantasy": "cupid gone wrong",
+      "silhouette": "cupid sprite with quiver",
+      "palette": {"body": "#FF79C6", "accent": "#FF4FA3", "outline": "#1A1230"},
+      "size": [8, 10],
+      "hp": 2,
+      "speed": 1.5,
+      "attacks": [
+        {
+          "id": "heart_ volley",
+          "type": "projectile",
+          "projectile_type": "heart",
+          "damage": 1,
+          "speed": 3,
+          "count": 3,
+          "spread": 0.8,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#FF79C6",
+          "telegraph_shape": "arc"
+        }
+      ],
+      "drops": {"xp": 2, "love_darts": 1}
+    },
+    {
+      "id": "glitch_shooter",
+      "name": "Glitch Shooter",
+      "fantasy": "digital sniper",
+      "silhouette": "blocky robot with scope head",
+      "palette": {"body": "#2F2352", "accent": "#46D8FF", "outline": "#0A0A14"},
+      "size": [10, 10],
+      "hp": 3,
+      "speed": 1.0,
+      "attacks": [
+        {
+          "id": "glitch_shot",
+          "type": "projectile",
+          "projectile_type": "glitch_bullet",
+          "damage": 2,
+          "speed": 6,
+          "pattern": "aimed",
+          "telegraph_time": 1.2,
+          "telegraph_color": "#46D8FF",
+          "telegraph_shape": "target_lock"
+        }
+      ],
+      "drops": {"xp": 3, "broken_code": 1}
+    },
+    {
+      "id": "crystal_sharder",
+      "name": "Crystal Sharder",
+      "fantasy": "gem mage",
+      "silhouette": "robed figure with crystal staff",
+      "palette": {"body": "#3A2C62", "accent": "#B98CFF", "outline": "#1A1230"},
+      "size": [9, 13],
+      "hp": 4,
+      "speed": 0.9,
+      "attacks": [
+        {
+          "id": "crystal_rain",
+          "type": "projectile",
+          "projectile_type": "crystal",
+          "damage": 1,
+          "speed": 2,
+          "count": 5,
+          "pattern": "rain",
+          "telegraph_time": 1.0,
+          "telegraph_color": "#B98CFF",
+          "telegraph_shape": "column"
+        }
+      ],
+      "drops": {"xp": 2, "shard_fragments": 1}
+    },
+    {
+      "id": "flame_dancer",
+      "name": "Flame Dancer",
+      "fantasy": "fire juggler",
+      "silhouette": "flowing scarf with torch hands",
+      "palette": {"body": "#FF4FA3", "accent": "#FFB347", "outline": "#1A1230"},
+      "size": [8, 11],
+      "hp": 2,
+      "speed": 1.8,
+      "attacks": [
+        {
+          "id": "fire_arc",
+          "type": "projectile",
+          "projectile_type": "fireball",
+          "damage": 1,
+          "speed": 3,
+          "count": 3,
+          "spread": 1.2,
+          "telegraph_time": 0.5,
+          "telegraph_color": "#FFB347",
+          "telegraph_shape": "arc"
+        }
+      ],
+      "drops": {"xp": 2, "ember_orbs": 1}
+    },
+    {
+      "id": "shadow_caster",
+      "name": "Shadow Caster",
+      "fantasy": "void mage",
+      "silhouette": "cloaked figure with dark orbs",
+      "palette": {"body": "#1A1630", "accent": "#8F66FF", "outline": "#0A0A14"},
+      "size": [9, 12],
+      "hp": 3,
+      "speed": 1.1,
+      "attacks": [
+        {
+          "id": "void_orb",
+          "type": "projectile",
+          "projectile_type": "void",
+          "damage": 2,
+          "speed": 2,
+          "pattern": "homing",
+          "telegraph_time": 0.8,
+          "telegraph_color": "#8F66FF",
+          "telegraph_shape": "gather"
+        }
+      ],
+      "drops": {"xp": 3, "shadow_essence": 1}
+    },
+    {
+      "id": "spike_roller",
+      "name": "Spike Roller",
+      "fantasy": "armored ball",
+      "silhouette": "spiked sphere rolling forward",
+      "palette": {"body": "#4A3774", "accent": "#A7A0C8", "outline": "#1A1230"},
+      "size": [10, 10],
+      "hp": 5,
+      "speed": 2.0,
+      "attacks": [
+        {
+          "id": "roll_attack",
+          "type": "projectile",
+          "projectile_type": "spike_ball",
+          "damage": 2,
+          "speed": 4,
+          "pattern": "straight",
+          "telegraph_time": 0.3,
+          "telegraph_color": "#A7A0C8",
+          "telegraph_shape": "charge"
+        }
+      ],
+      "drops": {"xp": 2, "spike_parts": 1}
+    },
+    {
+      "id": "thorn_shooter",
+      "name": "Thorn Shooter",
+      "fantasy": "nature's wrath",
+      "silhouette": "plant creature with thorn bouquet",
+      "palette": {"body": "#3A6B4A", "accent": "#77F7BF", "outline": "#1A1230"},
+      "size": [9, 11],
+      "hp": 3,
+      "speed": 1.3,
+      "attacks": [
+        {
+          "id": "thorn_barrage",
+          "type": "projectile",
+          "projectile_type": "thorn",
+          "damage": 1,
+          "speed": 4,
+          "count": 4,
+          "spread": 0.6,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#77F7BF",
+          "telegraph_shape": "fan"
+        }
+      ],
+      "drops": {"xp": 2, "thorn_bundles": 1}
+    }
+  ],
+  "melee_mobs": [
+    {
+      "id": "charger_berserker",
+      "name": "Charger Berserker",
+      "fantasy": "rushing fury",
+      "silhouette": "small angry figure with charge pose",
+      "palette": {"body": "#FF4FA3", "accent": "#FF79C6", "outline": "#1A1230"},
+      "size": [8, 8],
+      "hp": 2,
+      "speed": 3.0,
+      "attacks": [
+        {
+          "id": "charge_slash",
+          "type": "dash",
+          "damage": 2,
+          "telegraph_time": 0.4,
+          "telegraph_color": "#FF4FA3",
+          "telegraph_shape": "charge_line"
+        }
+      ],
+      "drops": {"xp": 1, "rage_shards": 1}
+    },
+    {
+      "id": "shield_bearer",
+      "name": "Shield Bearer",
+      "fantasy": "frontline defender",
+      "silhouette": "large figure with tower shield",
+      "palette": {"body": "#6B5B95", "accent": "#B98CFF", "outline": "#1A1230"},
+      "size": [14, 14],
+      "hp": 10,
+      "speed": 0.6,
+      "attacks": [
+        {
+          "id": "shield_bash",
+          "type": "melee",
+          "damage": 2,
+          "range": 25,
+          "telegraph_time": 0.8,
+          "telegraph_color": "#B98CFF",
+          "telegraph_shape": "frontal"
+        }
+      ],
+      "drops": {"xp": 3, "shield_plates": 1}
+    },
+    {
+      "id": "thorn_walker",
+      "name": "Thorn Walker",
+      "fantasy": "walking hazard",
+      "silhouette": "spiky vine creature",
+      "palette": {"body": "#3A6B4A", "accent": "#A7A0C8", "outline": "#1A1230"},
+      "size": [10, 12],
+      "hp": 5,
+      "speed": 0.8,
+      "attacks": [
+        {
+          "id": "thorn_lash",
+          "type": "melee",
+          "damage": 2,
+          "range": 22,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#A7A0C8",
+          "telegraph_shape": "whip_arc"
+        }
+      ],
+      "drops": {"xp": 2, "vine_cuttings": 1}
+    },
+    {
+      "id": "phantom_dasher",
+      "name": "Phantom Dasher",
+      "fantasy": "ghostly rush",
+      "silhouette": "wispy figure with trail",
+      "palette": {"body": "#C8D6FF", "accent": "#6DE6FF", "outline": "#1A1630"},
+      "size": [8, 10],
+      "hp": 2,
+      "speed": 2.5,
+      "attacks": [
+        {
+          "id": "phase_strike",
+          "type": "dash",
+          "damage": 2,
+          "telegraph_time": 0.5,
+          "telegraph_color": "#6DE6FF",
+          "telegraph_shape": "teleport_arc"
+        }
+      ],
+      "drops": {"xp": 2, "spirit_fragments": 1}
+    },
+    {
+      "id": "rock_thrower",
+      "name": "Rock Thrower",
+      "fantasy": "boulder tosser",
+      "silhouette": "muscular figure with boulder",
+      "palette": {"body": "#5A5A6E", "accent": "#A694C7", "outline": "#1A1230"},
+      "size": [11, 12],
+      "hp": 6,
+      "speed": 0.9,
+      "attacks": [
+        {
+          "id": "boulder_toss",
+          "type": "projectile",
+          "projectile_type": "rock",
+          "damage": 3,
+          "speed": 2,
+          "telegraph_time": 1.2,
+          "telegraph_color": "#A694C7",
+          "telegraph_shape": "overhead_windup"
+        }
+      ],
+      "drops": {"xp": 2, "stone_chunks": 1}
+    },
+    {
+      "id": "blade_dancer",
+      "name": "Blade Dancer",
+      "fantasy": "spinning killer",
+      "silhouette": "spinning blade shape",
+      "palette": {"body": "#C8D6FF", "accent": "#FF79C6", "outline": "#1A1230"},
+      "size": [10, 10],
+      "hp": 3,
+      "speed": 1.8,
+      "attacks": [
+        {
+          "id": "spin_blade",
+          "type": "spinning",
+          "damage": 1,
+          "radius": 18,
+          "telegraph_time": 0.3,
+          "telegraph_color": "#FF79C6",
+          "telegraph_shape": "spinning"
+        }
+      ],
+      "drops": {"xp": 2, "blade_shards": 1}
+    }
+  ],
+  "support_mobs": [
+    {
+      "id": "healer_spirit",
+      "name": "Healer Spirit",
+      "fantasy": "support wisp",
+      "silhouette": "floating orb with healing glow",
+      "palette": {"body": "#89FFD1", "accent": "#77F7BF", "outline": "#1A1230"},
+      "size": [8, 8],
+      "hp": 2,
+      "speed": 1.5,
+      "attacks": [],
+      "support_abilities": [
+        {
+          "id": "healing_aura",
+          "type": "heal",
+          "target": "allies",
+          "amount": 0.5,
+          "radius": 40,
+          "interval": 1.0,
+          "telegraph_time": 0.5,
+          "telegraph_color": "#89FFD1"
+        }
+      ],
+      "drops": {"xp": 1, "healing_essence": 1}
+    },
+    {
+      "id": "armor_buff_pylon",
+      "name": "Armor Buff Pylon",
+      "fantasy": "field generator",
+      "silhouette": "tower with shield aura",
+      "palette": {"body": "#6B5B95", "accent": "#C8D6FF", "outline": "#1A1230"},
+      "size": [10, 14],
+      "hp": 6,
+      "speed": 0,
+      "attacks": [],
+      "support_abilities": [
+        {
+          "id": "shield_field",
+          "type": "buff",
+          "target": "allies",
+          "effect": "shield",
+          "amount": 3,
+          "radius": 50,
+          "telegraph_time": 1.0,
+          "telegraph_color": "#C8D6FF"
+        }
+      ],
+      "drops": {"xp": 2, "pylon_cores": 1}
+    },
+    {
+      "id": "summoner_minion",
+      "name": "Summoner Minion",
+      "fantasy": "swarm commander",
+      "silhouette": "robed figure with portal",
+      "palette": {"body": "#8F66FF", "accent": "#46D8FF", "outline": "#1A1230"},
+      "size": [10, 12],
+      "hp": 4,
+      "speed": 1.0,
+      "attacks": [
+        {
+          "id": "minion_shoot",
+          "type": "projectile",
+          "projectile_type": "minion",
+          "damage": 1,
+          "speed": 3,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#8F66FF"
+        }
+      ],
+      "support_abilities": [
+        {
+          "id": "spawn_minions",
+          "type": "summon",
+          "count": 2,
+          "unit_type": "tiny_shadow",
+          "interval": 5,
+          "telegraph_time": 1.5,
+          "telegraph_color": "#46D8FF"
+        }
+      ],
+      "drops": {"xp": 3, "summoning_ink": 1}
+    },
+    {
+      "id": "speed_booster",
+      "name": "Speed Booster",
+      "fantasy": "momentum source",
+      "silhouette": "streamlined figure with wind trail",
+      "palette": {"body": "#6DE6FF", "accent": "#89FFD1", "outline": "#1A1230"},
+      "size": [8, 10],
+      "hp": 2,
+      "speed": 2.0,
+      "attacks": [],
+      "support_abilities": [
+        {
+          "id": "wind_rush",
+          "type": "buff",
+          "target": "allies",
+          "effect": "speed",
+          "amount": 1.5,
+          "radius": 35,
+          "duration": 3,
+          "telegraph_time": 0.5,
+          "telegraph_color": "#6DE6FF"
+        }
+      ],
+      "drops": {"xp": 2, "wind_essences": 1}
+    }
+  ],
+  "elites": [
+    {
+      "id": "paparazzi_rig",
+      "name": "Paparazzi Rig",
+      "fantasy": "camera mech elite",
+      "mechanic": "multi-flash barrage",
+      "silhouette": "mounted camera with multiple lenses",
+      "palette": {"body": "#4A4A5E", "accent": "#FF79C6", "outline": "#1A1230"},
+      "size": [14, 14],
+      "hp": 15,
+      "speed": 0.8,
+      "attacks": [
+        {
+          "id": "flash_barrage",
+          "type": "projectile",
+          "projectile_type": "flash",
+          "damage": 2,
+          "speed": 4,
+          "count": 6,
+          "spread": 1.5,
+          "telegraph_time": 1.2,
+          "telegraph_color": "#FF79C6"
+        }
+      ],
+      "special": "blinds player briefly on hit",
+      "drops": {"xp": 8, "camera_parts": 1, "crown_shard": 1}
+    },
+    {
+      "id": "trending_executor",
+      "name": "Trending Executor",
+      "fantasy": "algorithm enforcer",
+      "mechanic": "marks hottest target",
+      "silhouette": "tech warrior with targeting array",
+      "palette": {"body": "#2F2352", "accent": "#FF4FA3", "outline": "#0A0A14"},
+      "size": [12, 14],
+      "hp": 12,
+      "speed": 1.5,
+      "attacks": [
+        {
+          "id": "execute_marked",
+          "type": "targeted_beam",
+          "damage": 4,
+          "telegraph_time": 2.0,
+          "telegraph_color": "#FF4FA3",
+          "special": "deals bonus damage to marked targets"
+        }
+      ],
+      "special": "marks player for increased damage",
+      "drops": {"xp": 10, "algo_shards": 1, "crown_shard": 1}
+    },
+    {
+      "id": "archive_warden",
+      "name": "Archive Warden",
+      "fantasy": "deletes pickups",
+      "mechanic": "zone denial",
+      "silhouette": "floating record keeper with eraser",
+      "palette": {"body": "#1A1630", "accent": "#89FFD1", "outline": "#0A0A14"},
+      "size": [12, 14],
+      "hp": 10,
+      "speed": 1.0,
+      "attacks": [
+        {
+          "id": "delete_zone",
+          "type": "aoe",
+          "damage": 1,
+          "radius": 40,
+          "effect": "destroys_xp_gems",
+          "telegraph_time": 1.5,
+          "telegraph_color": "#89FFD1"
+        }
+      ],
+      "special": "destroys nearby XP gems",
+      "drops": {"xp": 8, "deleted_pages": 1, "crown_shard": 1}
+    },
+    {
+      "id": "reply_hydra",
+      "name": "Reply Hydra",
+      "fantasy": "splitting comment swarm",
+      "mechanic": "duplicates on hit",
+      "silhouette": "multi-headed comment snake",
+      "palette": {"body": "#8F66FF", "accent": "#FF4FA3", "outline": "#1A1230"},
+      "size": [16, 12],
+      "hp": 8,
+      "speed": 1.3,
+      "attacks": [
+        {
+          "id": "split_attack",
+          "type": "projectile",
+          "projectile_type": "reply",
+          "damage": 2,
+          "speed": 3,
+          "telegraph_time": 0.6,
+          "telegraph_color": "#8F66FF"
+        }
+      ],
+      "special": "splits into 2 when hit below 50% HP",
+      "drops": {"xp": 10, "hydra_heads": 1, "crown_shard": 1}
+    },
+    {
+      "id": "blacklist_duelist",
+      "name": "Blacklist Duelist",
+      "fantasy": "single-target hunter",
+      "mechanic": "telegraphed dash chains",
+      "silhouette": "armored duelist with chain weapons",
+      "palette": {"body": "#1A1630", "accent": "#FF4C7D", "outline": "#0A0A14"},
+      "size": [12, 14],
+      "hp": 14,
+      "speed": 2.0,
+      "attacks": [
+        {
+          "id": "chain_dash",
+          "type": "dash",
+          "damage": 3,
+          "telegraph_time": 0.8,
+          "telegraph_color": "#FF4C7D",
+          "pattern": "chain_3"
+        }
+      ],
+      "special": "chains 3 rapid dashes",
+      "drops": {"xp": 12, "chain_links": 1, "crown_shard": 1}
+    }
+  ],
+  "bosses": [
+    {
+      "id": "queen_of_clickbait",
+      "name": "Queen of Clickbait",
+      "chapter": 1,
+      "level": 10,
+      "arena": "neon newsroom",
+      "intro": "Every crown has a scandal.",
+      "silhouette": "Giant crowned figure with camera eyes",
+      "palette": {"body": "#FF79C6", "accent": "#FFE38A", "outline": "#1A1230"},
+      "size": [32, 40],
+      "hp": 100,
+      "attacks": [
+        {"id": "headline_slash", "type": "melee", "damage": 8, "telegraph": "slash_arc"},
+        {"id": "camera_cone", "type": "projectile", "damage": 5, "count": 3, "pattern": "cone"},
+        {"id": "flash_bang", "type": "aoe", "damage": 3, "effect": "blind", "radius": 60}
+      ],
+      "telegraph_patterns": {
+        "slash_arc": {"shape": "arc", "color": "#FF79C6", "time": 0.8},
+        "camera_cone": {"shape": "cone", "color": "#FFE38A", "time": 1.0}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "flash_bang"},
+        {"hp": 30, "unlocks": "camera_cone_rapid"}
+      ],
+      "drops": {"xp": 50, "crown_core_alpha": 1}
+    },
+    {
+      "id": "mr_algorithm",
+      "name": "Mr. Algorithm",
+      "chapter": 2,
+      "level": 20,
+      "arena": "data cathedral",
+      "intro": "I decide what they see.",
+      "silhouette": "Giant digital brain with circuits",
+      "palette": {"body": "#2F2352", "accent": "#46D8FF", "outline": "#0A0A14"},
+      "size": [36, 36],
+      "hp": 150,
+      "attacks": [
+        {"id": "grid_lock", "type": "aoe", "damage": 4, "pattern": "chess_board"},
+        {"id": "ranking_beam", "type": "targeted_beam", "damage": 10},
+        {"id": "data_meteor", "type": "projectile", "damage": 6, "count": 5, "pattern": "rain"}
+      ],
+      "telegraph_patterns": {
+        "grid_lock": {"shape": "grid", "color": "#46D8FF", "time": 1.5},
+        "ranking_beam": {"shape": "line", "color": "#FF4FA3", "time": 2.0}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "data_meteor"},
+        {"hp": 30, "unlocks": "grid_lock_rapid"}
+      ],
+      "drops": {"xp": 80, "crown_core_beta": 1}
+    },
+    {
+      "id": "director_cut",
+      "name": "Director Cut",
+      "chapter": 3,
+      "level": 30,
+      "arena": "broken stage set",
+      "intro": "Say it again, but louder.",
+      "silhouette": "Giant director with spotlight head",
+      "palette": {"body": "#1A1630", "accent": "#FFE38A", "outline": "#0A0A14"},
+      "size": [34, 42],
+      "hp": 200,
+      "attacks": [
+        {"id": "spotlight_snipe", "type": "targeted_beam", "damage": 8},
+        {"id": "clap_shockwave", "type": "aoe", "damage": 6, "radius": 50},
+        {"id": "roll_credits", "type": "projectile", "damage": 4, "count": 8, "pattern": "spiral"}
+      ],
+      "telegraph_patterns": {
+        "spotlight_snipe": {"shape": "target", "color": "#FFE38A", "time": 1.5},
+        "clap_shockwave": {"shape": "ring", "color": "#FF79C6", "time": 1.0}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "roll_credits"},
+        {"hp": 30, "unlocks": "spotlight_rapid"}
+      ],
+      "drops": {"xp": 120, "crown_core_gamma": 1}
+    },
+    {
+      "id": "glass_prince",
+      "name": "Glass Prince",
+      "chapter": 4,
+      "level": 40,
+      "arena": "mirror hall",
+      "intro": "Reflection is a weapon.",
+      "silhouette": "Elegant prince with crystalline body",
+      "palette": {"body": "#C8D6FF", "accent": "#B98CFF", "outline": "#1A1630"},
+      "size": [30, 38],
+      "hp": 180,
+      "attacks": [
+        {"id": "mirror_clone", "type": "summon", "count": 3, "duration": 10},
+        {"id": "shard_rain", "type": "projectile", "damage": 5, "count": 10, "pattern": "rain"},
+        {"id": "prism_beam", "type": "beam", "damage": 8, "splits": true}
+      ],
+      "telegraph_patterns": {
+        "mirror_clone": {"shape": "gather", "color": "#C8D6FF", "time": 2.0},
+        "shard_rain": {"shape": "column", "color": "#B98CFF", "time": 1.5}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "shard_rain"},
+        {"hp": 30, "unlocks": "mirror_clone_summon"}
+      ],
+      "drops": {"xp": 150, "crown_core_delta": 1}
+    },
+    {
+      "id": "midnight_forum",
+      "name": "Midnight Forum",
+      "chapter": 5,
+      "level": 50,
+      "arena": "floating chat abyss",
+      "intro": "Consensus becomes cage.",
+      "silhouette": "Giant forum interface with floating posts",
+      "palette": {"body": "#1A1630", "accent": "#8F66FF", "outline": "#0A0A14"},
+      "size": [40, 40],
+      "hp": 250,
+      "attacks": [
+        {"id": "vote_circle", "type": "aoe", "damage": 6, "radius": 45, "effect": "stun"},
+        {"id": "thread_chain", "type": "projectile", "damage": 4, "count": 6, "pattern": "chain"},
+        {"id": "ban_hammer", "type": "targeted_beam", "damage": 12}
+      ],
+      "telegraph_patterns": {
+        "vote_circle": {"shape": "circle", "color": "#8F66FF", "time": 1.2},
+        "thread_chain": {"shape": "web", "color": "#FF79C6", "time": 1.0}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "vote_circle"},
+        {"hp": 30, "unlocks": "ban_hammer"}
+      ],
+      "drops": {"xp": 200, "crown_core_epsilon": 1}
+    },
+    {
+      "id": "the_disbander",
+      "name": "The Disbander",
+      "chapter": 5,
+      "level": 60,
+      "arena": "fractured throne stage",
+      "intro": "End of story.",
+      "silhouette": "Giant void entity with crown fragments",
+      "palette": {"body": "#0A0A14", "accent": "#FF4FA3", "outline": "#000000"},
+      "size": [48, 52],
+      "hp": 400,
+      "attacks": [
+        {"id": "phase_tear", "type": "dash", "damage": 10},
+        {"id": "void_wedge", "type": "projectile", "damage": 8, "count": 4, "pattern": "wedge"},
+        {"id": "disband_pulse", "type": "aoe", "damage": 15, "radius": 80},
+        {"id": "crown_siphon", "type": "drain", "amount": 5, "duration": 5}
+      ],
+      "telegraph_patterns": {
+        "phase_tear": {"shape": "line", "color": "#FF4FA3", "time": 0.5},
+        "void_wedge": {"shape": "wedge", "color": "#0A0A14", "time": 1.5},
+        "disband_pulse": {"shape": "ring", "color": "#FF4FA3", "time": 2.0}
+      },
+      "phases": [
+        {"hp": 70, "unlocks": "void_wedge"},
+        {"hp": 40, "unlocks": "phase_tear_rapid"},
+        {"hp": 15, "enraged": true, "damage_mult": 1.5}
+      ],
+      "drops": {"xp": 500, "royal_core_omega": 1, "unlock_new_content": true}
+    }
+  ]
+}
