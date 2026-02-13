@@ -1,0 +1,309 @@
+{
+  "stages": [
+    {
+      "id": "neon_lobby",
+      "name": "Neon Lobby",
+      "chapter": 1,
+      "order": 1,
+      "description": "First crowd turns hostile; idols learn to weaponize choreography.",
+      "bg": {
+        "primary": "#111126",
+        "accent": "#FF79C6",
+        "mid": "#1A1630",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.1, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.3, "color": "#1A1630", "shapes": ["city_silhouette"]},
+        {"layer": "near", "speed": 0.5, "color": "#241B3F", "shapes": ["neon_signs"]}
+      ],
+      "ambience": {
+        "particles": "pink_dust",
+        "color_wash": ["#FF79C6", "#6DE6FF"],
+        "intensity": 0.04
+      },
+      "boss_id": "queen_of_clickbait",
+      "enemy_pool": ["flash_stalker", "tabloid_runner", "comment_wasp"],
+      "difficulty_modifier": 1.0,
+      "objective": "Survive and stabilize the crowd signal."
+    },
+    {
+      "id": "neon_lobby_2",
+      "name": "Neon Promenade",
+      "chapter": 1,
+      "order": 2,
+      "description": "The crowd grows more aggressive. Time to speed up.",
+      "bg": {
+        "primary": "#111126",
+        "accent": "#FF4FA3",
+        "mid": "#1A1630",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.1, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.35, "color": "#1A1630", "shapes": ["crowd_arms"]},
+        {"layer": "near", "speed": 0.55, "color": "#241B3F", "shapes": ["spotlights"]}
+      ],
+      "ambience": {
+        "particles": "pink_dust",
+        "color_wash": ["#FF4FA3", "#B98CFF"],
+        "intensity": 0.05
+      },
+      "boss_id": null,
+      "enemy_pool": ["flash_stalker", "tabloid_runner", "comment_wasp", "gatekeeper_knight"],
+      "difficulty_modifier": 1.2,
+      "objective": "Push through to the next area."
+    },
+    {
+      "id": "mall_mirrors",
+      "name": "Mall of Mirrors",
+      "chapter": 2,
+      "order": 3,
+      "description": "False reflections spread rumors that become enemies.",
+      "bg": {
+        "primary": "#1A1630",
+        "accent": "#B98CFF",
+        "mid": "#241B3F",
+        "far": "#111126"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.08, "color": "#111126"},
+        {"layer": "mid", "speed": 0.25, "color": "#1A1630", "shapes": ["mirror_panels"]},
+        {"layer": "near", "speed": 0.45, "color": "#2F2352", "shapes": ["reflection_shadows"]}
+      ],
+      "ambience": {
+        "particles": "shimmer",
+        "color_wash": ["#B98CFF", "#FF79C6"],
+        "intensity": 0.06
+      },
+      "boss_id": "mr_algorithm",
+      "enemy_pool": ["gatekeeper_knight", "fancam_leech", "spoiler_imp", "leak_rat"],
+      "difficulty_modifier": 1.4,
+      "objective": "Break reflection swarms and secure the lane."
+    },
+    {
+      "id": "mall_mirrors_2",
+      "name": "Reflection Garden",
+      "chapter": 2,
+      "order": 4,
+      "description": "The mirrors multiply. Find the real path.",
+      "bg": {
+        "primary": "#1A1630",
+        "accent": "#8F66FF",
+        "mid": "#241B3F",
+        "far": "#111126"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.08, "color": "#111126"},
+        {"layer": "mid", "speed": 0.28, "color": "#1A1630", "shapes": ["mirror_towers"]},
+        {"layer": "near", "speed": 0.48, "color": "#2F2352", "shapes": ["glitch_clones"]}
+      ],
+      "ambience": {
+        "particles": "shimmer",
+        "color_wash": ["#8F66FF", "#6DE6FF"],
+        "intensity": 0.07
+      },
+      "boss_id": null,
+      "enemy_pool": ["gatekeeper_knight", "fancam_leech", "spoiler_imp", "echo_fan"],
+      "difficulty_modifier": 1.6,
+      "objective": "Navigate the mirror maze."
+    },
+    {
+      "id": "broadcast_ruins",
+      "name": "Broadcast Ruins",
+      "chapter": 3,
+      "order": 5,
+      "description": "Signal towers scramble identity and split the team.",
+      "bg": {
+        "primary": "#0A0A14",
+        "accent": "#46D8FF",
+        "mid": "#111126",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.06, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.2, "color": "#111126", "shapes": ["broken_tvs"]},
+        {"layer": "near", "speed": 0.4, "color": "#1A1630", "shapes": ["antenna_silhouettes"]}
+      ],
+      "ambience": {
+        "particles": "static",
+        "color_wash": ["#46D8FF", "#FF79C6"],
+        "intensity": 0.08,
+        "effect": "glitch"
+      },
+      "boss_id": "director_cut",
+      "enemy_pool": ["doomscroll_slug", "leak_rat", "receipt_hunter", "echo_fan"],
+      "difficulty_modifier": 1.8,
+      "objective": "Interrupt relay towers and preserve formation."
+    },
+    {
+      "id": "broadcast_ruins_2",
+      "name": "Static Cathedral",
+      "chapter": 3,
+      "order": 6,
+      "description": "The signal grows stronger. Time to make some noise.",
+      "bg": {
+        "primary": "#0A0A14",
+        "accent": "#6DE6FF",
+        "mid": "#111126",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.06, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.22, "color": "#111126", "shapes": ["tv_walls"]},
+        {"layer": "near", "speed": 0.42, "color": "#1A1630", "shapes": ["cable_tangles"]}
+      ],
+      "ambience": {
+        "particles": "static",
+        "color_wash": ["#6DE6FF", "#B98CFF"],
+        "intensity": 0.09,
+        "effect": "rgb_split"
+      },
+      "boss_id": null,
+      "enemy_pool": ["doomscroll_slug", "receipt_hunter", "echo_fan", "comment_wasp"],
+      "difficulty_modifier": 2.0,
+      "objective": "Clear the broadcast interference."
+    },
+    {
+      "id": "archive_understage",
+      "name": "Archive Understage",
+      "chapter": 4,
+      "order": 7,
+      "description": "Deleted memories surface as elite hunters.",
+      "bg": {
+        "primary": "#1A1630",
+        "accent": "#89FFD1",
+        "mid": "#241B3F",
+        "far": "#111126"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.05, "color": "#111126"},
+        {"layer": "mid", "speed": 0.18, "color": "#1A1630", "shapes": ["filing_cabinets"]},
+        {"layer": "near", "speed": 0.35, "color": "#241B3F", "shapes": ["paper_storm"]}
+      ],
+      "ambience": {
+        "particles": "data_stream",
+        "color_wash": ["#89FFD1", "#B98CFF"],
+        "intensity": 0.06
+      },
+      "boss_id": "glass_prince",
+      "enemy_pool": ["spoiler_imp", "leak_rat", "fancam_leech", "paparazzi_rig"],
+      "difficulty_modifier": 2.2,
+      "objective": "Recover lost chorus shards from elites."
+    },
+    {
+      "id": "archive_understage_2",
+      "name": "Memory Vault",
+      "chapter": 4,
+      "order": 8,
+      "description": "The deep archive holds dangerous secrets.",
+      "bg": {
+        "primary": "#1A1630",
+        "accent": "#77F7BF",
+        "mid": "#241B3F",
+        "far": "#111126"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.05, "color": "#111126"},
+        {"layer": "mid", "speed": 0.2, "color": "#1A1630", "shapes": ["shelf_towers"]},
+        {"layer": "near", "speed": 0.38, "color": "#2F2352", "shapes": ["ghost_memories"]}
+      ],
+      "ambience": {
+        "particles": "data_stream",
+        "color_wash": ["#77F7BF", "#89FFD1"],
+        "intensity": 0.07
+      },
+      "boss_id": null,
+      "enemy_pool": ["spoiler_imp", "leak_rat", "archive_warden", "trending_executor"],
+      "difficulty_modifier": 2.4,
+      "objective": "Descend into the deepest archive."
+    },
+    {
+      "id": "crownline_citadel",
+      "name": "Crownline Citadel",
+      "chapter": 5,
+      "order": 9,
+      "description": "The final procession to the fracture throne.",
+      "bg": {
+        "primary": "#0A0A14",
+        "accent": "#FFE38A",
+        "mid": "#111126",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.04, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.15, "color": "#111126", "shapes": ["throne_pillars"]},
+        {"layer": "near", "speed": 0.3, "color": "#1A1630", "shapes": ["chandelier_fragments"]}
+      ],
+      "ambience": {
+        "particles": "golden_sparkle",
+        "color_wash": ["#FFE38A", "#FF79C6"],
+        "intensity": 0.05
+      },
+      "boss_id": "midnight_forum",
+      "enemy_pool": ["paparazzi_rig", "trending_executor", "archive_warden", "reply_hydra"],
+      "difficulty_modifier": 2.6,
+      "objective": "Push to the fracture throne."
+    },
+    {
+      "id": "throne_room",
+      "name": "Fracture Throne",
+      "chapter": 5,
+      "order": 10,
+      "description": "The final confrontation. End of story.",
+      "bg": {
+        "primary": "#0A0A14",
+        "accent": "#FF4FA3",
+        "mid": "#1A1630",
+        "far": "#0A0A14"
+      },
+      "parallax": [
+        {"layer": "far", "speed": 0.03, "color": "#0A0A14"},
+        {"layer": "mid", "speed": 0.12, "color": "#111126", "shapes": ["broken_crown"]},
+        {"layer": "near", "speed": 0.25, "color": "#1A1630", "shapes": ["void_crystals"]}
+      ],
+      "ambience": {
+        "particles": "void_dust",
+        "color_wash": ["#FF4FA3", "#FFE38A", "#46D8FF"],
+        "intensity": 0.1,
+        "effect": "chaos"
+      },
+      "boss_id": "the_disbander",
+      "enemy_pool": ["blacklist_duelist", "reply_hydra", "trending_executor", "paparazzi_rig"],
+      "difficulty_modifier": 3.0,
+      "objective": "Face the Disbander and reclaim the stage."
+    }
+  ],
+  "worlds": [
+    {
+      "id": "world_1",
+      "name": "Chapter 1: Neon Night",
+      "stages": ["neon_lobby", "neon_lobby_2"],
+      "theme": "urban_princess"
+    },
+    {
+      "id": "world_2",
+      "name": "Chapter 2: Mirror World",
+      "stages": ["mall_mirrors", "mall_mirrors_2"],
+      "theme": "dreamy_reflection"
+    },
+    {
+      "id": "world_3",
+      "name": "Chapter 3: Dead Signal",
+      "stages": ["broadcast_ruins", "broadcast_ruins_2"],
+      "theme": "glitch_ruin"
+    },
+    {
+      "id": "world_4",
+      "name": "Chapter 4: Lost Files",
+      "stages": ["archive_understage", "archive_understage_2"],
+      "theme": "data_gothic"
+    },
+    {
+      "id": "world_5",
+      "name": "Chapter 5: Crown Fall",
+      "stages": ["crownline_citadel", "throne_room"],
+      "theme": "royal_ruin"
+    }
+  ]
+}

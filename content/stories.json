@@ -1,0 +1,144 @@
+{
+  "intro_slides": [
+    {
+      "title": "The Stage-Network Fractures",
+      "body": "On comeback night, the city's attention economy mutates into a haunted stage-net.",
+      "icon": "crown"
+    },
+    {
+      "title": "Reclaim the Spotlight",
+      "body": "The idols must reclaim the spotlight shard by shard.",
+      "icon": "star"
+    },
+    {
+      "title": "Choose Your Idol",
+      "body": "Miho, Hyunju, Sujin, or Sohee - each with unique abilities.",
+      "icon": "heart"
+    },
+    {
+      "title": "Survive the Waves",
+      "body": "Defeat enemies, collect XP, and survive as long as you can.",
+      "icon": "bolt"
+    },
+    {
+      "title": "Bosses Await",
+      "body": "Defeat bosses to earn powerful charms and progress through chapters.",
+      "icon": "crown"
+    }
+  ],
+  "mid_run_popups": [
+    {
+      "trigger": "first_kill",
+      "text": "The crowd starts to notice you...",
+      "speaker": null
+    },
+    {
+      "trigger": "level_5",
+      "text": "Your first charm slot opens!",
+      "speaker": "System"
+    },
+    {
+      "trigger": "stage_2",
+      "text": "Chapter 2 begins. The reflections grow hostile.",
+      "speaker": null
+    },
+    {
+      "trigger": "stage_3",
+      "text": "The signal interference intensifies...",
+      "speaker": null
+    },
+    {
+      "trigger": "first_boss",
+      "text": "WARNING: Boss detected!",
+      "speaker": "System"
+    },
+    {
+      "trigger": "boss_defeat",
+      "text": "Boss defeated! Choose a charm reward.",
+      "speaker": "System"
+    },
+    {
+      "trigger": "half_hp",
+      "text": "Stay focused! You can do this!",
+      "speaker": null
+    },
+    {
+      "trigger": "combo_10",
+      "text": "Combo mastery! Keep it up!",
+      "speaker": "System"
+    },
+    {
+      "trigger": "stage_5",
+      "text": "Final chapter. The throne awaits.",
+      "speaker": null
+    }
+  ],
+  "boss_intros": {
+    "queen_of_clickbait": {
+      "quote": "Every crown has a scandal.",
+      "mood": "sassy"
+    },
+    "mr_algorithm": {
+      "quote": "I decide what they see.",
+      "mood": "cold"
+    },
+    "director_cut": {
+      "quote": "Say it again, but louder.",
+      "mood": "angry"
+    },
+    "glass_prince": {
+      "quote": "Reflection is a weapon.",
+      "mood": "elegant"
+    },
+    "midnight_forum": {
+      "quote": "Consensus becomes cage.",
+      "mood": "ominous"
+    },
+    "the_disbander": {
+      "quote": "End of story.",
+      "mood": "final"
+    }
+  },
+  "lore_cards": [
+    "The city trends in cycles; crowns are just cached attention.",
+    "A fan-light can guide or blind depending on who holds it.",
+    "Every rumor leaves a footprint in the signal fog.",
+    "Archived songs still hum under the stage floor.",
+    "They said princesses wait to be saved. They recompiled the script.",
+    "A perfect image cracks fastest under live lights.",
+    "The loudest boos become bass when synced.",
+    "Tiaras are antennas for courage, not approval.",
+    "In this city, silence is a stealth mechanic.",
+    "Final boss truth: disbandment is a narrative, not fate.",
+    "Crowns are cached attention; threads are trauma bonds.",
+    "The louder the noise, the emptier the signal.",
+    "Every follow is a contract, every like a leash.",
+    "They came for the spotlight but found the shadows instead."
+  ],
+  "idol_quotes": {
+    "miho": [
+      "My flames will protect SUPERNOVA forever~",
+      "Ready to cause some trouble?",
+      "Fox fire, ignite!",
+      "You can't handle my charm!"
+    ],
+    "hyunju": [
+      "I feel everything... and I'll share it all~",
+      "Let's dream together~",
+      "Feel the heartbeat of the crowd!",
+      "Emotions are my weapons!"
+    ],
+    "sujin": [
+      "Calculated. Precise. ...and fabulous.",
+      "Data doesn't lie, but I might.",
+      "Algorithm, execute!",
+      "Let's optimize this situation."
+    ],
+    "sohee": [
+      "I'm scared... but I won't let you down.",
+      "I'll protect everyone!",
+      "Butterfly, spread your wings!",
+      "This is my stage now."
+    ]
+  }
+}
