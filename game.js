@@ -1391,7 +1391,6 @@ const BOSS_TYPES = [
       intro:'End of story.', telegraphs:['phase_tear','void_wedge'] },
 ];
 
-let nextBossTime = 3600, bossesKilled = 0;
 let utilityUses = 0, ultActivations = 0;
 let currentArena = null; // Set during boss encounter
 
