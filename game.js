@@ -22,31 +22,33 @@ uiCanvas.height = UH;
 // Runtime content + UI tokens
 const CONTENT = window.SUPERNOVA_CONTENT || {};
 const UI = {
-    bg: CONTENT.uiTokens?.bg || '#0A0A14',
+    bg: '#0A0A14',            // dark — gameplay world only
     bgStage: '#111126',
-    panel: CONTENT.uiTokens?.panel || '#1A1630',
-    panelAlt: CONTENT.uiTokens?.panelAlt || '#241B3F',
-    surfaceCard: '#2F2352',
-    surfaceCardSoft: '#3A2C62',
-    surfaceChip: '#4A3774',
+    panel: '#FFE8F0',          // baby pink
+    panelAlt: '#FFD4E8',       // dusty rose
+    surfaceCard: '#F0D0FF',    // light lavender
+    surfaceCardSoft: '#F8E0FF',
+    surfaceChip: '#FFD0E0',
     surfaceChrome: '#C8D6FF',
-    text: CONTENT.uiTokens?.text || '#FFF6FF',
+    text: '#FFF6FF',
     textSecondary: '#D6C5F3',
-    textMuted: CONTENT.uiTokens?.textMuted || '#A694C7',
+    textMuted: '#9A6080',      // muted on pastel
     textInverse: '#1A1230',
-    pink: CONTENT.uiTokens?.brandPink || '#FF79C6',
-    rose: CONTENT.uiTokens?.brandRose || '#FF4FA3',
-    lilac: CONTENT.uiTokens?.brandLilac || '#B98CFF',
+    textDark: '#5A2040',       // dark rose text for pastel backgrounds
+    textDarkMuted: '#9A6080',  // muted text on pastel
+    pink: '#FF79C6',
+    rose: '#FF4FA3',
+    lilac: '#B98CFF',
     violet: '#8F66FF',
     mint: '#89FFD1',
-    cyan: CONTENT.uiTokens?.brandCyan || '#6DE6FF',
-    success: CONTENT.uiTokens?.success || '#77F7BF',
-    danger: CONTENT.uiTokens?.danger || '#FF4C7D',
-    warning: CONTENT.uiTokens?.warning || '#FFB347',
+    cyan: '#6DE6FF',
+    success: '#77F7BF',
+    danger: '#FF4C7D',
+    warning: '#FFB347',
     heal: '#89FFD1',
     info: '#78C7FF',
     cooldown: '#7A6B99',
-    quest: CONTENT.uiTokens?.quest || '#FFE38A',
+    quest: '#FFE38A',
     motifHeart: '#FF93C8',
     motifCrown: '#FFE38A',
     motifRibbon: '#FF8FCF',
@@ -54,11 +56,17 @@ const UI = {
     motifSpike: '#A7A0C8',
     motifGlitch: '#46D8FF',
     scrim: 'rgba(8, 8, 16, 0.78)',
-    panelScrim: 'rgba(21, 15, 40, 0.84)',
+    panelScrim: 'rgba(255, 220, 240, 0.82)',  // pastel pink scrim
     overlayCooldown: 'rgba(16, 13, 28, 0.65)',
     dangerGlow: 'rgba(255, 76, 125, 0.35)',
     focusGlow: 'rgba(109, 230, 255, 0.3)',
     borderUI: '#E8D8FF',
+    // Pastel kawaii tokens
+    bgPastel: '#FFF0F5',       // lavender blush — menu screen bg
+    bgPastelAlt: '#FFE4EF',    // slightly warmer pink bg
+    windowBorder: '#FF8CB0',   // thick retro window border
+    windowTitleBar: '#FFB0CC', // title bar fill
+    windowFill: '#FFF4F8',     // window interior (near-white pink)
 };
 
 // === PIXEL UI TOOLKIT — Princess Goth 16-bit ===
@@ -72,7 +80,7 @@ function sans(ctx, text, x, y, fill, size, align, weight) {
 function sansBold(ctx, text, x, y, fill, size, align) { sans(ctx, text, x, y, fill, size, align, 800); }
 
 function pixel(ctx, text, x, y, fill, size, align) {
-    ctx.font = `${size}px 'Press Start 2P', monospace`;
+    ctx.font = `${size}px 'Silkscreen', monospace`;
     ctx.textAlign = align || 'left'; ctx.textBaseline = 'top';
     ctx.fillStyle = fill; ctx.fillText(text, x, y);
 }
@@ -232,61 +240,71 @@ const PALETTES = {
 
 
 function drawPixelPanel(ctx, x, y, w, h, opts = {}) {
-    const fill = opts.fill || UI.panel;
-    const border = opts.border || UI.textMuted;
-    // Outer glow (subtle colored shadow behind panel)
-    if (opts.glow || opts.ribbon) {
-        const glowCol = opts.glow || opts.ribbon || border;
-        ctx.save();
-        ctx.globalAlpha = 0.15;
-        ctx.fillStyle = glowCol;
-        ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
-        ctx.globalAlpha = 0.08;
-        ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
-        ctx.restore();
-    }
+    const fill = opts.fill || UI.windowFill;
+    const border = opts.border || UI.windowBorder;
+    const titleBarH = 18;
+    const hasTitle = opts.title && !opts.noTitleBar;
+
+    // Soft pink drop shadow (2px offset down-right)
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = '#FF8CB0';
+    ctx.fillRect(x + 2, y + 2, w, h);
+    ctx.restore();
+
+    // Main window fill
     ctx.fillStyle = fill;
     ctx.fillRect(x, y, w, h);
+
+    // Thick border (2px)
     ctx.strokeStyle = border;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
-    // Double border for depth (inner highlight line)
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
-    // Lace corner decorations — princessy pixel notches
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+
+    // Inner highlight — 1px white line along top-left inner edge for depth
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillRect(x + 3, y + (hasTitle ? titleBarH + 3 : 3), w - 6, 1);
+    ctx.fillRect(x + 3, y + (hasTitle ? titleBarH + 3 : 3), 1, h - (hasTitle ? titleBarH + 6 : 6));
+
+    // Lace corner notches on pastel bg
     if (!opts.noLace && w > 20 && h > 20) {
         ctx.fillStyle = border;
-        const cs = Math.min(5, Math.floor(w / 8)); // corner size scales with panel
-        // Top-left lace
+        const cs = Math.min(5, Math.floor(w / 8));
         ctx.fillRect(x, y, cs, 1); ctx.fillRect(x, y, 1, cs);
         ctx.fillRect(x + 2, y + 2, 2, 1); ctx.fillRect(x + 2, y + 2, 1, 2);
-        // Top-right lace
         ctx.fillRect(x + w - cs, y, cs, 1); ctx.fillRect(x + w - 1, y, 1, cs);
         ctx.fillRect(x + w - 4, y + 2, 2, 1); ctx.fillRect(x + w - 3, y + 2, 1, 2);
-        // Bottom-left lace
         ctx.fillRect(x, y + h - 1, cs, 1); ctx.fillRect(x, y + h - cs, 1, cs);
         ctx.fillRect(x + 2, y + h - 3, 2, 1); ctx.fillRect(x + 2, y + h - 4, 1, 2);
-        // Bottom-right lace
         ctx.fillRect(x + w - cs, y + h - 1, cs, 1); ctx.fillRect(x + w - 1, y + h - cs, 1, cs);
         ctx.fillRect(x + w - 4, y + h - 3, 2, 1); ctx.fillRect(x + w - 3, y + h - 4, 1, 2);
     }
-    if (opts.ribbon) {
-        ctx.fillStyle = opts.ribbon;
-        ctx.fillRect(x + 6, y - 5, Math.min(120, w - 12), 7);
-        // Ribbon notch
-        ctx.fillStyle = fill;
-        ctx.fillRect(x + 6 + Math.min(120, w - 12) - 4, y - 5, 4, 2);
-    }
-    if (opts.spikes) {
-        ctx.fillStyle = opts.spikes;
-        for (let i = 0; i < 6; i++) ctx.fillRect(x + w - 14 + i * 2, y + 2 + i * 3, 2, 2);
-        for (let i = 0; i < 6; i++) ctx.fillRect(x + w - 14 + i * 2, y + h - 4 - i * 3, 2, 2);
+
+    // Title bar (retro OS window style)
+    if (hasTitle) {
+        ctx.fillStyle = opts.titleBarFill || UI.windowTitleBar;
+        ctx.fillRect(x + 2, y + 2, w - 4, titleBarH);
+        // Title bar bottom line
+        ctx.fillStyle = border;
+        ctx.fillRect(x + 2, y + 2 + titleBarH, w - 4, 1);
+        // Window control dots (red-pink, yellow, green)
+        ctx.fillStyle = '#FF6B8A';
+        ctx.beginPath(); ctx.arc(x + 14, y + 11, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#FFD166';
+        ctx.beginPath(); ctx.arc(x + 24, y + 11, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#77DD77';
+        ctx.beginPath(); ctx.arc(x + 34, y + 11, 3, 0, Math.PI * 2); ctx.fill();
+        // Title text
+        ctx.font = `8px 'Silkscreen', monospace`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillStyle = UI.textDark;
+        ctx.fillText(opts.title, x + w / 2, y + 5);
     }
 }
 
 function drawHeartChip(ctx, x, y, text) {
-    drawPixelPanel(ctx, x, y, 72, 18, { fill: UI.panelAlt, border: UI.pink, ribbon: UI.pink });
-    sansBold(ctx, '♥ ' + text, x + 8, y + 4, UI.text, 8);
+    drawPixelPanel(ctx, x, y, 72, 18, { fill: UI.panelAlt, border: UI.pink, noLace: true, noTitleBar: true });
+    sansBold(ctx, '♥ ' + text, x + 8, y + 4, UI.textDark, 8);
 }
 
 function getSkillCooldownRatio(skillId) {
@@ -298,7 +316,7 @@ function getSkillCooldownRatio(skillId) {
 
 // === SPRITE DATA — fully unique per character (hair, face, outfit, boots) ===
 const SPRITE_DATA = {
-    miho: [ // Fox Princess — blonde twin-tail, fox ears, pink frilly idol dress
+    miho: [ // Fox Princess — pink twin-tail, fox ears, pink frilly idol dress
         '04D003333300D400', // fox ear tips (4=inner, D=glow)
         '43D33333333D3D40', // ears + luxurious golden crown
         '4333D333333DD340', // highlight streaks in mane
@@ -1857,12 +1875,16 @@ function drawUI_HUD() {
     if (!player) return;
     const cd = player.charDef;
 
-    // === TOP LEFT: identity plate ===
-    drawPixelPanel(uctx, 10, 8, 138, 34, { fill: UI.panelAlt, border: UI.pink, ribbon: UI.pink });
-    sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 10);
-    sans(uctx, cd.hashtag, 18, 28, UI.textMuted, 8);
+    // HUD panels use semi-transparent pastel over dark game world
+    const hudFill = 'rgba(255, 240, 245, 0.88)';
+    const hudBorder = UI.windowBorder;
 
-    // HP bar — pixel panel frame with colored fill
+    // === TOP LEFT: identity plate (pastel panel) ===
+    drawPixelPanel(uctx, 10, 8, 138, 34, { fill: hudFill, border: UI.pink, noLace: true, noTitleBar: true });
+    sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.textDark, 10);
+    sans(uctx, cd.hashtag, 18, 28, UI.textDarkMuted, 8);
+
+    // HP bar — pastel panel frame with colored fill
     const hpR = player.hp/player.maxHp;
     const hpCol = hpR>0.5 ? UI.motifHeart : (hpR>0.25 ? UI.warning : UI.danger);
     // Heart icon prefix
@@ -1871,85 +1893,77 @@ function drawUI_HUD() {
     uctx.fillRect(153, 13, 5, 1);
     uctx.fillRect(154, 14, 3, 1);
     uctx.fillRect(155, 15, 1, 1);
-    // HP bar track
-    uctx.fillStyle = UI.panelAlt; uctx.fillRect(162, 11, 110, 10);
+    // HP bar track (pastel)
+    uctx.fillStyle = hudFill; uctx.fillRect(162, 11, 110, 10);
     uctx.strokeStyle = hpCol + '80'; uctx.lineWidth = 1;
     uctx.strokeRect(161.5, 10.5, 111, 11);
-    // HP fill with pulse when low
     const hpPulse = hpR < 0.3 ? Math.sin(gameTime * 0.15) * 0.15 + 0.85 : 1;
     uctx.globalAlpha = hpPulse;
     uctx.fillStyle = hpCol; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 10);
-    // HP highlight shine
     uctx.fillStyle = 'rgba(255,255,255,0.2)'; uctx.fillRect(162, 11, Math.ceil(110 * hpR), 3);
     uctx.globalAlpha = 1;
-    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp, 216, 11, UI.text, 8, 'center');
+    sansBold(uctx, Math.ceil(player.hp) + '/' + player.maxHp, 216, 11, UI.textDark, 8, 'center');
 
-    // XP bar — styled with lilac fill
+    // XP bar
     const xpR = player.xp/player.xpToNext;
-    uctx.fillStyle = UI.panelAlt; uctx.fillRect(162, 27, 110, 6);
+    uctx.fillStyle = hudFill; uctx.fillRect(162, 27, 110, 6);
     uctx.strokeStyle = UI.lilac + '40'; uctx.lineWidth = 1;
     uctx.strokeRect(161.5, 26.5, 111, 7);
     uctx.fillStyle = UI.lilac; uctx.fillRect(162, 27, Math.ceil(110 * xpR), 6);
     uctx.fillStyle = 'rgba(255,255,255,0.2)'; uctx.fillRect(162, 27, Math.ceil(110 * xpR), 2);
-    sans(uctx, 'LV ' + player.level, 158, 36, UI.textSecondary, 9, 'left', 600);
+    sans(uctx, 'LV ' + player.level, 158, 36, UI.textDark, 9, 'left', 600);
 
-    // Timer — pixel font, right-aligned
+    // Timer — pastel panel
+    drawPixelPanel(uctx, UW - 90, 4, 80, 20, { fill: hudFill, border: hudBorder, noLace: true, noTitleBar: true });
     const secs = Math.floor(survivalTime/60);
     const mins = Math.floor(secs/60);
     const secStr = (secs%60).toString().padStart(2,'0');
-    pixel(uctx, mins + ':' + secStr, UW - 20, 6, UI.text, 10, 'right');
+    pixel(uctx, mins + ':' + secStr, UW - 50, 8, UI.textDark, 10, 'center');
     // Wave display
-    drawPixelPanel(uctx, UW - 110, 28, 90, 20, { fill: UI.panelAlt, border: UI.textMuted, noLace: true });
-    pixel(uctx, 'EP.' + difficulty, UW - 104, 32, 'rgba(255,255,255,0.5)', 8);
+    drawPixelPanel(uctx, UW - 110, 28, 90, 20, { fill: hudFill, border: hudBorder, noLace: true, noTitleBar: true });
+    pixel(uctx, 'EP.' + difficulty, UW - 104, 32, UI.textDarkMuted, 8);
 
-    // Followers — chip panel
+    // Followers — pastel heart chip
     drawHeartChip(uctx, UW - 166, 8, formatNum(followers));
-    sans(uctx, 'follows', UW - 92, 13, UI.textMuted, 8);
+    sans(uctx, 'follows', UW - 92, 13, UI.textDarkMuted, 8);
 
-    // KO — bottom of top cluster
-    sans(uctx, killCount + ' KOs', UW - 152, 30, 'rgba(255,255,255,0.35)', 9, 'left', 600);
+    // KO
+    sans(uctx, killCount + ' KOs', UW - 152, 30, UI.textDarkMuted, 9, 'left', 600);
 
-    // Combo — pixel panel with glow when active
+    // Combo — pastel panel with accent border glow
     if (comboCount >= 3) {
         const comboCol = comboCount>=25 ? UI.warning : (comboCount>=10 ? UI.rose : UI.pink);
-        drawPixelPanel(uctx, UW/2 - 80, 56, 160, 44, { fill: UI.panel, border: comboCol, glow: comboCol, noLace: true });
+        drawPixelPanel(uctx, UW/2 - 80, 56, 160, 44, { fill: hudFill, border: comboCol, noLace: true, noTitleBar: true });
         pixel(uctx, comboCount + 'x', UW/2, 60, comboCol, 12, 'center');
-        pixel(uctx, comboCount >= 25 ? 'UNREAL' : (comboCount >= 10 ? 'ON FIRE' : 'COMBO'), UW/2, 82, 'rgba(255,255,255,0.4)', 6, 'center');
+        pixel(uctx, comboCount >= 25 ? 'UNREAL' : (comboCount >= 10 ? 'ON FIRE' : 'COMBO'), UW/2, 82, UI.textDarkMuted, 6, 'center');
     }
 
-    // === BOSS — editorial callout ===
+    // === BOSS — danger themed but with pastel interior ===
     const activeBoss = enemies.find(e => e.boss);
     if (activeBoss) {
         const bossY = comboCount >= 3 ? 106 : 68;
-        drawPixelPanel(uctx, UW/2 - 202, bossY, 404, 44, { fill: 'rgba(56,19,43,0.9)', border: UI.danger, spikes: UI.warning });
+        drawPixelPanel(uctx, UW/2 - 202, bossY, 404, 44, { fill: hudFill, border: UI.danger, noTitleBar: true });
         pixel(uctx, activeBoss.bossType.name, UW/2, bossY + 6, UI.danger, 8, 'center');
         const bhr = activeBoss.hp / activeBoss.maxHp;
-        uctx.fillStyle = 'rgba(255,255,255,0.08)'; uctx.fillRect(UW/2 - 180, bossY + 26, 360, 6);
+        uctx.fillStyle = 'rgba(255,200,220,0.3)'; uctx.fillRect(UW/2 - 180, bossY + 26, 360, 6);
         uctx.fillStyle = UI.danger; uctx.fillRect(UW/2 - 180, bossY + 26, 360 * bhr, 6);
-        sans(uctx, Math.ceil(activeBoss.hp) + '/' + activeBoss.maxHp, UW/2, bossY + 34, UI.textMuted, 8, 'center', 500);
+        sans(uctx, Math.ceil(activeBoss.hp) + '/' + activeBoss.maxHp, UW/2, bossY + 34, UI.textDarkMuted, 8, 'center', 500);
     }
 
     if (bossIntroTimer > 0) {
         const pulse = 0.8 + Math.sin(gameTime * 0.08) * 0.2;
         uctx.globalAlpha = pulse;
-        drawPixelPanel(uctx, UW/2 - 200, 134, 400, 40, { fill: UI.panel, border: UI.warning, ribbon: UI.warning, spikes: UI.danger });
-        // Chrome frame + warning stripe per telegraph_patterns.boss_intro
-        uctx.fillStyle = UI.surfaceChrome;
+        drawPixelPanel(uctx, UW/2 - 200, 134, 400, 40, { fill: hudFill, border: UI.warning, noTitleBar: true });
+        uctx.fillStyle = UI.warning;
         uctx.fillRect(UW/2 - 199, 135, 398, 2);
         uctx.fillRect(UW/2 - 199, 172, 398, 2);
-        // Warning stripe accents (alternating spike pattern)
-        uctx.fillStyle = UI.motifSpike;
-        for (let si = 0; si < 20; si++) {
-            uctx.fillRect(UW/2 - 198 + si * 20, 135, 10, 2);
-            uctx.fillRect(UW/2 - 188 + si * 20, 172, 10, 2);
-        }
-        pixel(uctx, 'BOSS INCOMING', UW/2 - 178, 141, UI.surfaceChrome, 8);
-        pixel(uctx, bossIntroText, UW/2, 152, UI.text, 8, 'center');
+        pixel(uctx, 'BOSS INCOMING', UW/2 - 178, 141, UI.danger, 8);
+        pixel(uctx, bossIntroText, UW/2, 152, UI.textDark, 8, 'center');
         uctx.globalAlpha = 1;
         bossIntroTimer--;
     }
 
-    // === BOTTOM: Skill icons — pixel icon rail ===
+    // === BOTTOM: Skill icons — pastel panel backgrounds ===
     const cd2 = CHARACTERS[player.charIdx];
     const allSkills = [...cd2.skills, ...SHARED_POWERS];
     const activeSkills = allSkills.filter(sk => player.powers[sk.id] > 0);
@@ -1962,9 +1976,8 @@ function drawUI_HUD() {
         activeSkills.forEach((sk, idx) => {
             const ix = startX + idx * (iconSize + 6);
             const lv = player.powers[sk.id];
-            drawPixelPanel(uctx, ix, iconY, iconSize, iconSize + 8, { fill: UI.panelAlt, border: UI.lilac });
+            drawPixelPanel(uctx, ix, iconY, iconSize, iconSize + 8, { fill: hudFill, border: UI.lilac, noTitleBar: true });
 
-            // Pixel icon instead of emoji — drawn at 2x for visibility
             const iconInfo = SKILL_ICON_MAP[sk.id];
             if (iconInfo) {
                 const iconCanvas = getPixelIcon(iconInfo.icon, iconInfo.c1, iconInfo.c2);
@@ -1975,10 +1988,9 @@ function drawUI_HUD() {
                 }
             } else {
                 uctx.font = '16px serif'; uctx.textAlign='center'; uctx.textBaseline='top';
-                uctx.fillStyle=UI.text; uctx.fillText(sk.emoji, ix + 17, iconY + 6);
+                uctx.fillStyle=UI.textDark; uctx.fillText(sk.emoji, ix + 17, iconY + 6);
             }
 
-            // Level gems — diamond chips below icon
             const maxGems = Math.max(lv, 4);
             const gemsToShow = Math.min(maxGems, 7);
             const gemCenterX = ix + iconSize / 2;
@@ -1987,7 +1999,6 @@ function drawUI_HUD() {
                 drawGemChip(uctx, gemStartX + d * 7, iconY + iconSize + 1, d < lv, UI.motifCrown);
             }
 
-            // Cooldown wipe — vertical dark wipe from top
             const cdRatio = getSkillCooldownRatio(sk.id);
             if (cdRatio > 0.01) {
                 const wipeH = Math.floor((iconSize + 8) * cdRatio);
@@ -2001,17 +2012,17 @@ function drawUI_HUD() {
         });
     }
 
-    // === BOTTOM-LEFT: Fan count panel ===
-    drawPixelPanel(uctx, 12, UH - 36, 120, 22, { fill: UI.panelAlt, border: UI.pink, noLace: true });
-    pixel(uctx, formatNum(followers) + ' FANS', 22, UH - 30, UI.text, 7);
+    // === BOTTOM-LEFT: Fan count (pastel panel) ===
+    drawPixelPanel(uctx, 12, UH - 36, 120, 22, { fill: hudFill, border: UI.pink, noLace: true, noTitleBar: true });
+    pixel(uctx, formatNum(followers) + ' FANS', 22, UH - 30, UI.textDark, 7);
 
-    // === RIGHT: Notifications as pixel panel toasts ===
+    // === RIGHT: Notifications as pastel toast panels ===
     let ny = 70;
     notifications.slice(-4).forEach(n => {
         const alpha = Math.min(1, n.life / 30);
         uctx.globalAlpha = alpha;
-        drawPixelPanel(uctx, UW - 240, ny, 226, 28, { fill: UI.panel, border: n.color || UI.textMuted, noLace: true });
-        sans(uctx, n.text, UW - 232, ny + 8, 'rgba(255,255,255,0.75)', 8);
+        drawPixelPanel(uctx, UW - 240, ny, 226, 28, { fill: hudFill, border: n.color || hudBorder, noLace: true, noTitleBar: true });
+        sans(uctx, n.text, UW - 232, ny + 8, UI.textDark, 8);
         ny += 34;
     });
     uctx.globalAlpha = 1;
@@ -2020,17 +2031,17 @@ function drawUI_HUD() {
     if (trendingText) {
         const tpulse = Math.sin(gameTime * 0.04) * 0.12 + 0.88;
         uctx.globalAlpha = tpulse;
-        pixel(uctx, trendingText, 16, UH - 58, 'rgba(255,255,255,0.2)', 6);
+        pixel(uctx, trendingText, 16, UH - 58, 'rgba(255,255,255,0.3)', 6);
         uctx.globalAlpha = 1;
     }
 
-    // Quest / story access hint
-    drawPixelPanel(uctx, UW - 248, UH - 50, 236, 24, { fill: UI.panel, border: UI.quest, ribbon: UI.quest });
+    // Quest / story access hint (pastel panel)
+    drawPixelPanel(uctx, UW - 248, UH - 50, 236, 24, { fill: hudFill, border: UI.quest, noLace: true, noTitleBar: true });
     const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
-    sansBold(uctx, '[Q] QUEST', UW - 238, UH - 42, UI.bg, 8);
-    sans(uctx, chapter ? chapter.title : 'CHAPTER', UW - 170, UH - 41, UI.text, 8);
+    sansBold(uctx, '[Q] QUEST', UW - 238, UH - 42, UI.textDark, 8);
+    sans(uctx, chapter ? chapter.title : 'CHAPTER', UW - 170, UH - 41, UI.textDark, 8);
 
-    // Fan chants (world-space) — pixel font
+    // Fan chants (world-space)
     fanChants.forEach(f => {
         const fx = (f.x - camX) * S, fy = (f.y - camY) * S;
         uctx.globalAlpha = Math.min(1, f.life / 15);
@@ -2038,7 +2049,7 @@ function drawUI_HUD() {
     });
     uctx.globalAlpha = 1;
 
-    // Floating texts (world-space) — with damage/heal prefix sprites
+    // Floating texts (world-space)
     floatingTexts.forEach(t => {
         const tx = (t.x - camX) * S, ty = (t.y - camY) * S;
         uctx.globalAlpha = Math.min(1, t.life / 15);
@@ -2068,6 +2079,22 @@ function formatNum(n) {
     return n.toString();
 }
 
+// === FLOATING PIXEL HEARTS DECORATION (menu screens) ===
+function drawFloatingHearts(ctx, w, h, t) {
+    ctx.fillStyle = UI.windowBorder;
+    for (let i = 0; i < 12; i++) {
+        const hx = (i * 97 + t * 0.3) % w;
+        const hy = (i * 71 + t * 0.2) % h;
+        ctx.globalAlpha = 0.08 + Math.sin(t * 0.02 + i) * 0.04;
+        // tiny 5px heart
+        ctx.fillRect(hx, hy, 1, 1); ctx.fillRect(hx + 2, hy, 1, 1);
+        ctx.fillRect(hx - 1, hy + 1, 5, 1);
+        ctx.fillRect(hx, hy + 2, 3, 1);
+        ctx.fillRect(hx + 1, hy + 3, 1, 1);
+    }
+    ctx.globalAlpha = 1;
+}
+
 // ================================================================
 // UI SCREENS (Title, Select, Level Up, Game Over)
 // ================================================================
@@ -2075,118 +2102,112 @@ function formatNum(n) {
 function drawUI_Title() {
     uctx.clearRect(0, 0, UW, UH);
 
-    // Background fill + animated pink/cyan wash
-    uctx.fillStyle = UI.bg; uctx.fillRect(0, 0, UW, UH);
-    const wash1 = Math.sin(gameTime * 0.01) * 0.5 + 0.5;
-    const wash2 = Math.sin(gameTime * 0.01 + 2) * 0.5 + 0.5;
-    uctx.globalAlpha = 0.04;
-    uctx.fillStyle = UI.pink;
-    uctx.fillRect(0, 0, UW * wash1, UH);
-    uctx.fillStyle = UI.cyan;
-    uctx.fillRect(UW * (1 - wash2), 0, UW * wash2, UH);
-    uctx.globalAlpha = 1;
+    // Pastel background
+    uctx.fillStyle = UI.bgPastel; uctx.fillRect(0, 0, UW, UH);
 
-    // === TITLE PANEL ===
-    drawPixelPanel(uctx, 180, 30, 600, 130, { fill: UI.panel, border: UI.motifCrown, ribbon: UI.motifCrown, glow: UI.pink });
-    // Crown icons flanking title
-    const crownL = getPixelIcon('crown', UI.motifCrown, '#fff');
-    const crownR = getPixelIcon('crown', UI.motifCrown, '#fff');
-    if (crownL) { uctx.imageSmoothingEnabled = false; uctx.drawImage(crownL, 200, 50, 32, 32); uctx.imageSmoothingEnabled = true; }
-    if (crownR) { uctx.imageSmoothingEnabled = false; uctx.drawImage(crownR, 728, 50, 32, 32); uctx.imageSmoothingEnabled = true; }
-    pixel(uctx, 'SUPERNOVA', UW/2, 48, UI.text, 12, 'center');
-    pixel(uctx, 'STAGE SURVIVORS', UW/2, 80, UI.pink, 8, 'center');
-    sans(uctx, 'K-pop idols vs the darkness. Pick your champion.', UW/2, 110, UI.textMuted, 10, 'center', 400);
+    // Floating hearts decoration
+    drawFloatingHearts(uctx, UW, UH, gameTime);
 
-    // === CHARACTER LINEUP — 4 pixel panel cards ===
+    // === TITLE WINDOW (retro OS) ===
+    drawPixelPanel(uctx, 180, 20, 600, 140, { fill: UI.windowFill, border: UI.windowBorder, title: 'SUPERNOVA' });
+    pixel(uctx, 'STAGE SURVIVORS', UW/2, 58, UI.pink, 10, 'center');
+    sans(uctx, 'K-pop idols vs the darkness. Pick your champion.', UW/2, 90, UI.textDark, 10, 'center', 400);
+    // Heart decorations flanking
+    uctx.fillStyle = UI.motifHeart;
+    uctx.fillRect(210, 100, 1, 1); uctx.fillRect(212, 100, 1, 1);
+    uctx.fillRect(209, 101, 5, 1); uctx.fillRect(210, 102, 3, 1); uctx.fillRect(211, 103, 1, 1);
+    uctx.fillRect(738, 100, 1, 1); uctx.fillRect(740, 100, 1, 1);
+    uctx.fillRect(737, 101, 5, 1); uctx.fillRect(738, 102, 3, 1); uctx.fillRect(739, 103, 1, 1);
+
+    // === CHARACTER CARDS — 4 cute OS windows ===
     gctx.clearRect(0, 0, PW, PH);
     const charIDs = ['miho','hyunju','sujin','sohee'];
     const charNames = ['MIHO', 'HYUNJU', 'SUJIN', 'SOHEE'];
     const charTitles = ['The Gumiho', 'The Dreamer', 'The Genius', 'Quiet Storm'];
-    const charSkillIcons = ['flame', 'heart', 'beam', 'shield'];
+    const charCardFills = ['#FFF0F5', '#FFF8F0', '#FFF0F0', '#F0F4FF'];
 
     for (let i = 0; i < 4; i++) {
         const cx = 60 + i * 220;
         const col = CHAR_COLORS[i];
-        drawPixelPanel(uctx, cx, 190, 180, 260, { fill: UI.panel, border: col, glow: col });
+        drawPixelPanel(uctx, cx, 190, 180, 260, { fill: charCardFills[i], border: col, title: charNames[i] });
 
         const scaled = getScaledSprite(charIDs[i], 6);
         if (scaled) {
             const bob = Math.sin(gameTime * 0.04 + i * 1.5) * 3;
             uctx.imageSmoothingEnabled = false;
-            uctx.drawImage(scaled, cx + 42, 206 + bob);
+            uctx.drawImage(scaled, cx + 42, 222 + bob);
             uctx.imageSmoothingEnabled = true;
         }
 
-        pixel(uctx, charNames[i], cx + 90, 345, col, 8, 'center');
-        sans(uctx, charTitles[i], cx + 90, 365, UI.textMuted, 9, 'center', 500);
-
-        // Signature skill icon decoration
-        const skIcon = getPixelIcon(charSkillIcons[i], col, '#fff');
-        if (skIcon) {
-            uctx.imageSmoothingEnabled = false;
-            uctx.drawImage(skIcon, cx + 148, 420, 16, 16);
-            uctx.imageSmoothingEnabled = true;
-        }
+        pixel(uctx, charNames[i], cx + 90, 350, col, 8, 'center');
+        sans(uctx, charTitles[i], cx + 90, 370, UI.textDarkMuted, 9, 'center', 500);
     }
 
-    // === CONTROLS PANEL ===
-    drawPixelPanel(uctx, 230, 480, 500, 90, { fill: UI.surfaceCard, border: UI.motifLace, ribbon: UI.lilac });
-    pixel(uctx, 'HOW TO PLAY', 480, 488, UI.text, 8, 'center');
-    sans(uctx, 'WASD / Arrows = Move', 290, 516, UI.textSecondary, 10);
-    sans(uctx, 'Auto-attack = Stay alive', 290, 534, UI.textSecondary, 10);
-    sans(uctx, 'Collect gems = Level up', 530, 516, UI.textSecondary, 10);
-    sans(uctx, 'Pick powers = Get stronger', 530, 534, UI.textSecondary, 10);
+    // === CONTROLS WINDOW ===
+    drawPixelPanel(uctx, 230, 480, 500, 100, { fill: UI.windowFill, border: UI.windowBorder, title: 'HOW TO PLAY' });
+    sans(uctx, 'WASD / Arrows = Move', 290, 510, UI.textDark, 10);
+    sans(uctx, 'Auto-attack = Stay alive', 290, 530, UI.textDark, 10);
+    sans(uctx, 'Collect gems = Level up', 530, 510, UI.textDark, 10);
+    sans(uctx, 'Pick powers = Get stronger', 530, 530, UI.textDark, 10);
 
-    // === CTA ===
+    // === CTA with heart decorations ===
     const blink = Math.sin(gameTime * 0.06) * 0.2 + 0.8;
     uctx.globalAlpha = blink;
-    pixel(uctx, 'PRESS SPACE TO START', UW/2, UH - 80, UI.text, 10, 'center');
+    // Heart left of CTA
+    uctx.fillStyle = UI.pink;
+    uctx.fillRect(UW/2 - 130, UH - 77, 1, 1); uctx.fillRect(UW/2 - 128, UH - 77, 1, 1);
+    uctx.fillRect(UW/2 - 131, UH - 76, 5, 1); uctx.fillRect(UW/2 - 130, UH - 75, 3, 1); uctx.fillRect(UW/2 - 129, UH - 74, 1, 1);
+    pixel(uctx, 'PRESS SPACE TO START', UW/2, UH - 80, UI.textDark, 10, 'center');
+    // Heart right of CTA
+    uctx.fillRect(UW/2 + 127, UH - 77, 1, 1); uctx.fillRect(UW/2 + 129, UH - 77, 1, 1);
+    uctx.fillRect(UW/2 + 126, UH - 76, 5, 1); uctx.fillRect(UW/2 + 127, UH - 75, 3, 1); uctx.fillRect(UW/2 + 128, UH - 74, 1, 1);
     uctx.globalAlpha = 1;
-    sans(uctx, 'or click anywhere', UW/2, UH - 54, 'rgba(255,255,255,0.3)', 9, 'center', 400);
+    sans(uctx, 'or click anywhere', UW/2, UH - 54, UI.textDarkMuted, 9, 'center', 400);
 }
 
 function drawUI_Select() {
     uctx.clearRect(0, 0, UW, UH);
 
-    uctx.fillStyle = UI.bg; uctx.fillRect(0, 0, UW, UH);
+    // Pastel background with character accent wash
+    uctx.fillStyle = UI.bgPastel; uctx.fillRect(0, 0, UW, UH);
 
     const selChar = CHARACTERS[selectedChar];
     const selCol = CHAR_COLORS[selectedChar];
 
-    // Character color wash behind portrait area
-    uctx.globalAlpha = 0.06;
+    // Character color wash
+    uctx.globalAlpha = 0.08;
     uctx.fillStyle = selCol;
-    uctx.fillRect(0, 30, 470, 420);
-    uctx.globalAlpha = 0.03;
-    uctx.fillStyle = UI.lilac;
-    uctx.fillRect(470, 0, UW - 470, UH);
+    uctx.fillRect(0, 0, UW, UH);
     uctx.globalAlpha = 1;
 
-    // === HEADER ===
-    pixel(uctx, 'SELECT YOUR IDOL', UW/2, 14, UI.text, 10, 'center');
+    // Floating hearts
+    drawFloatingHearts(uctx, UW, UH, gameTime);
 
-    // === LEFT: Hero panel ===
-    drawPixelPanel(uctx, 30, 40, 440, 400, { fill: UI.panel, border: selCol, ribbon: selCol, glow: selCol });
+    // === HEADER ===
+    pixel(uctx, 'SELECT YOUR IDOL', UW/2, 14, UI.textDark, 10, 'center');
+
+    // === LEFT: Hero window ===
+    drawPixelPanel(uctx, 30, 40, 440, 400, { fill: UI.windowFill, border: selCol, title: selChar.name });
     const heroSprite = getScaledSprite(selChar.id, 10);
     if (heroSprite) {
         const bob = Math.sin(gameTime * 0.05) * 4;
         uctx.imageSmoothingEnabled = false;
-        uctx.drawImage(heroSprite, 80, 60 + bob);
+        uctx.drawImage(heroSprite, 80, 76 + bob);
         uctx.imageSmoothingEnabled = true;
     }
 
-    pixel(uctx, selChar.name, 50, 280, UI.text, 12);
-    pixel(uctx, selChar.title, 50, 310, selCol, 8);
+    pixel(uctx, selChar.name, 50, 290, UI.textDark, 12);
+    pixel(uctx, selChar.title, 50, 318, selCol, 8);
 
-    // Stats heart chips
-    drawHeartChip(uctx, 50, 340, 'SPD ' + selChar.stats.speed.toFixed(1));
-    drawHeartChip(uctx, 140, 340, 'HP ' + selChar.stats.hp);
-    drawHeartChip(uctx, 230, 340, 'ATK ' + selChar.stats.atk.toFixed(1));
+    // Stats heart chips on pastel bg
+    drawHeartChip(uctx, 50, 348, 'SPD ' + selChar.stats.speed.toFixed(1));
+    drawHeartChip(uctx, 140, 348, 'HP ' + selChar.stats.hp);
+    drawHeartChip(uctx, 230, 348, 'ATK ' + selChar.stats.atk.toFixed(1));
 
-    sans(uctx, selChar.desc, 50, 374, UI.textMuted, 10, 'left', 400);
-    sans(uctx, selChar.hashtag, 50, 396, 'rgba(255,255,255,0.4)', 10, 'left', 500);
+    sans(uctx, selChar.desc, 50, 382, UI.textDarkMuted, 10, 'left', 400);
+    sans(uctx, selChar.hashtag, 50, 404, UI.textDarkMuted, 10, 'left', 500);
 
-    // === RIGHT: 3 thumbnail panels ===
+    // === RIGHT: 3 thumbnail windows ===
     let thumbIdx = 0;
     const thumbPositions = [{x:530, y:40}, {x:530, y:165}, {x:530, y:290}];
     for (let i = 0; i < 4; i++) {
@@ -2194,36 +2215,34 @@ function drawUI_Select() {
         const pos = thumbPositions[thumbIdx];
         if (!pos) { thumbIdx++; continue; }
         const col = CHAR_COLORS[i];
-        drawPixelPanel(uctx, pos.x, pos.y, 400, 110, { fill: UI.panel, border: col });
+        drawPixelPanel(uctx, pos.x, pos.y, 400, 110, { fill: UI.windowFill, border: col, title: CHARACTERS[i].name });
 
         const sc = 4;
         const scaled = getScaledSprite(CHARACTERS[i].id, sc);
         if (scaled) {
             uctx.imageSmoothingEnabled = false;
-            uctx.drawImage(scaled, pos.x + 16, pos.y + 12);
+            uctx.drawImage(scaled, pos.x + 16, pos.y + 26);
             uctx.imageSmoothingEnabled = true;
         }
 
-        pixel(uctx, CHARACTERS[i].name, pos.x + 100, pos.y + 16, col, 8);
-        sans(uctx, CHARACTERS[i].title, pos.x + 100, pos.y + 36, UI.textMuted, 9, 'left', 500);
-        sans(uctx, CHARACTERS[i].desc, pos.x + 100, pos.y + 56, 'rgba(255,255,255,0.4)', 8, 'left', 400);
+        pixel(uctx, CHARACTERS[i].name, pos.x + 100, pos.y + 28, col, 8);
+        sans(uctx, CHARACTERS[i].title, pos.x + 100, pos.y + 48, UI.textDarkMuted, 9, 'left', 500);
+        sans(uctx, CHARACTERS[i].desc, pos.x + 100, pos.y + 68, UI.textDarkMuted, 8, 'left', 400);
         thumbIdx++;
     }
 
-    // Browse hint panel
-    drawPixelPanel(uctx, 530, 410, 400, 26, { fill: UI.panelAlt, border: UI.textMuted, noLace: true });
-    sans(uctx, 'A/D to browse  |  SPACE or click hero to start', 540, 416, 'rgba(255,255,255,0.45)', 9, 'left', 500);
+    // Browse hint
+    drawPixelPanel(uctx, 530, 410, 400, 26, { fill: UI.panelAlt, border: UI.windowBorder, noLace: true, noTitleBar: true });
+    sans(uctx, 'A/D to browse  |  SPACE or click hero to start', 540, 416, UI.textDarkMuted, 9, 'left', 500);
 
-    // === BOTTOM: Skill tree panel ===
-    drawPixelPanel(uctx, 30, 466, 900, 230, { fill: UI.panel, border: selCol, ribbon: selCol });
-    pixel(uctx, 'SKILL TREE', 40, 474, UI.text, 8);
-    sans(uctx, selChar.name, 160, 476, selCol, 9, 'left', 600);
+    // === BOTTOM: Skill tree window ===
+    drawPixelPanel(uctx, 30, 466, 900, 230, { fill: UI.windowFill, border: selCol, title: 'SKILL TREE - ' + selChar.name });
 
     selChar.skills.forEach((sk, idx) => {
         const sx2 = 42 + idx * 176;
         const sy2 = 498;
 
-        drawPixelPanel(uctx, sx2, sy2, 166, 188, { fill: UI.panelAlt, border: selCol });
+        drawPixelPanel(uctx, sx2, sy2, 166, 188, { fill: UI.panelAlt, border: selCol, noTitleBar: true });
 
         // Pixel icon
         const iconInfo = SKILL_ICON_MAP[sk.id];
@@ -2237,43 +2256,36 @@ function drawUI_Select() {
         }
 
         pixel(uctx, sk.name, sx2 + 83, sy2 + 44, selCol, 6, 'center');
-        sans(uctx, sk.desc, sx2 + 83, sy2 + 60, UI.textMuted, 7, 'center', 400);
+        sans(uctx, sk.desc, sx2 + 83, sy2 + 60, UI.textDarkMuted, 7, 'center', 400);
 
         sk.levels.forEach((lv, li) => {
             const ly = sy2 + 78 + li * 20;
             const isFirst = li === 0;
-            // Gem chip for each level
             drawGemChip(uctx, sx2 + 14, ly + 4, isFirst, selCol);
-            sans(uctx, (li+1) + '. ' + lv, sx2 + 22, ly, isFirst ? UI.warning : '#555', 6, 'left', isFirst ? 600 : 400);
+            sans(uctx, (li+1) + '. ' + lv, sx2 + 22, ly, isFirst ? UI.warning : UI.textDarkMuted, 6, 'left', isFirst ? 600 : 400);
         });
 
         if (idx === 0) {
-            drawPixelPanel(uctx, sx2 + 40, sy2 + 174, 80, 12, { fill: UI.motifCrown, border: UI.motifCrown, noLace: true });
+            drawPixelPanel(uctx, sx2 + 40, sy2 + 174, 80, 12, { fill: UI.motifCrown, border: UI.motifCrown, noLace: true, noTitleBar: true });
             sans(uctx, 'SIGNATURE', sx2 + 50, sy2 + 175, UI.textInverse, 7, 'left', 800);
         }
     });
 }
 
 function drawUI_LevelUp() {
-    // Scrim
+    // Semi-transparent pastel pink scrim
     uctx.fillStyle = UI.panelScrim;
     uctx.fillRect(0, 0, UW, UH);
 
     const cd = CHARACTERS[player.charIdx];
     const accent = CHAR_COLORS[player.charIdx] || UI.pink;
 
-    // === HEADER PANEL ===
+    // === HEADER WINDOW ===
     const bounce = Math.sin(gameTime * 0.08) * 2;
-    drawPixelPanel(uctx, 230, 18 + bounce, 500, 76, { fill: UI.panel, border: UI.motifCrown, ribbon: UI.motifCrown, glow: accent });
-    // Crown icons flanking
-    const crownL = getPixelIcon('crown', UI.motifCrown, '#fff');
-    const crownR = getPixelIcon('crown', UI.motifCrown, '#fff');
-    if (crownL) { uctx.imageSmoothingEnabled = false; uctx.drawImage(crownL, 248, 30 + bounce, 24, 24); uctx.imageSmoothingEnabled = true; }
-    if (crownR) { uctx.imageSmoothingEnabled = false; uctx.drawImage(crownR, 688, 30 + bounce, 24, 24); uctx.imageSmoothingEnabled = true; }
-    pixel(uctx, 'LEVEL UP', UW/2, 32 + bounce, UI.text, 12, 'center');
-    pixel(uctx, cd.name + ' LV ' + player.level, UW/2, 60 + bounce, accent, 8, 'center');
+    drawPixelPanel(uctx, 230, 18 + bounce, 500, 76, { fill: UI.windowFill, border: UI.motifCrown, title: 'LEVEL UP' });
+    pixel(uctx, cd.name + ' LV ' + player.level, UW/2, 56 + bounce, accent, 8, 'center');
 
-    // === 3 CHOICE CARDS — horizontal row ===
+    // === 3 CHOICE CARD WINDOWS ===
     levelUpChoices.forEach((choice, i) => {
         const bx = 30 + i * 310, by = 120;
         const cw = 280, ch = 360;
@@ -2281,14 +2293,13 @@ function drawUI_LevelUp() {
         const isCharSkill = cd.skills.some(s => s.id === choice.id);
 
         drawPixelPanel(uctx, bx, by, cw, ch, {
-            fill: hover ? UI.surfaceCard : UI.panel,
-            border: hover ? accent : UI.textMuted,
-            glow: hover ? accent : null,
-            spikes: hover ? UI.motifSpike : null
+            fill: hover ? '#FFE0F0' : UI.windowFill,
+            border: hover ? accent : UI.windowBorder,
+            title: choice.name
         });
 
         // Number
-        pixel(uctx, (i + 1) + '', bx + 16, by + 14, accent + '80', 10);
+        pixel(uctx, (i + 1) + '', bx + 16, by + 28, accent + '80', 10);
 
         // Skill pixel icon at 3x
         const iconInfo = SKILL_ICON_MAP[choice.id];
@@ -2296,83 +2307,74 @@ function drawUI_LevelUp() {
             const iconCanvas = getPixelIcon(iconInfo.icon, iconInfo.c1, iconInfo.c2);
             if (iconCanvas) {
                 uctx.imageSmoothingEnabled = false;
-                uctx.drawImage(iconCanvas, bx + cw/2 - 24, by + 44, 48, 48);
+                uctx.drawImage(iconCanvas, bx + cw/2 - 24, by + 50, 48, 48);
                 uctx.imageSmoothingEnabled = true;
             }
         }
 
-        // Name
-        pixel(uctx, choice.name, bx + cw/2, by + 104, UI.text, 8, 'center');
-
         // Signature badge
         if (isCharSkill) {
-            drawPixelPanel(uctx, bx + cw/2 - 40, by + 124, 80, 14, { fill: UI.motifCrown, border: UI.motifCrown, noLace: true });
-            sans(uctx, 'SIGNATURE', bx + cw/2, by + 126, UI.textInverse, 7, 'center', 800);
+            drawPixelPanel(uctx, bx + cw/2 - 40, by + 114, 80, 14, { fill: UI.motifCrown, border: UI.motifCrown, noLace: true, noTitleBar: true });
+            sans(uctx, 'SIGNATURE', bx + cw/2, by + 116, UI.textInverse, 7, 'center', 800);
         }
 
         // Level info
         const curLv = player.powers[choice.id];
-        sans(uctx, 'LV ' + curLv + ' > ' + (curLv + 1), bx + cw/2, by + 150, UI.textMuted, 10, 'center', 600);
+        sans(uctx, 'LV ' + curLv + ' > ' + (curLv + 1), bx + cw/2, by + 140, UI.textDark, 10, 'center', 600);
 
         // Gem chips for level
         const gemStartX = bx + cw/2 - 17;
         for (let d = 0; d < 5; d++) {
-            drawGemChip(uctx, gemStartX + d * 8, by + 174, d < curLv, d === curLv ? UI.warning : accent);
+            drawGemChip(uctx, gemStartX + d * 8, by + 164, d < curLv, d === curLv ? UI.warning : accent);
         }
 
         // Description
-        sans(uctx, choice.desc, bx + 14, by + 196, 'rgba(255,255,255,0.55)', 9, 'left', 400);
+        sans(uctx, choice.desc, bx + 14, by + 186, UI.textDarkMuted, 9, 'left', 400);
 
-        // Level-specific detail in accent-bordered sub-panel
+        // Level-specific detail
         const charSkill = cd.skills.find(s => s.id === choice.id);
         if (charSkill && charSkill.levels && charSkill.levels[curLv]) {
-            drawPixelPanel(uctx, bx + 10, by + 220, cw - 20, 30, { fill: UI.panelAlt, border: accent, noLace: true });
-            sans(uctx, '> ' + charSkill.levels[curLv], bx + 18, by + 226, accent, 8, 'left', 500);
+            drawPixelPanel(uctx, bx + 10, by + 210, cw - 20, 30, { fill: UI.panelAlt, border: accent, noLace: true, noTitleBar: true });
+            sans(uctx, '> ' + charSkill.levels[curLv], bx + 18, by + 216, accent, 8, 'left', 500);
         }
     });
 
     // === HINT ===
-    pixel(uctx, 'PRESS 1, 2, OR 3', UW/2, UH - 60, UI.text, 8, 'center');
-    sans(uctx, 'or click to choose', UW/2, UH - 40, 'rgba(255,255,255,0.3)', 9, 'center', 400);
+    pixel(uctx, 'PRESS 1, 2, OR 3', UW/2, UH - 60, UI.textDark, 8, 'center');
+    sans(uctx, 'or click to choose', UW/2, UH - 40, UI.textDarkMuted, 9, 'center', 400);
 }
 
 function drawUI_GameOver() {
-    // Background + accent wash
-    uctx.fillStyle = UI.bg;
+    // Pastel background
+    uctx.fillStyle = UI.bgPastelAlt;
     uctx.fillRect(0, 0, UW, UH);
-    if (player) {
-        const accent = CHAR_COLORS[player.charIdx] || UI.pink;
-        uctx.globalAlpha = 0.04;
-        uctx.fillStyle = accent;
-        uctx.fillRect(0, 0, UW, UH);
-        uctx.globalAlpha = 1;
-    }
 
-    // === HEADER PANEL ===
-    drawPixelPanel(uctx, 180, 20, 600, 80, { fill: UI.panel, border: UI.danger, ribbon: UI.danger, spikes: UI.warning });
-    pixel(uctx, 'GAME OVER', UW/2, 34, UI.text, 12, 'center');
-    sans(uctx, 'The stage has fallen. Here is your record.', UW/2, 68, UI.textMuted, 10, 'center', 400);
+    drawFloatingHearts(uctx, UW, UH, gameTime);
+
+    // === HEADER WINDOW — danger but still kawaii ===
+    drawPixelPanel(uctx, 180, 20, 600, 80, { fill: UI.windowFill, border: UI.danger, title: 'GAME OVER' });
+    sans(uctx, 'The stage has fallen. Here is your record.', UW/2, 68, UI.textDarkMuted, 10, 'center', 400);
 
     if (player) {
         const cd = player.charDef;
         const accent = CHAR_COLORS[player.charIdx] || UI.danger;
 
-        // === LEFT: Portrait panel ===
-        drawPixelPanel(uctx, 30, 120, 280, 340, { fill: UI.panel, border: accent, glow: accent });
+        // === LEFT: Portrait window ===
+        drawPixelPanel(uctx, 30, 120, 280, 340, { fill: UI.windowFill, border: accent, title: cd.name });
         const goScaled = getScaledSprite(player.charId, 8);
         if (goScaled) {
             const bob = Math.sin(gameTime * 0.04) * 3;
             uctx.imageSmoothingEnabled = false;
-            uctx.drawImage(goScaled, 75, 140 + bob);
+            uctx.drawImage(goScaled, 75, 156 + bob);
             uctx.imageSmoothingEnabled = true;
         }
 
-        pixel(uctx, cd.name, 170, 320, UI.text, 10, 'center');
-        pixel(uctx, cd.title, 170, 346, accent, 8, 'center');
-        sans(uctx, cd.hashtag, 170, 374, 'rgba(255,255,255,0.35)', 9, 'center', 500);
-        drawHeartChip(uctx, 100, 400, formatNum(followers) + ' fans');
+        pixel(uctx, cd.name, 170, 330, UI.textDark, 10, 'center');
+        pixel(uctx, cd.title, 170, 356, accent, 8, 'center');
+        sans(uctx, cd.hashtag, 170, 384, UI.textDarkMuted, 9, 'center', 500);
+        drawHeartChip(uctx, 100, 410, formatNum(followers) + ' fans');
 
-        // === RIGHT: Stats panel ===
+        // === RIGHT: Stats window ===
         const secs = Math.floor(survivalTime / 60);
         const mins = Math.floor(secs / 60);
         const secStr = (secs % 60).toString().padStart(2, '0');
@@ -2388,16 +2390,15 @@ function drawUI_GameOver() {
             ['Bosses', bossesKilled.toString()],
         ];
 
-        drawPixelPanel(uctx, 340, 120, 590, 340, { fill: UI.panel, border: accent, ribbon: accent });
-        pixel(uctx, 'BATTLE RECORD', 360, 128, UI.text, 8);
+        drawPixelPanel(uctx, 340, 120, 590, 340, { fill: UI.windowFill, border: accent, title: 'BATTLE RECORD' });
 
         stats.forEach((s, idx) => {
             const row = Math.floor(idx / 2);
             const col = idx % 2;
             const sx = 360 + col * 286;
-            const sy = 158 + row * 90;
+            const sy = 162 + row * 90;
 
-            drawPixelPanel(uctx, sx, sy, 264, 82, { fill: UI.panelAlt, border: statColors[idx] });
+            drawPixelPanel(uctx, sx, sy, 264, 82, { fill: UI.panelAlt, border: statColors[idx], noTitleBar: true });
 
             // Pixel icon
             const icon = getPixelIcon(statIcons[idx], statColors[idx], '#fff');
@@ -2407,53 +2408,50 @@ function drawUI_GameOver() {
                 uctx.imageSmoothingEnabled = true;
             }
 
-            sans(uctx, s[0], sx + 52, sy + 12, UI.textMuted, 9, 'left', 500);
-            pixel(uctx, s[1], sx + 52, sy + 32, UI.text, 10);
+            sans(uctx, s[0], sx + 52, sy + 12, UI.textDarkMuted, 9, 'left', 500);
+            pixel(uctx, s[1], sx + 52, sy + 32, UI.textDark, 10);
         });
 
-        // === VERDICT PANEL ===
+        // === VERDICT WINDOW ===
         const verdict = killCount >= 100 ? 'LEGENDARY PRINCESS' :
                         killCount >= 50 ? 'VAMPIRE SLAYER' :
                         killCount >= 25 ? 'RISING IDOL' :
                         'FIRST CHAPTER';
-        drawPixelPanel(uctx, 180, 480, 600, 50, { fill: UI.panel, border: UI.motifCrown, ribbon: UI.motifCrown });
-        pixel(uctx, verdict, UW/2, 496, UI.motifCrown, 10, 'center');
+        drawPixelPanel(uctx, 180, 480, 600, 50, { fill: UI.windowFill, border: UI.motifCrown, title: verdict });
     }
 
     // === CTA ===
     const blink = Math.sin(gameTime * 0.06) * 0.2 + 0.8;
     uctx.globalAlpha = blink;
-    pixel(uctx, 'PRESS SPACE TO RESTART', UW/2, UH - 70, UI.text, 10, 'center');
+    pixel(uctx, 'PRESS SPACE TO RESTART', UW/2, UH - 70, UI.textDark, 10, 'center');
     uctx.globalAlpha = 1;
-    sans(uctx, 'or click anywhere', UW/2, UH - 44, 'rgba(255,255,255,0.3)', 9, 'center', 400);
+    sans(uctx, 'or click anywhere', UW/2, UH - 44, UI.textDarkMuted, 9, 'center', 400);
 }
 
 
 function drawUI_QuestModal() {
     const chapter = (CONTENT.story?.chapters || [])[chapterIdx];
     const lore = lastLoreCard || (CONTENT.story?.loreCards || [])[0] || '';
-    uctx.fillStyle = UI.scrim;
+    uctx.fillStyle = UI.panelScrim;
     uctx.fillRect(0, 0, UW, UH);
-    drawPixelPanel(uctx, UW/2 - 260, UH/2 - 150, 520, 300, { fill: UI.panel, border: UI.quest, ribbon: UI.quest, spikes: UI.danger });
-    sansBold(uctx, 'QUEST / STORY PROMPT', UW/2 - 236, UH/2 - 140, UI.bg, 9);
-    pixel(uctx, chapter ? chapter.title : 'CHAPTER', UW/2, UH/2 - 105, UI.text, 10, 'center');
-    sans(uctx, chapter ? chapter.objective : 'Hold the stage and survive.', UW/2, UH/2 - 64, UI.textMuted, 12, 'center', 600);
+    drawPixelPanel(uctx, UW/2 - 260, UH/2 - 150, 520, 300, { fill: UI.windowFill, border: UI.quest, title: 'QUEST / STORY' });
+    pixel(uctx, chapter ? chapter.title : 'CHAPTER', UW/2, UH/2 - 105, UI.textDark, 10, 'center');
+    sans(uctx, chapter ? chapter.objective : 'Hold the stage and survive.', UW/2, UH/2 - 64, UI.textDarkMuted, 12, 'center', 600);
 
-    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 16, 440, 88, { fill: UI.panelAlt, border: UI.pink });
+    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 16, 440, 88, { fill: UI.panelAlt, border: UI.pink, noTitleBar: true });
     sansBold(uctx, 'LORE CARD', UW/2 - 200, UH/2 - 7, UI.pink, 9);
-    sans(uctx, lore, UW/2 - 200, UH/2 + 20, UI.text, 12, 'left', 500);
-    // Footer key prompt with styled chip
-    drawPixelPanel(uctx, UW/2 - 60, UH/2 + 90, 120, 22, { fill: UI.surfaceChip, border: UI.borderUI, noLace: true });
-    sans(uctx, '[Q] Close', UW/2, UH/2 + 94, UI.textSecondary, 10, 'center', 600);
+    sans(uctx, lore, UW/2 - 200, UH/2 + 20, UI.textDark, 12, 'left', 500);
+    drawPixelPanel(uctx, UW/2 - 60, UH/2 + 90, 120, 22, { fill: UI.surfaceChip, border: UI.windowBorder, noLace: true, noTitleBar: true });
+    sans(uctx, '[Q] Close', UW/2, UH/2 + 94, UI.textDark, 10, 'center', 600);
 }
 
 function drawUI_Paused() {
-    // Scrim + character accent wash
-    uctx.fillStyle = UI.scrim;
+    // Scrim + pastel accent wash
+    uctx.fillStyle = UI.panelScrim;
     uctx.fillRect(0, 0, UW, UH);
     if (player) {
         const accent = CHAR_COLORS[player.charIdx] || UI.pink;
-        uctx.globalAlpha = 0.05;
+        uctx.globalAlpha = 0.08;
         uctx.fillStyle = accent;
         uctx.fillRect(0, 0, UW, UH);
         uctx.globalAlpha = 1;
@@ -2461,20 +2459,19 @@ function drawUI_Paused() {
 
     const accent = player ? (CHAR_COLORS[player.charIdx] || UI.pink) : UI.pink;
 
-    // Centered pixel panel
-    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 80, 440, 160, { fill: UI.panel, border: accent, glow: accent });
+    // Centered OS window
+    drawPixelPanel(uctx, UW/2 - 220, UH/2 - 80, 440, 160, { fill: UI.windowFill, border: accent, title: 'PAUSED' });
 
-    // Sparkle icons flanking
-    const sparkL = getPixelIcon('sparkle', accent, '#fff');
-    const sparkR = getPixelIcon('sparkle', accent, '#fff');
-    if (sparkL) { uctx.imageSmoothingEnabled = false; uctx.drawImage(sparkL, UW/2 - 190, UH/2 - 40, 32, 32); uctx.imageSmoothingEnabled = true; }
-    if (sparkR) { uctx.imageSmoothingEnabled = false; uctx.drawImage(sparkR, UW/2 + 158, UH/2 - 40, 32, 32); uctx.imageSmoothingEnabled = true; }
+    // Heart decorations
+    uctx.fillStyle = UI.pink;
+    uctx.fillRect(UW/2 - 180, UH/2 - 30, 1, 1); uctx.fillRect(UW/2 - 178, UH/2 - 30, 1, 1);
+    uctx.fillRect(UW/2 - 181, UH/2 - 29, 5, 1); uctx.fillRect(UW/2 - 180, UH/2 - 28, 3, 1); uctx.fillRect(UW/2 - 179, UH/2 - 27, 1, 1);
+    uctx.fillRect(UW/2 + 177, UH/2 - 30, 1, 1); uctx.fillRect(UW/2 + 179, UH/2 - 30, 1, 1);
+    uctx.fillRect(UW/2 + 176, UH/2 - 29, 5, 1); uctx.fillRect(UW/2 + 177, UH/2 - 28, 3, 1); uctx.fillRect(UW/2 + 178, UH/2 - 27, 1, 1);
 
-    pixel(uctx, 'PAUSED', UW/2, UH/2 - 50, UI.text, 12, 'center');
-
-    // Hint sub-panel
-    drawPixelPanel(uctx, UW/2 - 140, UH/2 + 10, 280, 30, { fill: UI.panelAlt, border: UI.textMuted, noLace: true });
-    pixel(uctx, 'ESC TO CONTINUE', UW/2, UH/2 + 18, UI.textMuted, 8, 'center');
+    // Hint
+    drawPixelPanel(uctx, UW/2 - 140, UH/2 + 20, 280, 30, { fill: UI.panelAlt, border: UI.windowBorder, noLace: true, noTitleBar: true });
+    pixel(uctx, 'ESC TO CONTINUE', UW/2, UH/2 + 28, UI.textDark, 8, 'center');
 }
 
 // ================================================================
