@@ -216,6 +216,7 @@ const Z = {
     white: UI.text, cream: UI.motifLace, offwhite: UI.textSecondary,
     dark: UI.bg, darkCard: UI.panel, darkGray: UI.panelAlt,
     gray: UI.textMuted, lightGray: UI.textSecondary, faint: 'rgba(255,255,255,0.06)',
+    miho_accent: UI.pink, hyunju_accent: UI.warning, sujin_accent: '#C05050', sohee_accent: UI.cyan,
 };
 
 // === PIXEL ICON ATLAS — 16x16 pixel art for skill HUD ===
@@ -286,7 +287,7 @@ const PIXEL_ICONS = {
 // Map skill IDs to pixel icon names + colors
 const SKILL_ICON_MAP = {
     foxFire: { icon: 'flame', c1: '#ff8844', c2: '#ffcc66' },
-    nineTails: { icon: 'fox', c1: '#f7e065', c2: '#fff0a0' },
+    nineTails: { icon: 'fox', c1: '#FF79C6', c2: '#ffc0e0' },
     charm: { icon: 'sparkle', c1: '#ff66aa', c2: '#ffaadd' },
     spiritForm: { icon: 'fox', c1: '#ddaaff', c2: '#eeddff' },
     feast: { icon: 'heart', c1: '#ff4466', c2: '#ff8899' },
@@ -355,15 +356,15 @@ function drawGemChip(ctx, cx, cy, filled, color) {
 
 // === PALETTES (unified idol style — same face/body, unique colors) ===
 const PALETTES = {
-    miho: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ffe066', 4:'#e8b830',
-        5:'#ff6eb4', 6:'#ff3d8e', 7:'#1a1028', 8:'#ff6688', 9:'#ffd700',
-        A:'#ffffff', B:'#ffb0d0', C:'#ff70a0', D:'#fff0a0', E:'#ff44aa', F:'#ffffff' },
+    miho: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff79c6', 4:'#e05aaa',
+        5:'#ff6eb4', 6:'#ff3d8e', 7:'#1a1028', 8:'#ff6688', 9:'#ff93c8',
+        A:'#ffffff', B:'#ffb0d0', C:'#ff70a0', D:'#ffc0e0', E:'#ff44aa', F:'#ffffff' },
     hyunju: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff9944', 4:'#dd7722',
         5:'#fff0e0', 6:'#ffd4a8', 7:'#1a1028', 8:'#ff8866', 9:'#44cc88',
         A:'#ffffff', B:'#dda870', C:'#bb8850', D:'#ffcc80', E:'#ff7744', F:'#ffffff' },
-    sujin: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#cc2244', 4:'#991133',
-        5:'#2a2a3e', 6:'#3a3a55', 7:'#1a1028', 8:'#dd4466', 9:'#ffdd44',
-        A:'#ffffff', B:'#333348', C:'#444466', D:'#ff3355', E:'#4488ff', F:'#ffffff' },
+    sujin: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#8B3A3A', 4:'#6B2828',
+        5:'#2a2a3e', 6:'#3a3a55', 7:'#1a1028', 8:'#c04848', 9:'#ffdd44',
+        A:'#ffffff', B:'#333348', C:'#444466', D:'#a04040', E:'#4488ff', F:'#ffffff' },
     sohee: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#3366cc', 4:'#2244aa',
         5:'#e0e8f0', 6:'#c0d0e8', 7:'#1a1028', 8:'#ee8899', 9:'#88ddff',
         A:'#ffffff', B:'#7799bb', C:'#5577aa', D:'#5599ff', E:'#44ccaa', F:'#ffffff' },
@@ -636,12 +637,12 @@ const CHARACTERS = [
         title: 'The Gumiho', hashtag: '#FoxQueen',
         desc: '"My flames will protect SUPERNOVA forever~"',
         fandom: 'Foxies', lightstick: '🔥',
-        color: '#f7e065', color2: '#ff88bb', bgGrad: ['#f7e065','#ff88bb'],
+        color: '#FF79C6', color2: '#ff88bb', bgGrad: ['#FF79C6','#ff88bb'],
         stats: { speed: 3.2, hp: 5, atk: 1.5, atkSpeed: 36, range: 70 },
         skills: [
             { id:'foxFire', name:'Fox Fire', emoji:'🔥', desc:'Homing flames that chase enemies', color:'#ff8844',
               levels:['1 flame','2 flames','3 flames, +pierce','4 flames, +speed','5 flames, fox inferno!'] },
-            { id:'nineTails', name:'Nine Tails', emoji:'🦊', desc:'Tail sweep damages nearby foes', color:'#f7e065',
+            { id:'nineTails', name:'Nine Tails', emoji:'🦊', desc:'Tail sweep damages nearby foes', color:'#FF79C6',
               levels:['Tail whip x1','Tail whip x2','Wider sweep','Tail whip x3','NINE TAILS UNLEASHED'] },
             { id:'charm', name:'Charm', emoji:'💫', desc:'Enemies freeze in your presence', color:'#ff66aa',
               levels:['10% freeze 1s','15% freeze 1.5s','20% freeze 2s','25% + slow','30% + confusion'] },
@@ -676,7 +677,7 @@ const CHARACTERS = [
         title: 'The Genius', hashtag: '#BigBrainStar',
         desc: '"Calculated. Precise. ...and fabulous."',
         fandom: 'Starlings', lightstick: '⚡',
-        color: '#cc2244', color2: '#ffdd44', bgGrad: ['#cc2244','#ff6644'],
+        color: '#8B3A3A', color2: '#c04848', bgGrad: ['#8B3A3A','#c04848'],
         stats: { speed: 2.5, hp: 3, atk: 1.8, atkSpeed: 50, range: 80 },
         skills: [
             { id:'starBeam', name:'Star Beam', emoji:'⭐', desc:'Piercing precision laser', color:'#ffdd44',
@@ -1148,7 +1149,7 @@ function fireNineTails(dm) {
         for (let i = 0; i < count; i++) {
             const a = Math.random()*Math.PI*2;
             particles.push({ x:player.x+Math.cos(a)*range, y:player.y+Math.sin(a)*range,
-                vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#f7e065', size:2 });
+                vx:Math.cos(a)*0.5, vy:Math.sin(a)*0.5, life:10, color:'#FF79C6', size:2 });
         }
     }
 }
@@ -1999,7 +2000,7 @@ function drawUI_HUD() {
 
     // === TOP LEFT: identity plate ===
     drawPixelPanel(uctx, 10, 8, 138, 34, { fill: UI.panelAlt, border: UI.pink, ribbon: UI.pink });
-    sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 11);
+    sansBold(uctx, cd.emoji + ' ' + cd.name, 18, 14, UI.text, 10);
     sans(uctx, cd.hashtag, 18, 28, UI.textMuted, 8);
 
     // HP bar — pixel panel frame with colored fill
@@ -2257,7 +2258,7 @@ function drawUI_Title() {
     const charIDs = ['miho','hyunju','sujin','sohee'];
     const charNames = ['MIHO', 'HYUNJU', 'SUJIN', 'SOHEE'];
     const charTags = ['#FoxQueen', '#DreamWeaver', '#BigBrainStar', '#SilentPower'];
-    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+    const charColors = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent];
     const positions = [
         {x: 490, y: 70, s: 6, rot: 2},
         {x: 610, y: 100, s: 5, rot: -3},
@@ -2315,7 +2316,7 @@ function drawUI_Title() {
     // Tile 3: reaction/social tile
     drawCutout(uctx, 500, 360, 440, 150, UI.panel, 0.8);
     serif(uctx, 'Hot take:', 520, 375, Z.hot, 20);
-    serif(uctx, 'this is the game of the year', 520, 400, Z.white, 18, 'left', true);
+    serif(uctx, 'this is the game of the year', 520, 400, Z.white, 16, 'left', true);
     drawReactionBar(uctx, 520, 440, [['🔥','4.2K'],['💀','982'],['👑','1.7K'],['💕','3.3K']]);
     // Comment bubble overlapping
     drawCommentBubble(uctx, 700, 370, 'ok but miho tho', 'user_02', 'rgba(255,255,255,0.06)');
@@ -2340,7 +2341,7 @@ function drawUI_Select() {
     uctx.fillStyle = Z.dark; uctx.fillRect(0, 0, UW, UH);
 
     const selChar = CHARACTERS[selectedChar];
-    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+    const charColors = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent];
     const selCol = charColors[selectedChar];
 
     // Character color wash behind portrait area
@@ -2375,7 +2376,7 @@ function drawUI_Select() {
     }
 
     // Character name — huge, overlapping the image
-    serif(uctx, selChar.name, 50, 260, Z.white, 56, 'left');
+    serif(uctx, selChar.name, 50, 260, Z.white, 48, 'left');
     drawHighlight(uctx, 48, 320, 180, 20, selCol + '40');
     serif(uctx, selChar.title, 50, 318, selCol, 18, 'left', true);
 
@@ -2416,6 +2417,7 @@ function drawUI_Select() {
     // Stickers scattered
     drawSticker(uctx, '✨', 430, 200, 10, 22);
     drawSticker(uctx, '🔥', 860, 60, -12, 18);
+    drawSticker(uctx, '👑', 370, 440, -6, 20);
 
     // === BROWSE HINT — tape label ===
     drawTape(uctx, 420, 225, 200, 22, 'rgba(255,255,255,0.07)', 0);
@@ -2444,7 +2446,7 @@ function drawUI_Select() {
         sk.levels.forEach((lv, li) => {
             const ly = sy2 + 68 + li * 22;
             const isFirst = li === 0 && idx === 0;
-            sans(uctx, (li+1) + '. ' + lv, sx2 + 12, ly, isFirst ? Z.yellow : '#555', 7, 'left', isFirst ? 600 : 400);
+            sans(uctx, (li+1) + '. ' + lv, sx2 + 12, ly, isFirst ? Z.yellow : '#555', 6, 'left', isFirst ? 600 : 400);
         });
 
         if (idx === 0) {
@@ -2463,10 +2465,14 @@ function drawUI_LevelUp() {
     uctx.fillRect(0, 0, UW, UH);
     drawGrain(uctx, UW, UH, 0.03);
 
+    // Stickers for visual consistency
+    drawSticker(uctx, '💫', 880, 60, -10, 22);
+    drawSticker(uctx, '✨', 60, UH - 80, 8, 20);
+
     // Subtle color wash — shifted, rotated cutout
     const cd = CHARACTERS[player.charIdx];
-    const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
-    const accent = charColors[player.charIdx] || Z.hot;
+    const charColors = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent];
+    const accent = charColors[player.charIdx] || Z.miho_accent;
     drawCutout(uctx, -30, -10, UW + 60, 120, accent + '08', -0.3);
 
     // === HEADER — editorial headline, overlapping tape ===
@@ -2513,8 +2519,10 @@ function drawUI_LevelUp() {
 
         // Signature tag
         if (isCharSkill) {
-            drawTape(uctx, bx + 92 + choice.name.length * 11 + 10, by + 12, 70, 14, UI.motifCrown + '73', -1.5);
-            sans(uctx, 'SIGNATURE', bx + 92 + choice.name.length * 11 + 16, by + 14, UI.textInverse, 7, 'left', 800);
+            uctx.font = "20px 'DM Serif Display', serif";
+            const nameW = uctx.measureText(choice.name).width;
+            drawTape(uctx, bx + 92 + nameW + 10, by + 12, 70, 14, UI.motifCrown + '73', -1.5);
+            sans(uctx, 'SIGNATURE', bx + 92 + nameW + 16, by + 14, UI.textInverse, 7, 'left', 800);
         }
 
         // Level — clean sans
@@ -2561,7 +2569,7 @@ function drawUI_GameOver() {
     uctx.fillRect(0, 0, UW, UH);
     // Dramatic vignette with character color
     if (player) {
-        const accent = [Z.hot, Z.coral, Z.magenta, Z.sky][player.charIdx] || Z.hot;
+        const accent = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent][player.charIdx] || Z.miho_accent;
         uctx.globalAlpha = 0.05;
         uctx.fillStyle = accent;
         uctx.fillRect(0, 0, UW, UH);
@@ -2590,7 +2598,7 @@ function drawUI_GameOver() {
 
     if (player) {
         const cd = player.charDef;
-        const charColors = [Z.hot, Z.coral, Z.magenta, Z.sky];
+        const charColors = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent];
         const accent = charColors[player.charIdx] || Z.hot;
 
         // === LEFT: Character portrait cutout ===
@@ -2608,7 +2616,7 @@ function drawUI_GameOver() {
         }
 
         // Name + title overlapping portrait
-        serif(uctx, cd.name, 50, 320, Z.white, 36, 'left');
+        serif(uctx, cd.name, 50, 320, Z.white, 32, 'left');
         drawHighlight(uctx, 48, 360, 140, 16, accent + '35');
         serif(uctx, cd.title, 50, 358, accent, 14, 'left', true);
         sans(uctx, cd.hashtag, 50, 384, 'rgba(255,255,255,0.35)', 10, 'left', 500);
@@ -2707,6 +2715,14 @@ function drawUI_Paused() {
     // === STORY OVERLAY — minimal, magazine interstitial ===
     uctx.fillStyle = UI.scrim;
     uctx.fillRect(0, 0, UW, UH);
+    // Character color wash
+    if (player) {
+        const pauseAccent = [Z.miho_accent, Z.hyunju_accent, Z.sujin_accent, Z.sohee_accent][player.charIdx] || Z.miho_accent;
+        uctx.globalAlpha = 0.05;
+        uctx.fillStyle = pauseAccent;
+        uctx.fillRect(0, 0, UW, UH);
+        uctx.globalAlpha = 1;
+    }
     drawGrain(uctx, UW, UH, 0.03);
 
     // Centered cutout card
