@@ -224,9 +224,9 @@ function drawGemChip(ctx, cx, cy, filled, color) {
 
 // === PALETTES (unified idol style — same face/body, unique colors) ===
 const PALETTES = {
-    miho: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff79c6', 4:'#e05aaa',
+    miho: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff5cb8', 4:'#d94a9a',
         5:'#ff6eb4', 6:'#ff3d8e', 7:'#1a1028', 8:'#ff6688', 9:'#ff93c8',
-        A:'#ffffff', B:'#ffb0d0', C:'#ff70a0', D:'#ffc0e0', E:'#ff44aa', F:'#ffffff' },
+        A:'#ffffff', B:'#ffb0d0', C:'#ff70a0', D:'#ff90cc', E:'#ff44aa', F:'#ffffff' },
     hyunju: { 0:null, 1:'#fde8d0', 2:'#e8c8a8', 3:'#ff9944', 4:'#dd7722',
         5:'#fff0e0', 6:'#ffd4a8', 7:'#1a1028', 8:'#ff8866', 9:'#44cc88',
         A:'#ffffff', B:'#dda870', C:'#bb8850', D:'#ffcc80', E:'#ff7744', F:'#ffffff' },
@@ -318,18 +318,18 @@ function getSkillCooldownRatio(skillId) {
 const SPRITE_DATA = {
     miho: [ // Fox Princess — pink twin-tail, fox ears, pink frilly idol dress
         '04D003333300D400', // fox ear tips (4=inner, D=glow)
-        '43D33333333D3D40', // ears + luxurious golden crown
-        '4333D333333DD340', // highlight streaks in mane
-        '0D33333333333D00', // full golden volume
+        '43D33333333D3D40', // ears + pink hair crown
+        '4333D333333DD340', // highlight streaks in pink mane
+        '0D33333333333D00', // full pink hair volume
         '0033711111173300', // forehead + dark brows
         '00031EA1AE130000', // sparkly eyes (E=iris, A=highlight)
         '0003111811130000', // nose + cute smile
         '0000218111820000', // chin + pink blush
-        '0000019991000000', // neck + gold choker (9)
+        '0000019991000000', // neck + rose choker (9)
         '0000566665500000', // ruffle collar
-        '0005559955500000', // bodice + gold gem buttons
+        '0005559955500000', // bodice + rose gem buttons
         '0015555555510000', // bodice + arms (1=skin)
-        '0005666966650000', // grand ruffle + gold buckle
+        '0005666966650000', // grand ruffle + rose buckle
         '0005565556550000', // layered skirt top
         '0000566666500000', // skirt accent tier
         '0000555555500000', // skirt body
